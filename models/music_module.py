@@ -39,8 +39,27 @@ class MusicLightningModule(BaseLightningModule):
         for name in loss.individuals:
             log_name = f"{phase} {name.replace('_', ' ')}"
             self.log(log_name, loss.individuals[name])
-        self.log(f"{phase} total loss", loss.total)
+        self.log(f"{phase} total loss", loss.total, prog_bar=True)
         return loss.total
+
+    def step(self, batch: dict[str, Any], phase: str) -> torch.Tensor | None:
+        """
+        Utility method to perform the network step and inference.
+
+        Args:
+            batch (dict[str, Any]): Data batch in a form of a dictionary
+            phase (str): Phase, used for logging purposes.
+
+        Returns:
+            torch.Tensor | None: Either the total loss if there is a loss aggregator, or none if there is no aggregator.
+        """
+        output = self.forward(batch)
+        if self.loss_aggregator is None:
+            return
+        targets = {"z_e": output["z_e"], "slice": batch["slice"]}
+        loss = self.loss_aggregator(output, targets)
+        loss_total = self.handle_loss(loss, phase)
+        return loss_total
 
     @classmethod
     def from_cfg(cls, cfg: DictConfig) -> Self:

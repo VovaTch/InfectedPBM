@@ -355,6 +355,7 @@ class BaseLightningModule(L.LightningModule):
             )
         self.log(f"test_total", loss.total, prog_bar=True, on_step=False, on_epoch=True)
 
+    @abstractmethod
     def step(self, batch: dict[str, Any], phase: str) -> torch.Tensor | None:
         """
         Utility method to perform the network step and inference.
@@ -365,25 +366,6 @@ class BaseLightningModule(L.LightningModule):
 
         Returns:
             torch.Tensor | None: Either the total loss if there is a loss aggregator, or none if there is no aggregator.
-        """
-        output = self.forward(batch)
-        if self.loss_aggregator is None:
-            return
-        loss = self.loss_aggregator(output, batch)
-        loss_total = self.handle_loss(loss, phase)
-        return loss_total
-
-    @abstractmethod
-    def handle_loss(self, loss: "LossOutput", phase: str) -> torch.Tensor:
-        """
-        Utility method to implement in a subclass. Used for logging and additional computations if needed.
-
-        Args:
-            loss (LossOutput): Loss output object
-            phase (str): Phase for logging or other purposes.
-
-        Returns:
-            torch.Tensor: Total loss
         """
         ...
 

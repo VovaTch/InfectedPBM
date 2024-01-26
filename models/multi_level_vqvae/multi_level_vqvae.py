@@ -151,15 +151,16 @@ class MultiLvlVQVariationalAutoEncoder(Tokenizer):
         z_e = self.encode(x)
         _, total_output = self.decode(z_e, origin_shape=tuple(origin_shape))  # type: ignore
 
-        loss_target = {"slice": x, "z_e": z_e}
-
-        if self.loss_aggregator is not None:
-            total_loss = self.loss_aggregator(total_output, loss_target)
-            total_output.update(
-                {"total_loss": total_loss.total, **total_loss.individuals}
-            )
-
+        total_output.update({"z_e": z_e})
         return total_output
+
+    def on_train_epoch_end(self) -> None:
+        """
+        Callback function called at the end of each training epoch.
+        Randomly restarts the VQ codebook and resets its usage.
+        """
+        self.vq_module.vq_codebook.random_restart()
+        self.vq_module.vq_codebook.reset_usage()
 
     @classmethod
     def from_cfg(cls, cfg: DictConfig) -> Self:
