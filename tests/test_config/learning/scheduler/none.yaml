@@ -1,0 +1,4 @@
+type: "none"  # Options: "none", "step", "cosine", etc.
+loss_monitor: "step"
+interval: "training_total_loss"
+frequency: 1

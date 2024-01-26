@@ -1,0 +1,7 @@
+defaults:
+  - dataset: "mp3_dataset"
+  - learning: "fcn"
+  - model: "ml_vqvae"
+  - loss: "none"
+
+model_name: vqvae_lvl1

@@ -1,0 +1,3 @@
+defaults:
+  - aggregator: "weighted_sum"
+  - components: "cls"

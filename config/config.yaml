@@ -1,0 +1,7 @@
+defaults:
+  - loss: cls
+  - model: fcn
+  - learning: fcn
+  - data_cfg: mnist
+
+model_name: mnist_fcn

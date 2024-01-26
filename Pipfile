@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = false
+name = "pip_conf_index_global"
+
+[packages]
+lightning = "*"
+tqdm = "*"
+numpy = "*"
+pytest = "*"
+pyyaml = "*"
+hydra-core = "*"
+matplotlib = "*"
+tensorboard = "*"
+ipykernel = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
