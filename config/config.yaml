@@ -1,7 +1,7 @@
 defaults:
-  - loss: cls
-  - model: fcn
-  - learning: fcn
-  - data_cfg: mnist
+  - loss: ml_vqvae
+  - model: ml_vqvae
+  - learning: ml_vqvae
+  - dataset: music_slices
 
-model_name: mnist_fcn
+model_name: ml_vqvae_tokenizer

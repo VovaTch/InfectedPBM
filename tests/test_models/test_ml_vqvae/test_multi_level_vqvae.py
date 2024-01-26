@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 import pytest
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
+import yaml
 
 from models.multi_level_vqvae.blocks import VQ1D
 from models.multi_level_vqvae.decoder import Decoder1D
@@ -51,7 +52,7 @@ def test_MultiLvlVQVariationalAutoEncoder_forward_cpu(
     input_tensor = torch.randn(2, 3, 100)
     total_output = multi_lvl_vqvae.forward(input_tensor)
     assert isinstance(total_output, dict)
-    assert total_output["output"].size() == input_tensor.size()
+    assert total_output["slice"].size() == input_tensor.size()
 
 
 def test_MultiLvlVQVariationalAutoEncoder_forward_gpu(
@@ -61,7 +62,7 @@ def test_MultiLvlVQVariationalAutoEncoder_forward_gpu(
     input_tensor = torch.randn(2, 3, 100).to("cuda")
     total_output = multi_lvl_vqvae.forward(input_tensor)
     assert isinstance(total_output, dict)
-    assert total_output["output"].size() == input_tensor.size()
+    assert total_output["slice"].size() == input_tensor.size()
 
 
 def test_multi_lvl_vqvae_from_cfg(cfg: DictConfig) -> None:
@@ -73,3 +74,12 @@ def test_multi_lvl_vqvae_from_cfg(cfg: DictConfig) -> None:
     assert isinstance(model.encoder, Encoder1D)
     assert isinstance(model.decoder, Decoder1D)
     assert isinstance(model.vq_module, VQ1D)
+
+
+def test_complete_model_forward(real_cfg: DictConfig) -> None:
+    model = MultiLvlVQVariationalAutoEncoder.from_cfg(real_cfg)
+    model = model.to("cuda")
+    input_tensor = torch.randn(128, 1, 1024).to("cuda")
+    total_output = model.forward(input_tensor)
+    assert isinstance(total_output, dict)
+    assert total_output["slice"].size() == input_tensor.size()

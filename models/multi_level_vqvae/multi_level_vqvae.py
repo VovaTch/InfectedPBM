@@ -133,7 +133,7 @@ class MultiLvlVQVariationalAutoEncoder(Tokenizer):
 
         x_out = x_out.permute((0, 2, 1)).reshape(origin_shape)
 
-        total_output = {**vq_block_output, "output": x_out}
+        total_output = {**vq_block_output, "slice": x_out}
 
         return x_out, total_output
 
@@ -151,7 +151,7 @@ class MultiLvlVQVariationalAutoEncoder(Tokenizer):
         z_e = self.encode(x)
         _, total_output = self.decode(z_e, origin_shape=tuple(origin_shape))  # type: ignore
 
-        loss_target = {"music_slice": x, "z_e": z_e}
+        loss_target = {"slice": x, "z_e": z_e}
 
         if self.loss_aggregator is not None:
             total_loss = self.loss_aggregator(total_output, loss_target)

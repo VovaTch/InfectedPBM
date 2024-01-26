@@ -1,11 +1,13 @@
 from dataclasses import dataclass
-from typing import Protocol, Self
+from typing import Protocol, Self, TYPE_CHECKING
 from omegaconf import DictConfig
 
 import torch
 
-from .component_base import LossComponent
 from common import registry
+
+if TYPE_CHECKING:
+    from .component_base import LossComponent
 
 
 @dataclass
@@ -27,7 +29,7 @@ class LossAggregator(Protocol):
     Loss aggregator protocol, uses a math operation on component losses to compute a total loss. For example, weighted sum.
     """
 
-    components: list[LossComponent]
+    components: list["LossComponent"]
 
     def __call__(
         self,
@@ -66,7 +68,7 @@ class WeightedSumAggregator:
     Weighted sum loss component
     """
 
-    components: list[LossComponent]
+    components: list["LossComponent"]
 
     def __call__(
         self, estimation: dict[str, torch.Tensor], target: dict[str, torch.Tensor]
@@ -105,7 +107,7 @@ class WeightedSumAggregator:
         """
         return cls(
             [
-                LossComponent.from_cfg(name, loss_cfg)
+                registry.get_loss_component(loss_cfg["type"]).from_cfg(name, loss_cfg)
                 for name, loss_cfg in cfg.loss.components.items()
             ]
         )

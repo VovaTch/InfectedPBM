@@ -30,14 +30,14 @@ def get_args() -> argparse.Namespace:
         "-m",
         "--model",
         type=str,
-        default="mnist_fcn",
+        default="music",
         help="Type of model used for training.",
     )
     parser.add_argument(
         "-dm",
         "--data_module",
         type=str,
-        default="mnist",
+        default="music_data_module",
         help="Type of data module used for training",
     )
     parser.add_argument(
@@ -58,7 +58,7 @@ def main(cfg: DictConfig) -> None:
     learning_params = LearningParameters.from_cfg(cfg)
     trainer = initialize_trainer(learning_params)
     logger.debug("Initialized Trainer")
-    model = registry.get_lightning_module(args.model)(cfg, args.resume)
+    model = registry.get_lightning_module(args.model).from_cfg(cfg)  # type: ignore
     logger.debug("Initialized Model")
     data_module = registry.get_data_module(args.data_module).from_cfg(cfg)
     logger.debug("Initialized Data Module")

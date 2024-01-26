@@ -153,8 +153,9 @@ class ConvDownsample(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        sequence_length = x.shape[-1]
         x = F.pad(x, (0, self.padding_needed))
-        return self.conv_down(x)
+        return self.conv_down(x)[..., : sequence_length // self.downsample_divide]
 
 
 class VQ1D(nn.Module):

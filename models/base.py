@@ -269,13 +269,13 @@ class BaseLightningModule(L.LightningModule):
             frequency (int): Frequency to potentially use the scheduler.
 
         Raises:
-            TypeError: Must include a scheduler
+            AttributeError: Must include a scheduler
 
         Returns:
             dict[str, Any]: Scheduler configuration dictionary
         """
         if self.scheduler is None:
-            raise TypeError("Must include a scheduler")
+            raise AttributeError("Must include a scheduler")
         return {
             "scheduler": self.scheduler,
             "interval": interval,
@@ -305,16 +305,16 @@ class BaseLightningModule(L.LightningModule):
             batch_idx (int): Data index
 
         Raises:
-            RuntimeError: For training, an optimizer is required (usually shouldn't come to this).
-            RuntimeError: For training, must include a loss aggregator.
+            AttributeError: For training, an optimizer is required (usually shouldn't come to this).
+            AttributeError: For training, must include a loss aggregator.
 
         Returns:
             STEP_OUTPUT: total loss output
         """
         if self.optimizer is None:
-            raise RuntimeError("For training, an optimizer is required.")
+            raise AttributeError("For training, an optimizer is required.")
         if self.loss_aggregator is None:
-            raise RuntimeError("For training, must include a loss aggregator.")
+            raise AttributeError("For training, must include a loss aggregator.")
         return self.step(batch, "training")  # type: ignore
 
     def validation_step(

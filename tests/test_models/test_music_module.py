@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 import pytest
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
+import yaml
 
 from loss.aggregators import LossOutput
 from models.base import BaseLightningModule
@@ -21,8 +22,8 @@ def test_MusicLightningModule_forward(music_module: MusicLightningModule) -> Non
     input_tensor = {"slice": torch.randn(1, 1, 512)}
     output_tensor = music_module.forward(input_tensor)
     assert isinstance(output_tensor, dict)
-    assert "output" in output_tensor
-    assert output_tensor["output"].shape == (1, 1, 512)
+    assert "slice" in output_tensor
+    assert output_tensor["slice"].shape == (1, 1, 512)
 
 
 def test_MusicLightningModule_handle_loss(music_module: MusicLightningModule) -> None:
