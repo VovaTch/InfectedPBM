@@ -198,7 +198,7 @@ class BaseLightningModule(L.LightningModule):
         Raises:
             AttributeError: If the specified optimizer type is not supported.
         """
-        if optimizer_cfg is not None:
+        if optimizer_cfg is not None and optimizer_cfg["type"] != "none":
             filtered_optimizer_cfg = {
                 key: value for key, value in optimizer_cfg.items() if key != "type"
             }
@@ -227,7 +227,7 @@ class BaseLightningModule(L.LightningModule):
             or None if scheduler_cfg is None.
         """
         # Build scheduler
-        if scheduler_cfg is not None:
+        if scheduler_cfg is not None and scheduler_cfg["type"] != "none":
             filtered_schedulers_cfg = {
                 key: value for key, value in scheduler_cfg.items() if key != "type"
             }

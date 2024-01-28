@@ -1,0 +1,4 @@
+type: OneCycleLR
+epochs: 200
+steps_per_epoch: 376
+max_lr: 0.003

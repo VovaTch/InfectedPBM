@@ -80,18 +80,8 @@ class MusicLightningModule(BaseLightningModule):
             else None
         )
 
-        optimizer_cfg_raw: dict[str, Any] = cfg.learning.optimizer
-        optimizer_cfg = (
-            {key: value for (key, value) in optimizer_cfg_raw.items() if key != "type"}
-            if optimizer_cfg_raw["type"] != "none"
-            else None
-        )
-        scheduler_cfg_raw: dict[str, Any] = cfg.learning.scheduler
-        scheduler_cfg = (
-            {key: value for (key, value) in scheduler_cfg_raw.items() if key != "type"}
-            if scheduler_cfg_raw["type"] != "none"
-            else None
-        )
+        optimizer_cfg: dict[str, Any] = cfg.learning.optimizer
+        scheduler_cfg: dict[str, Any] = cfg.learning.scheduler
 
         return cls(
             model,

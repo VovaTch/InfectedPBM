@@ -19,6 +19,14 @@
             "module": "scripts.pull_last_weights",
             "console": "integratedTerminal",
             "justMyCode": true
+        },
+        {
+            "name": "Python: Train",
+            "type": "python",
+            "request": "launch",
+            "module": "scripts.train",
+            "console": "integratedTerminal",
+            "justMyCode": true
         }
     ]
 }
