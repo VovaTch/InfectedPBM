@@ -1,0 +1,4 @@
+type: ReduceLROnPlateau
+mode: min
+factor: 0.1
+patience: 50
