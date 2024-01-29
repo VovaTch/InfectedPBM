@@ -74,9 +74,9 @@ class LearningParameters:
             val_split=learning_params["val_split"],
             test_split=learning_params["test_split"],
             amp=learning_params["amp"],
-            loss_monitor=learning_params["scheduler"]["loss_monitor"],
-            interval=learning_params["scheduler"]["interval"],
-            frequency=learning_params["scheduler"]["frequency"],
+            loss_monitor=learning_params["loss_monitor"],
+            interval=learning_params["interval"],
+            frequency=learning_params["frequency"],
         )
 
 

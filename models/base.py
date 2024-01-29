@@ -4,6 +4,7 @@ from typing import Any, Callable, Protocol, Self, TYPE_CHECKING
 
 import lightning as L
 from lightning.pytorch.utilities.types import STEP_OUTPUT, OptimizerLRScheduler
+from omegaconf import DictConfig
 import torch
 import torch.nn as nn
 
@@ -371,12 +372,12 @@ class BaseLightningModule(L.LightningModule):
 
     @classmethod
     @abstractmethod
-    def from_cfg(cls, cfg: dict[str, Any]) -> Self:
+    def from_cfg(cls, cfg: DictConfig) -> Self:
         """
         Create an instance of the class from a configuration dictionary.
 
         Args:
-            cfg (dict[str, Any]): The configuration dictionary.
+            cfg (DictConfig): The configuration dictionary.
 
         Returns:
             Self: An instance of the class.

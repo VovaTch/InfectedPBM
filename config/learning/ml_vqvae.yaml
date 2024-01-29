@@ -1,11 +1,11 @@
 defaults:
-  - scheduler: "none"
+  - scheduler: "onecyclelr"
   - optimizer: "none"
 
 learning_rate: 0.0003
 weight_decay: 0.02
 batch_size: 128
-epochs: 200
+epochs: 350
 beta_ema: 0.9999
 gradient_clip: 0.1
 val_split: 0.01
@@ -17,5 +17,5 @@ save_path: "saved/"
 
 # Scheduler config basic
 interval: "step"
-loss_monitor: "training_total_loss"
+loss_monitor: "validation total loss"
 frequency: 1

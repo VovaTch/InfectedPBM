@@ -6,13 +6,13 @@ import torch
 import torch.nn as nn
 import lightning as L
 
-
 if TYPE_CHECKING:
     from loss.aggregators import LossAggregator
     from loss.component_base import LossComponent
     from models.mel_spec_converters import MelSpecConverter
     from loaders.datasets import MusicDataset
     from loaders.data_modules import BaseDataModule
+    from models.base import BaseLightningModule
 
 
 LossComponentFactory = Callable[[str, DictConfig], "LossComponent"]
@@ -53,7 +53,7 @@ class Registry:
 
     models: dict[str, type[nn.Module]] = field(default_factory=lambda: {})
     activation_functions: dict[str, nn.Module] = field(default_factory=lambda: {})
-    lightning_modules: dict[str, type[L.LightningModule]] = field(
+    lightning_modules: dict[str, type["BaseLightningModule"]] = field(
         default_factory=lambda: {}
     )
     datasets: dict[str, type["MusicDataset"]] = field(default_factory=lambda: {})
@@ -152,7 +152,7 @@ class Registry:
 
         return decorator
 
-    def get_lightning_module(self, name: str) -> type[L.LightningModule]:
+    def get_lightning_module(self, name: str) -> type["BaseLightningModule"]:
         if name not in self.lightning_modules:
             raise KeyError(
                 f"Lightning module {name} is not registered, available names: {list(self.lightning_modules.keys())}"
