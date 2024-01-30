@@ -62,12 +62,13 @@ class MusicLightningModule(BaseLightningModule):
         return loss_total
 
     @classmethod
-    def from_cfg(cls, cfg: DictConfig) -> Self:
+    def from_cfg(cls, cfg: DictConfig, weights: str | None = None) -> Self:
         """
         Create a MusicModule instance from a configuration dictionary.
 
         Args:
             cfg (DictConfig): The configuration dictionary.
+            weights (str | None): Path to the weights file to load. Defaults to None.
 
         Returns:
             MusicModule: The created MusicModule instance.
@@ -83,11 +84,26 @@ class MusicLightningModule(BaseLightningModule):
         optimizer_cfg: dict[str, Any] = cfg.learning.optimizer
         scheduler_cfg: dict[str, Any] = cfg.learning.scheduler
 
-        return cls(
-            model,
-            learning_parameters,
-            None,
-            loss_aggregator,
-            optimizer_cfg,
-            scheduler_cfg,
-        )
+        model_params = {
+            "model": model,
+            "learning_params": learning_parameters,
+            "transforms": None,
+            "loss_aggregator": loss_aggregator,
+            "optimizer_cfg": optimizer_cfg,
+            "scheduler_cfg": scheduler_cfg,
+        }
+
+        if weights is None:
+            return cls(**model_params)
+        else:
+            return cls.load_from_checkpoint(weights, **model_params)
+
+    def on_train_epoch_end(self) -> None:
+        """
+        Callback function called at the end of each training epoch.
+        Randomly restarts the VQ codebook and resets its usage.
+        """
+        if hasattr(self.model, "vq_module"):
+            num_dead_codes = self.model.vq_module.vq_codebook.random_restart()
+            self.model.vq_module.vq_codebook.reset_usage()
+            self.log("number of dead codes", num_dead_codes)

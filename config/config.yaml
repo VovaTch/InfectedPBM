@@ -5,3 +5,4 @@ defaults:
   - dataset: music_slices
 
 model_name: ml_vqvae_tokenizer
+resume: weights/tokenizer_best.ckpt

@@ -12,13 +12,17 @@ def get_args() -> argparse.Namespace:
         "-p", "--path", type=str, default="saved", help="Path for all the saved files"
     )
     parser.add_argument(
-        "-n", "--model_name", type=str, default="mnist_fcn", help="Name of the model"
+        "-n",
+        "--model_name",
+        type=str,
+        default="ml_vqvae_tokenizer",
+        help="Name of the model",
     )
     parser.add_argument(
         "-f",
         "--file_name",
         type=str,
-        default="mnist_best",
+        default="tokenizer_best",
         help="File name to copy the weights into",
     )
     parser.add_argument(

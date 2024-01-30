@@ -7,30 +7,9 @@ from utils.containers import LearningParameters
 from utils.trainer import initialize_trainer
 
 
-def get_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Training script for InfectedBPM")
-    parser.add_argument(
-        "-r",
-        "--resume",
-        type=str,
-        default=None,
-        help="Checkpoint path to load the model from",
-    )
-    parser.add_argument(
-        "-d",
-        "--num_devices",
-        type=int,
-        default=1,
-        help="Number of CUDA devices. If 0, use CPU.",
-    )
-    return parser.parse_args()
-
-
 @hydra.main(version_base=None, config_path="../config", config_name="config")
 def main(cfg: DictConfig) -> None:
-    args = get_args()
     learning_parameters = LearningParameters.from_cfg(cfg)
-    cfg.learning.num_devices = args.num_devices
 
     # Data
     logger.info("Initializing data...")
@@ -42,14 +21,9 @@ def main(cfg: DictConfig) -> None:
 
     # Initialize model
     logger.info("Initializing model...")
-    if args.resume is not None:
-        model = (
-            registry.get_lightning_module(cfg.model.module_type)
-            .from_cfg(cfg)
-            .load_from_checkpoint(args.resume)
-        )
-    else:
-        model = registry.get_lightning_module(cfg.model.module_type).from_cfg(cfg)
+    model = registry.get_lightning_module(cfg.model.module_type).from_cfg(
+        cfg, cfg.resume
+    )
 
     # Train
     logger.info("Starting training...")

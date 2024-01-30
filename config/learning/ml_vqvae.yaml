@@ -1,10 +1,10 @@
 defaults:
-  - scheduler: "onecyclelr"
+  - scheduler: "reduce_lr_on_plateau"
   - optimizer: "none"
 
 learning_rate: 0.0003
 weight_decay: 0.02
-batch_size: 128
+batch_size: 160
 epochs: 350
 beta_ema: 0.9999
 gradient_clip: 0.1
@@ -16,6 +16,6 @@ num_workers: 4
 save_path: "saved/"
 
 # Scheduler config basic
-interval: "step"
+interval: "epoch"
 loss_monitor: "validation total loss"
 frequency: 1

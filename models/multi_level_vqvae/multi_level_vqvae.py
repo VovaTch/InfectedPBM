@@ -154,14 +154,6 @@ class MultiLvlVQVariationalAutoEncoder(Tokenizer):
         total_output.update({"z_e": z_e})
         return total_output
 
-    def on_train_epoch_end(self) -> None:
-        """
-        Callback function called at the end of each training epoch.
-        Randomly restarts the VQ codebook and resets its usage.
-        """
-        self.vq_module.vq_codebook.random_restart()
-        self.vq_module.vq_codebook.reset_usage()
-
     @classmethod
     def from_cfg(cls, cfg: DictConfig) -> Self:
         """

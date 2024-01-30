@@ -132,9 +132,12 @@ class Codebook(Protocol):
         """
         ...
 
-    def random_restart(self) -> None:
+    def random_restart(self) -> int:
         """
         Performs a random restart for the optimization algorithm.
+
+        Returns:
+            int: The number of dead codes
         """
         ...
 
@@ -173,6 +176,7 @@ class BaseLightningModule(L.LightningModule):
                 If None, no scheduler is used. Defaults to None.
         """
         super().__init__()
+
         self.model = model
         self.learning_params = learning_params
         self.loss_aggregator = loss_aggregator
@@ -372,12 +376,13 @@ class BaseLightningModule(L.LightningModule):
 
     @classmethod
     @abstractmethod
-    def from_cfg(cls, cfg: DictConfig) -> Self:
+    def from_cfg(cls, cfg: DictConfig, weights: str | None = None) -> Self:
         """
         Create an instance of the class from a configuration dictionary.
 
         Args:
             cfg (DictConfig): The configuration dictionary.
+            weights (str | None): Path to the weights file to load. Defaults to None.
 
         Returns:
             Self: An instance of the class.

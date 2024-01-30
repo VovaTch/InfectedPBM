@@ -164,3 +164,5 @@ cython_debug/
 outputs/
 saved/
 data/
+weights/
+sample.mp3
