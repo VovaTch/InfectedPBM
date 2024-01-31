@@ -1,3 +1,4 @@
+import os
 import lightning as L
 from lightning.pytorch.callbacks import (
     ModelCheckpoint,
@@ -30,6 +31,8 @@ def initialize_trainer(learning_parameters: LearningParameters) -> L.Trainer:
     learning_rate_monitor = LearningRateMonitor(logging_interval="step")
     logger = TensorBoardLogger(save_dir="saved/", name=learning_parameters.model_name)
     model_checkpoint_callback = ModelCheckpoint(
+        dirpath=os.path.join("saved", learning_parameters.model_name),
+        filename=f"{learning_parameters.model_name}_best.ckpt",
         save_last=True,
         save_weights_only=True,
         save_top_k=1,
