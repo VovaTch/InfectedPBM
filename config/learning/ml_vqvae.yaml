@@ -1,5 +1,5 @@
 defaults:
-  - scheduler: "reduce_lr_on_plateau"
+  - scheduler: "none"
   - optimizer: "none"
 
 learning_rate: 0.0003
@@ -17,5 +17,5 @@ save_path: "saved/"
 
 # Scheduler config basic
 interval: "epoch"
-loss_monitor: "validation total loss"
+loss_monitor: "training total loss"
 frequency: 1
