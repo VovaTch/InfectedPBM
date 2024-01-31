@@ -163,3 +163,59 @@ def vq_codebook_select(x_in: torch.Tensor, emb_batch: torch.Tensor):
     Applies the vq codebook function, allowing to pass gradients through it.
     """
     return VQCodebookFunc.apply(x_in, emb_batch)
+
+
+class ResidualCodebookCollection(nn.Module):
+    def __init__(self, token_dim: int, num_codebooks: int, num_tokens: int) -> None:
+        super().__init__()
+        _codebook_list = [
+            VQCodebook(token_dim, num_tokens=num_tokens) for _ in range(num_codebooks)
+        ]
+        self.vq_codebooks = nn.ModuleList(*_codebook_list)
+
+    def apply_codebook(
+        self, x_in: torch.Tensor, code_sg: bool = False
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """
+        Applies the VQ codebook to the input tensor.
+
+        Args:
+            x_in (torch.Tensor): The input tensor to be encoded.
+            code_sg (bool, optional): Whether to use the straight-through gradient estimator during encoding.
+                Defaults to False.
+
+        Returns:
+            tuple[torch.Tensor, torch.Tensor]: A tuple containing the encoded tensor and the indices of the codebook
+            vectors used.
+        """
+        x_res = x_in.clone()
+        z_q = torch.zeros_like(x_in)
+        z_q_ind = z_q.clone()
+        indices = []
+        for codebook in self.vq_codebooks:
+            x_res -= z_q_ind
+            z_q_ind, indices_ind = codebook.apply_codebook(x_res, code_sg)
+            z_q += z_q_ind
+            indices.append(indices_ind)
+
+        indices = torch.stack(indices, dim=-2)
+        return z_q, indices
+
+    def embed_codebook(self, indices: torch.Tensor) -> torch.Tensor:
+        """
+        Embeds the codebook using the given indices.
+
+        Args:
+            indices (torch.Tensor): The indices to use for embedding.
+
+        Returns:
+            torch.Tensor: The embedded codebook.
+
+        """
+        for idx, codebook in enumerate(self.vq_codebooks):
+            if idx == 0:
+                emb = codebook.embed_codebook(indices[..., idx])
+            else:
+                emb += codebook.embed_codebook(indices[..., idx])
+
+        return emb
