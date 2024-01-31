@@ -17,5 +17,5 @@ save_path: "saved/"
 
 # Scheduler config basic
 interval: "epoch"
-loss_monitor: "training total loss"
+loss_monitor: "validation total loss"
 frequency: 1
