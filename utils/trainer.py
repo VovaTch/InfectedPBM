@@ -5,7 +5,8 @@ from lightning.pytorch.callbacks import (
     ModelSummary,
     LearningRateMonitor,
 )
-from lightning.pytorch.loggers import TensorBoardLogger
+from lightning.pytorch.loggers import TensorBoardLogger, WandbLogger
+from omegaconf import DictConfig
 
 from .ema import EMA
 from .containers import LearningParameters
@@ -67,3 +68,16 @@ def initialize_trainer(learning_parameters: LearningParameters) -> L.Trainer:
     )
 
     return trainer
+
+
+def add_optional_wandb_logger(trainer: L.Trainer, cfg: DictConfig) -> None:
+    """
+    Adds a wandb logger to the trainer, if wandb is used
+
+    Args:
+        trainer (L.Trainer): Pytorch lightning trainer
+        cfg (DictConfig): Hydra config
+    """
+    if cfg.use_wandb:
+        wandb_logger = WandbLogger(project=cfg.project_name, log_model="all")
+        trainer.loggers = [*trainer.loggers, wandb_logger]

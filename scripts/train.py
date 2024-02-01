@@ -1,6 +1,6 @@
-import argparse
 import hydra
 from omegaconf import DictConfig
+from lightning.pytorch.loggers import WandbLogger
 
 from common import logger, registry
 from utils.containers import LearningParameters
@@ -18,6 +18,11 @@ def main(cfg: DictConfig) -> None:
     # Trainer
     logger.info("Initializing trainer...")
     trainer = initialize_trainer(learning_parameters)
+
+    # Wandb, add to the loggers if used
+    if cfg.use_wandb:
+        wandb_logger = WandbLogger(project=cfg.project_name, log_model="all")
+        trainer.loggers = [*trainer.loggers, wandb_logger]
 
     # Initialize model
     logger.info("Initializing model...")
