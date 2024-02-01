@@ -31,6 +31,8 @@ class LearningParameters:
         loss_monitor (str, optional): Loss monitor for scheduler. Defaults to "step".
         interval (str, optional): Interval for scheduler. Defaults to "training_total_loss".
         frequency (int, optional): Frequency for scheduler. Defaults to 1.
+        use_wandb (bool, optional): Flag indicating whether to use wandb. Defaults to False.
+        project_name (str): Project name, used mostly for Wandb, defaults to InfectedBPM.
     """
 
     model_name: str
@@ -43,6 +45,8 @@ class LearningParameters:
     save_path: str
     amp: bool
     val_split: float
+    use_wandb: bool = False
+    project_name: str = "InfectedBPM"
     test_split: float = 0.0
     num_devices: int = 1
     num_workers: int = 0
@@ -77,6 +81,8 @@ class LearningParameters:
             loss_monitor=learning_params["loss_monitor"],
             interval=learning_params["interval"],
             frequency=learning_params["frequency"],
+            project_name=cfg["project_name"],
+            use_wandb=cfg["use_wandb"],
         )
 
 

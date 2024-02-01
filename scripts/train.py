@@ -19,11 +19,6 @@ def main(cfg: DictConfig) -> None:
     logger.info("Initializing trainer...")
     trainer = initialize_trainer(learning_parameters)
 
-    # Wandb, add to the loggers if used
-    if cfg.use_wandb:
-        wandb_logger = WandbLogger(project=cfg.project_name, log_model="all")
-        trainer.loggers = [*trainer.loggers, wandb_logger]
-
     # Initialize model
     logger.info("Initializing model...")
     model = registry.get_lightning_module(cfg.model.module_type).from_cfg(

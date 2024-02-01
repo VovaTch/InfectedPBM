@@ -6,7 +6,6 @@ from lightning.pytorch.callbacks import (
     LearningRateMonitor,
 )
 from lightning.pytorch.loggers import TensorBoardLogger, WandbLogger
-from omegaconf import DictConfig
 
 from .ema import EMA
 from .containers import LearningParameters
@@ -30,7 +29,11 @@ def initialize_trainer(learning_parameters: LearningParameters) -> L.Trainer:
     # Configure trainer
     ema = EMA(learning_parameters.beta_ema)
     learning_rate_monitor = LearningRateMonitor(logging_interval="step")
-    logger = TensorBoardLogger(save_dir="saved/", name=learning_parameters.model_name)
+    tensorboard_logger = TensorBoardLogger(
+        save_dir="saved/", name=learning_parameters.model_name
+    )
+    loggers = [tensorboard_logger]
+
     model_checkpoint_callback = ModelCheckpoint(
         dirpath=os.path.join("saved", learning_parameters.model_name),
         filename=f"{learning_parameters.model_name}_best.ckpt",
@@ -46,13 +49,20 @@ def initialize_trainer(learning_parameters: LearningParameters) -> L.Trainer:
         save_top_k=0,
     )
 
+    # Initialize wandb if needed
+    if learning_parameters.use_wandb:
+        wandb_logger = WandbLogger(
+            project=learning_parameters.project_name, log_model="all"
+        )
+        loggers.append(wandb_logger)
+
     # AMP
     precision = 16 if learning_parameters.amp else 32
 
     model_summary = ModelSummary(max_depth=3)
     trainer = L.Trainer(
         gradient_clip_val=learning_parameters.gradient_clip,
-        logger=logger,
+        logger=loggers,
         callbacks=[
             model_checkpoint_callback,
             model_last_checkpoint_callback,
@@ -68,16 +78,3 @@ def initialize_trainer(learning_parameters: LearningParameters) -> L.Trainer:
     )
 
     return trainer
-
-
-def add_optional_wandb_logger(trainer: L.Trainer, cfg: DictConfig) -> None:
-    """
-    Adds a wandb logger to the trainer, if wandb is used
-
-    Args:
-        trainer (L.Trainer): Pytorch lightning trainer
-        cfg (DictConfig): Hydra config
-    """
-    if cfg.use_wandb:
-        wandb_logger = WandbLogger(project=cfg.project_name, log_model="all")
-        trainer.loggers = [*trainer.loggers, wandb_logger]
