@@ -54,6 +54,7 @@ def initialize_trainer(learning_parameters: LearningParameters) -> L.Trainer:
         logger=logger,
         callbacks=[
             model_checkpoint_callback,
+            model_last_checkpoint_callback,
             model_summary,
             learning_rate_monitor,
             ema,
