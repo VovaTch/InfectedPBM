@@ -219,3 +219,35 @@ class ResidualCodebookCollection(nn.Module):
                 emb += codebook.embed_codebook(indices[..., idx])
 
         return emb
+
+    def update_usage(self, min_enc: torch.Tensor) -> None:
+        """
+        Update the usage of the model based on the minimum encoding.
+
+        Args:
+            min_enc (torch.Tensor): The minimum encoding.
+
+        Returns:
+            None
+        """
+        for codebook in self.vq_codebooks:
+            codebook.update_usage(min_enc)
+
+    def reset_usage(self) -> None:
+        """
+        Resets the usage of the object.
+        """
+        for codebook in self.vq_codebooks:
+            codebook.reset_usage()
+
+    def random_restart(self) -> int:
+        """
+        Performs a random restart for the optimization algorithm.
+
+        Returns:
+            int: The number of dead codes
+        """
+        dead_codes = 0
+        for codebook in self.vq_codebooks:
+            dead_codes += codebook.random_restart()
+        return dead_codes

@@ -33,10 +33,16 @@ def initialize_trainer(learning_parameters: LearningParameters) -> L.Trainer:
     model_checkpoint_callback = ModelCheckpoint(
         dirpath=os.path.join("saved", learning_parameters.model_name),
         filename=f"{learning_parameters.model_name}_best.ckpt",
-        save_last=True,
         save_weights_only=True,
         save_top_k=1,
         monitor=learning_parameters.loss_monitor,
+    )
+    model_last_checkpoint_callback = ModelCheckpoint(
+        dirpath=os.path.join("saved", learning_parameters.model_name),
+        filename=f"{learning_parameters.model_name}_last.ckpt",
+        save_last=True,
+        save_weights_only=True,
+        save_top_k=0,
     )
 
     # AMP
