@@ -208,27 +208,3 @@ class VQ1D(nn.Module):
             output.update({"emb": emb})
 
         return output
-
-
-class ResidualCodebookCollection(nn.Module):
-    def __init__(self, token_dim: int, num_codebooks: int, num_tokens: int) -> None:
-        super().__init__()
-        _codebook_list = [
-            VQCodebook(token_dim, num_tokens=num_tokens) for _ in range(num_codebooks)
-        ]
-        self.vq_codebooks = nn.ModuleList(*_codebook_list)
-
-    def apply_codebook(
-        self, x_in: torch.Tensor, code_sg: bool = False
-    ) -> tuple[torch.Tensor, torch.Tensor]:
-        x_res = x_in.clone()
-        z_q = torch.zeros_like(x_in)
-        indices = []
-        for codebook in self.vq_codebooks:
-            x_res -= z_q
-            z_q_ind, indices_ind = codebook.apply_codebook(x_res, code_sg)
-            z_q += z_q_ind
-            indices.append(indices_ind)
-
-        indices = torch.stack(indices, dim=-2)
-        return z_q, indices
