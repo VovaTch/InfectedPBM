@@ -1,4 +1,3 @@
-from typing import Callable
 import torch
 
 from common import registry

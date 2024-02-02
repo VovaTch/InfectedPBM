@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from common import registry
-from ..vq_codebook import ResidualCodebookCollection, VQCodebook
+from ..vq_codebook import ResidualCodebookCollection
 
 
 class Res1DBlock(nn.Module):

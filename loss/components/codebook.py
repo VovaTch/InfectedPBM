@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from typing import Any, Self
-from numpy import diff
+from typing import Any
+from typing_extensions import Self
 
 import torch
 import torch.nn as nn

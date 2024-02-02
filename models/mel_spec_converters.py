@@ -1,5 +1,6 @@
 from dataclasses import asdict
-from typing import Any, Protocol, Self
+from typing import Any, Protocol
+from typing_extensions import Self
 
 import torch
 from torchaudio.transforms import MelSpectrogram

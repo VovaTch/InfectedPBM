@@ -1,6 +1,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Protocol, Self, TYPE_CHECKING
+from typing import Any, Protocol, TYPE_CHECKING
+from typing_extensions import Self
 
 import lightning as L
 from lightning.pytorch.utilities.types import STEP_OUTPUT, OptimizerLRScheduler

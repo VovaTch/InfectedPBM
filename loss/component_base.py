@@ -1,7 +1,8 @@
 from __future__ import annotations
-from typing import Any, Callable, Protocol, Self
-from omegaconf import DictConfig
+from typing import Any, Callable, Protocol
+from typing_extensions import Self
 
+from omegaconf import DictConfig
 import torch
 import torch.nn as nn
 from torchvision.ops import sigmoid_focal_loss

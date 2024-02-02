@@ -1,7 +1,8 @@
 from __future__ import annotations
-from typing import Protocol, Self, TYPE_CHECKING
-from omegaconf import DictConfig
+from typing import Protocol, TYPE_CHECKING
+from typing_extensions import Self
 
+from omegaconf import DictConfig
 import torch
 import torch.nn as nn
 

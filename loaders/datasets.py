@@ -1,6 +1,7 @@
 import json
 import os
-from typing import Any, Protocol, Self
+from typing import Any, Protocol
+from typing_extensions import Self
 from omegaconf import DictConfig
 
 import torch

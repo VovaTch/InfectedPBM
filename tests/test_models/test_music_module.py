@@ -1,8 +1,7 @@
 import torch
 import torch.nn as nn
 import pytest
-from omegaconf import DictConfig, OmegaConf
-import yaml
+from omegaconf import DictConfig
 
 from loss.aggregators import LossOutput
 from models.base import BaseLightningModule

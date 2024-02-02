@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Any, Callable, TYPE_CHECKING, Self
+from typing import Any, Callable, TYPE_CHECKING
+from typing_extensions import Self
 
 import torch
 import torch.nn as nn

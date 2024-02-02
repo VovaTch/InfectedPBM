@@ -1,7 +1,8 @@
 from dataclasses import dataclass
-from typing import Protocol, Self, TYPE_CHECKING
-from omegaconf import DictConfig
+from typing import Protocol, TYPE_CHECKING
+from typing_extensions import Self
 
+from omegaconf import DictConfig
 import torch
 
 from common import registry

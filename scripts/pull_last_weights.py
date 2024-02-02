@@ -1,7 +1,6 @@
 import os
 import subprocess
 
-import hydra
 import fire
 
 from common import logger

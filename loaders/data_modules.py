@@ -1,4 +1,5 @@
-from typing import Protocol, Self, TypeVar
+from typing import Protocol, TypeVar
+from typing_extensions import Self
 
 import lightning as L
 from lightning.pytorch.utilities.types import EVAL_DATALOADERS, TRAIN_DATALOADERS

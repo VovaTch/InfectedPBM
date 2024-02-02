@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Type, TypeVar
+from typing import Any, TypeVar
 
 from omegaconf import DictConfig
 
