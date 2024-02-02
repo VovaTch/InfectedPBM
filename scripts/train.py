@@ -1,6 +1,5 @@
 import hydra
 from omegaconf import DictConfig
-from lightning.pytorch.loggers import WandbLogger
 
 from common import logger, registry
 from utils.containers import LearningParameters

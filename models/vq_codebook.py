@@ -85,7 +85,7 @@ class VQCodebook(nn.Module):
     def reset_usage(self) -> None:
         self.usage.zero_()  # reset usage between epochs # type: ignore
 
-    def random_restart(self) -> int:
+    def random_restart(self) -> float:
         #  randomly restart all dead codes below threshold with random code in codebook
         dead_codes = torch.nonzero(self.usage < self.usage_threshold).squeeze(1)  # type: ignore
         # used_codes = torch.nonzero(self.usage >= self.usage_threshold).squeeze(1)
@@ -168,10 +168,10 @@ def vq_codebook_select(x_in: torch.Tensor, emb_batch: torch.Tensor):
 class ResidualCodebookCollection(nn.Module):
     def __init__(self, token_dim: int, num_codebooks: int, num_tokens: int) -> None:
         super().__init__()
-        _codebook_list = [
-            VQCodebook(token_dim, num_tokens=num_tokens) for _ in range(num_codebooks)
-        ]
-        self.vq_codebooks = nn.ModuleList(*_codebook_list)
+        self.vq_codebooks = nn.ModuleList(
+            [VQCodebook(token_dim, num_tokens=num_tokens) for _ in range(num_codebooks)]
+        )
+        self.token_dim = token_dim
 
     def apply_codebook(
         self, x_in: torch.Tensor, code_sg: bool = False
@@ -198,7 +198,7 @@ class ResidualCodebookCollection(nn.Module):
             z_q += z_q_ind
             indices.append(indices_ind)
 
-        indices = torch.stack(indices, dim=-2)
+        indices = torch.cat(indices, dim=-1)
         return z_q, indices
 
     def embed_codebook(self, indices: torch.Tensor) -> torch.Tensor:
@@ -212,13 +212,13 @@ class ResidualCodebookCollection(nn.Module):
             torch.Tensor: The embedded codebook.
 
         """
+        emb = torch.zeros((indices.shape[0], indices.shape[1], self.token_dim)).to(
+            indices.device
+        )
         for idx, codebook in enumerate(self.vq_codebooks):
-            if idx == 0:
-                emb = codebook.embed_codebook(indices[..., idx])
-            else:
-                emb += codebook.embed_codebook(indices[..., idx])
+            emb += codebook.embed_codebook(indices[..., idx])
 
-        return emb
+        return emb.transpose(1, 2)
 
     def update_usage(self, min_enc: torch.Tensor) -> None:
         """
@@ -240,14 +240,14 @@ class ResidualCodebookCollection(nn.Module):
         for codebook in self.vq_codebooks:
             codebook.reset_usage()
 
-    def random_restart(self) -> int:
+    def random_restart(self) -> float:
         """
         Performs a random restart for the optimization algorithm.
 
         Returns:
-            int: The number of dead codes
+            float: The average number of dead codes
         """
         dead_codes = 0
         for codebook in self.vq_codebooks:
             dead_codes += codebook.random_restart()
-        return dead_codes
+        return dead_codes / len(self.vq_codebooks)

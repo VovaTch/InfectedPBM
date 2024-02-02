@@ -1,110 +1,44 @@
-import argparse
 import os
-from typing import Any
 import subprocess
 
+import hydra
+import fire
 
-def get_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Script to pull the last weights from a model"
-    )
-    parser.add_argument(
-        "-p", "--path", type=str, default="saved", help="Path for all the saved files"
-    )
-    parser.add_argument(
-        "-n",
-        "--model_name",
-        type=str,
-        default="ml_vqvae_tokenizer",
-        help="Name of the model",
-    )
-    parser.add_argument(
-        "-f",
-        "--file_name",
-        type=str,
-        default="tokenizer_best",
-        help="File name to copy the weights into",
-    )
-    parser.add_argument(
-        "-del",
-        "--delete",
-        action="store_true",
-        help="Delete history; default is False",
-    )
-    return parser.parse_args()
+from common import logger
+from utils.config import load_cfg_from_hydra
 
 
-def _parse_args(args: Any) -> tuple[str, str, str, bool]:
-    save_path = args.path
-    model_name = args.model_name
-    file_name = args.file_name
-    delete_history = args.delete
-    return save_path, model_name, file_name, delete_history
-
-
-def list_direct_subdirs(root_dir_path: str) -> list[str]:
+def main(checkpoint_name: str, folder_path: str = "weights") -> None:
     """
-    Given a path, list all subdirectories in that path
+    Copy the last checkpoint file to a new location and delete the old checkpoint file.
 
     Args:
-        root_dir_path (str): Folder path
-
-    Returns:
-        list[str]: All subdirectories in the path
+        checkpoint_name (str): The name of the new checkpoint file.
+        folder_path (str, optional): The path to the folder where the new checkpoint file will be saved. Defaults to "weights".
     """
-    version_dirs = []
-    for item in os.listdir(root_dir_path):
-        if not os.path.isdir(os.path.join(root_dir_path, item)):
-            continue
-        version_dirs.append(item)
-    return version_dirs
+    cfg = load_cfg_from_hydra("../config", "config")
 
+    # Create the folder if there is none
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
 
-def find_latest_version_dir(version_dirs: list[str]) -> str:
-    """
-    Utility function to find the latest version folder out of a list of folders with identical
-    names except for the version number
-
-    Args:
-        version_dirs (list[str]): List of version directories
-
-    Returns:
-        str: The last version directory
-    """
-    version_dirs_number = [int(ind_dir.split("_")[-1]) for ind_dir in version_dirs]
-    max_version_idx = version_dirs_number.index(max(version_dirs_number))
-    return version_dirs[max_version_idx]
-
-
-def main() -> None:
-    """
-    Script to copy the latest version of a model into a "weights" folder.
-    """
-
-    args = get_args()
-
-    save_path, model_name, file_name, delete_history = _parse_args(args)
-    saved_versions = os.path.join(save_path, model_name)
-    version_dirs = list_direct_subdirs(saved_versions)
-    latest_version_dir = find_latest_version_dir(version_dirs)
-    weights_file_path = os.path.join(
-        saved_versions, latest_version_dir, "checkpoints", "last.ckpt"
+    # Create paths
+    last_checkpoint_save_path = os.path.join(
+        cfg.learning.save_path, cfg.model_name, "last.ckpt"
     )
-    if not os.path.isdir("weights"):
-        os.makedirs("weights")
-    moved_weights_file_path = os.path.join("weights", file_name + ".ckpt")
+    new_saved_path = os.path.join(folder_path, f"{checkpoint_name}.ckpt")
+    logger.info(f"Copying {last_checkpoint_save_path} to {new_saved_path}")
 
-    # Create and execute copy shell command
-    command = ["cp", "-r", weights_file_path, moved_weights_file_path]
+    # Create and run the new command
+    command = ["cp", last_checkpoint_save_path, new_saved_path]
     subprocess.run(command)
-    print(f"Copied weights from {weights_file_path} to {moved_weights_file_path}")
+    logger.info("Copied the last checkpoint to the new path.")
 
-    # Create and execute delete shell command if needed
-    command = ["rm", "-r", saved_versions]
-    if delete_history:
-        subprocess.run(command)
-        print(f"Removed all model checkpoints from {saved_versions}")
+    # delete the old last checkpoint
+    command = ["rm", last_checkpoint_save_path]
+    subprocess.run(command)
+    logger.info("Deleted the old last checkpoint.")
 
 
 if __name__ == "__main__":
-    main()
+    fire.Fire(main)

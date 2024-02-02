@@ -132,12 +132,12 @@ class Codebook(Protocol):
         """
         ...
 
-    def random_restart(self) -> int:
+    def random_restart(self) -> float:
         """
         Performs a random restart for the optimization algorithm.
 
         Returns:
-            int: The number of dead codes
+            float: The average number of dead codes
         """
         ...
 

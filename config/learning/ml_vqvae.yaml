@@ -4,7 +4,7 @@ defaults:
 
 learning_rate: 0.0003
 weight_decay: 0.02
-batch_size: 160
+batch_size: 96
 epochs: 350
 beta_ema: 0.9999
 gradient_clip: 0.1
@@ -12,7 +12,7 @@ val_split: 0.01
 test_split: 0.0
 amp: False
 num_devices: 0
-num_workers: 4
+num_workers: 11
 save_path: "saved/"
 
 # Scheduler config basic

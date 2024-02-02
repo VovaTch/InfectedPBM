@@ -185,6 +185,7 @@ class MultiLvlVQVariationalAutoEncoder(Tokenizer):
 
         # VQ parameter initialization
         vocabulary_size: int = model_cfg.vocabulary_size
+        num_codebooks: int = model_cfg.num_codebooks
 
         # loss aggregator
         if cfg.loss.aggregator.type != "none":
@@ -228,7 +229,9 @@ class MultiLvlVQVariationalAutoEncoder(Tokenizer):
             activation_type=activation_type,
         )
 
-        vq_module = VQ1D(latent_depth, num_tokens=vocabulary_size)
+        vq_module = VQ1D(
+            latent_depth, num_tokens=vocabulary_size, num_codebooks=num_codebooks
+        )
 
         return cls(input_channels, encoder, decoder, vq_module, loss_aggregator)
 

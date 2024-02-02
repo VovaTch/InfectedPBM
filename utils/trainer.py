@@ -5,7 +5,7 @@ from lightning.pytorch.callbacks import (
     ModelSummary,
     LearningRateMonitor,
 )
-from lightning.pytorch.loggers import TensorBoardLogger, WandbLogger
+from lightning.pytorch.loggers import TensorBoardLogger, WandbLogger, Logger
 
 from .ema import EMA
 from .containers import LearningParameters
@@ -32,7 +32,7 @@ def initialize_trainer(learning_parameters: LearningParameters) -> L.Trainer:
     tensorboard_logger = TensorBoardLogger(
         save_dir="saved/", name=learning_parameters.model_name
     )
-    loggers = [tensorboard_logger]
+    loggers: list[Logger] = [tensorboard_logger]
 
     model_checkpoint_callback = ModelCheckpoint(
         dirpath=os.path.join("saved", learning_parameters.model_name),

@@ -83,6 +83,8 @@ class LearningParameters:
             frequency=learning_params["frequency"],
             project_name=cfg["project_name"],
             use_wandb=cfg["use_wandb"],
+            # num_workers=learning_params["num_workers"],
+            # num_devices=learning_params["num_devices"],
         )
 
 
