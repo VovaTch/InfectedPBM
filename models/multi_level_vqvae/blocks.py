@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from common import registry
-from ..vq_codebook import ResidualCodebookCollection
+from ..vq_codebook import ResidualCodebookCollection, VQCodebook
 
 
 class Res1DBlock(nn.Module):
@@ -190,6 +190,7 @@ class VQ1D(nn.Module):
         self.vq_codebook = ResidualCodebookCollection(
             token_dim, num_codebooks=num_codebooks, num_tokens=num_tokens
         )
+        # self.vq_codebook = VQCodebook(token_dim=token_dim, num_tokens=num_tokens)
 
     def forward(
         self, z_e: torch.Tensor, extract_losses: bool = False

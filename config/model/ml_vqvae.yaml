@@ -4,7 +4,7 @@ module_type: music
 
 # Model parameters
 hidden_size: 4
-latent_depth: 512
+latent_depth: 128
 channel_dim_change_list: [2, 2, 2, 2, 2, 2, 2, 2]
 input_channels: 1
 vocabulary_size: 4092
