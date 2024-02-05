@@ -1,23 +1,23 @@
 reconstruction_loss:
   type: rec
   weight: 1.0
-  base_loss_type: 'l2_loss'
+  base_loss_type: 'mse'
   phase_parameter: 1
 
 alignment_loss:
   type: align
   weight: 0.5
-  base_loss_type: 'l2_loss'
+  base_loss_type: 'mse'
 
 commitment_loss:
   type: commit
   weight: 0.5
-  base_loss_type: 'l2_loss'
+  base_loss_type: 'mse'
 
 melspec_loss_1:
   type: mel_spec
   weight: 1.0
-  base_loss_type: 'l2_loss'
+  base_loss_type: 'mse'
   lin_start: 1.00
   lin_end: 1.0
   
@@ -35,7 +35,7 @@ melspec_loss_1:
 melspec_loss_2:
   type: mel_spec
   weight: 1.0
-  base_loss_type: 'l1_loss'
+  base_loss_type: 'l1'
   lin_start: 1.0
   lin_end: 1.0
 
@@ -53,7 +53,7 @@ melspec_loss_2:
 melspec_loss_3:
   type: mel_spec
   weight: 1.0
-  base_loss_type: 'l1_loss'
+  base_loss_type: 'l1'
   lin_start: 0.1
   lin_end: 20
 
@@ -71,7 +71,7 @@ melspec_loss_3:
 melspec_loss_4:
   type: mel_spec
   weight: 5.0
-  base_loss_type: 'l1_loss'
+  base_loss_type: 'l1'
   lin_start: 0.5
   lin_end: 10.0
   
@@ -89,7 +89,7 @@ melspec_loss_4:
 melspec_loss_5:
   type: mel_spec
   weight: 5.0
-  base_loss_type: 'l1_loss'
+  base_loss_type: 'l1'
   lin_start: 0.1
   lin_end: 20
 

@@ -1,0 +1,10 @@
+defaults:
+  - loss: ripl
+  - model: ripl
+  - learning: ripl
+  - dataset: music_slices
+
+project_name: InfectedBPM
+model_name: ripple_linear_net
+resume: null
+use_wandb: false

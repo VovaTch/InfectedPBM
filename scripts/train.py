@@ -8,6 +8,9 @@ from utils.trainer import initialize_trainer
 
 @hydra.main(version_base=None, config_path="../config", config_name="config")
 def main(cfg: DictConfig) -> None:
+    """
+    Main function for training. Initializes the data, model, and trainer and starts the training.
+    """
     learning_parameters = LearningParameters.from_cfg(cfg)
 
     # Data

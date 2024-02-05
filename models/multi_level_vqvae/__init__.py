@@ -1,1 +1,2 @@
 from .multi_level_vqvae import MultiLvlVQVariationalAutoEncoder
+from .ripplenet import RippleReconstructor

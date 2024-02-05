@@ -1,0 +1,7 @@
+# Model type
+type: ripl
+module_type: ripl
+
+# Model parameters
+hidden_size: 32
+num_inner_layers: 1
