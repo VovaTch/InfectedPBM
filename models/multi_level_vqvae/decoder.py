@@ -1,3 +1,8 @@
+from dataclasses import dataclass
+from mimetypes import init
+from typing_extensions import Self
+
+from omegaconf import DictConfig
 import torch
 import torch.nn as nn
 
@@ -90,3 +95,37 @@ class Decoder1D(nn.Module):
         x_out = self.end_conv(z)
 
         return x_out
+
+
+@dataclass
+class RippleDecoderParameters:
+    input_dim: int
+    hidden_dim: int
+    mlp_num_layers: int
+    output_dim: int
+    ripl_hidden_dim: int
+    ripl_num_layers: int
+
+    @classmethod
+    def from_cfg(cls, cfg: DictConfig) -> Self:
+        return cls(
+            input_dim=cfg.model.input_dim,
+            hidden_dim=cfg.model.hidden_dim,
+            mlp_num_layers=cfg.model.mlp_num_layers,
+            output_dim=cfg.model.output_dim,
+            ripl_hidden_dim=cfg.model.ripl_hidden_dim,
+            ripl_num_layers=cfg.model.ripl_num_layers,
+        )
+
+
+class RippleDecoder(nn.Module):
+    def __init__(
+        self,
+        dec_params: RippleDecoderParameters,
+    ) -> None:
+        super().__init__()
+        self.dec_params = dec_params
+
+        ripple_weight_dim = self._compute_ripple_weight_dim(
+            self.dec_params.ripl_hidden_dim, self.dec_params.ripl_num_layers
+        )

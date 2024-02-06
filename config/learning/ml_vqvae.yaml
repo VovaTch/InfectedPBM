@@ -2,10 +2,10 @@ defaults:
   - scheduler: "none"
   - optimizer: "none"
 
-learning_rate: 0.0003
+learning_rate: 0.00002
 weight_decay: 0.02
 batch_size: 128
-epochs: 350
+epochs: 500
 beta_ema: 0.9999
 gradient_clip: 0.1
 val_split: 0.01

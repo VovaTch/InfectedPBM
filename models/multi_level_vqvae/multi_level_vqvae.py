@@ -23,12 +23,10 @@ class InterfaceVQ1D(Protocol):
 
     def __call__(
         self, z_e: torch.Tensor, extract_losses: bool = False
-    ) -> dict[str, torch.Tensor]:
-        ...
+    ) -> dict[str, torch.Tensor]: ...
 
     @property
-    def vq_codebook(self) -> Codebook:
-        ...
+    def vq_codebook(self) -> Codebook: ...
 
 
 @registry.register_model("multi_lvl_vqvae")
@@ -267,3 +265,10 @@ class MultiLvlVQVariationalAutoEncoder(Tokenizer):
             decoder_channel_list,
             decoder_dim_changes,
         )
+
+
+@registry.register_model("ripl_vqvae")
+class RippleVQVariationalAutoEncoder(MultiLvlVQVariationalAutoEncoder):
+
+    @classmethod
+    def from_cfg(cls, cfg: DictConfig) -> Self: ...
