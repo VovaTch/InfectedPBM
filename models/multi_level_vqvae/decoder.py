@@ -7,6 +7,7 @@ import torch
 import torch.nn as nn
 
 from common import registry
+from models.multi_level_vqvae.ripplenet import ripple_linear_func
 from .blocks import Res1DBlockReverse
 
 
@@ -131,12 +132,23 @@ class RippleDecoder(nn.Module):
             raise ValueError(
                 f"MLP number of hidden layers must be non negative, got {self.dec_params.mlp_num_layers}"
             )
-        self.mlp = nn.Sequential(
-            [nn.Linear(1, self.dec_params.hidden_dim)]
-            + [nn.Linear(self.dec_params.hidden_dim, self.dec_params.hidden_dim)]
+
+        layer_list = (
+            [
+                nn.Linear(self.dec_params.input_dim, self.dec_params.hidden_dim),
+                nn.GELU(),
+                nn.LayerNorm(self.dec_params.hidden_dim),
+            ]
+            + [
+                nn.Linear(self.dec_params.hidden_dim, self.dec_params.hidden_dim),
+                nn.GELU(),
+                nn.LayerNorm(self.dec_params.hidden_dim),
+            ]
             * self.dec_params.mlp_num_layers
             + [nn.Linear(self.dec_params.hidden_dim, ripple_weight_dim)]
         )
+        self.mlp = nn.Sequential(*layer_list)
+        self.sequence_length = self.dec_params.output_dim
 
     @staticmethod
     def _compute_ripple_weight_dim(in_dim: int, out_dim: int) -> int:
@@ -167,13 +179,13 @@ class RippleDecoder(nn.Module):
             self._compute_ripple_weight_dim(
                 self.dec_params.ripl_hidden_dim, self.dec_params.ripl_hidden_dim
             )
-            * self.dec_params.mlp_num_layers
+            * self.dec_params.ripl_num_layers
         )
         return in_dim + out_dim + middle_dim
 
     def _split_mlp_output_to_ripple_layers(
         self, mlp_output: torch.Tensor
-    ) -> nn.ModuleList:
+    ) -> list[torch.Tensor]:
         """
         Splits the output of the MLP into ripple layers.
 
@@ -183,6 +195,7 @@ class RippleDecoder(nn.Module):
         Returns:
             nn.ModuleList: A list of tensors representing the ripple layers.
         """
+
         in_dim = self._compute_ripple_weight_dim(1, self.dec_params.ripl_hidden_dim)
         out_dim = self._compute_ripple_weight_dim(self.dec_params.ripl_hidden_dim, 1)
         middle_dims = [
@@ -192,7 +205,7 @@ class RippleDecoder(nn.Module):
         ] * self.dec_params.mlp_num_layers
 
         # Compute the splitting via a running index
-        ripple_weight_layers = nn.ModuleList()
+        ripple_weight_layers = []
         running_idx = 0
         ripple_weight_layers.append(mlp_output[..., :in_dim])
         running_idx += in_dim
@@ -206,6 +219,9 @@ class RippleDecoder(nn.Module):
         )
         return ripple_weight_layers
 
+    def set_sequence_length(self, sequence_length: int) -> None:
+        self.sequence_length = sequence_length
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Forward pass of the ripple decoder.
@@ -216,5 +232,45 @@ class RippleDecoder(nn.Module):
         Returns:
             torch.Tensor: Output tensor.
         """
-        mlp_output = self.mlp(x)
+
+        mlp_output = self.mlp(x.flatten(start_dim=1))
         ripple_weight_layers = self._split_mlp_output_to_ripple_layers(mlp_output)
+        in_weights = ripple_weight_layers[0]
+        out_weights = ripple_weight_layers[-1]
+        middle_weights = ripple_weight_layers[1:-1]
+
+        # Forward pass through the ripple-linear layers
+        line_coordinates = (
+            torch.arange(0, self.sequence_length, step=1)
+            .float()
+            .to(x.device)
+            .unsqueeze(0)
+            .unsqueeze(-1)
+            .repeat(1, x.shape[0], 1)
+        )
+
+        # Input layer
+        ripl_weights = in_weights.flatten().view(-1, 1, 2)
+        ripl_bias = in_weights.flatten().view((-1, 2))
+        lc_x = ripple_linear_func(
+            line_coordinates, self.dec_params.ripl_hidden_dim, ripl_weights, ripl_bias
+        )
+
+        # Middle layers
+        for middle_weight in middle_weights:
+            ripl_weights = middle_weight.view(
+                (self.dec_params.ripl_hidden_dim, self.dec_params.ripl_hidden_dim, 2)
+            )
+            ripl_bias = middle_weight.view(
+                (self.dec_params.ripl_hidden_dim, self.dec_params.ripl_hidden_dim + 1)
+            )
+            lc_x = ripple_linear_func(
+                lc_x, self.dec_params.ripl_hidden_dim, ripl_weights, ripl_bias
+            )
+
+        # Output layer
+        ripl_weights = out_weights.view((1, self.dec_params.ripl_hidden_dim, 2))
+        ripl_bias = out_weights.view((1, self.dec_params.ripl_hidden_dim + 1))
+        lc_x = ripple_linear_func(lc_x, 1, ripl_weights, ripl_bias)
+
+        return lc_x.transpose(1, 2)
