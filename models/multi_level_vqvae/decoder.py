@@ -125,7 +125,6 @@ class RippleDecoder(nn.Module):
     ) -> None:
         super().__init__()
         self.dec_params = dec_params
-
         ripple_weight_dim = self._compute_ripple_weight_dim(
             self.dec_params.ripl_hidden_dim, self.dec_params.ripl_num_layers
         )

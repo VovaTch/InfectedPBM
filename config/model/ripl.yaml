@@ -3,5 +3,5 @@ type: ripl
 module_type: ripl
 
 # Model parameters
-hidden_size: 32
+hidden_size: 64
 num_inner_layers: 1

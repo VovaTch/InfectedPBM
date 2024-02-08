@@ -1,4 +1,4 @@
 mse_loss:
   type: rec
   weight: 1.0
-  base_loss_type: 'mse'
+  base_loss: 'l1'

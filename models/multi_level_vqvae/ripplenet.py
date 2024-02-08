@@ -167,7 +167,7 @@ class RippleReconstructor(nn.Module):
             raise ValueError("Number of inner layers must be a positive integer.")
 
         # Layers
-        self.in_ripl = RippleLinear(1, hidden_size)
+        self.in_layer = nn.Linear(1, hidden_size)
         self.out_ripl = RippleLinear(hidden_size, 1)
         self.inner_ripl = nn.ModuleList(
             [RippleLinear(hidden_size, hidden_size) for _ in range(num_inner_layers)]
@@ -183,7 +183,7 @@ class RippleReconstructor(nn.Module):
         Returns:
             torch.Tensor: Output tensor.
         """
-        x = self.in_ripl(x)
+        x = self.in_layer(x.float())
         for layer in self.inner_ripl:
             x = layer(x)
         x = self.out_ripl(x)
