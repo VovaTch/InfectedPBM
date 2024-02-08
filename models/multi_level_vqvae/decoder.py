@@ -126,6 +126,95 @@ class RippleDecoder(nn.Module):
         super().__init__()
         self.dec_params = dec_params
 
-        ripple_weight_dim = self._compute_ripple_weight_dim(
-            self.dec_params.ripl_hidden_dim, self.dec_params.ripl_num_layers
+        ripple_weight_dim = self._compute_mlp_output_dim()
+        if self.dec_params.mlp_num_layers < 0:
+            raise ValueError(
+                f"MLP number of hidden layers must be non negative, got {self.dec_params.mlp_num_layers}"
+            )
+        self.mlp = nn.Sequential(
+            [nn.Linear(1, self.dec_params.hidden_dim)]
+            + [nn.Linear(self.dec_params.hidden_dim, self.dec_params.hidden_dim)]
+            * self.dec_params.mlp_num_layers
+            + [nn.Linear(self.dec_params.hidden_dim, ripple_weight_dim)]
         )
+
+    @staticmethod
+    def _compute_ripple_weight_dim(in_dim: int, out_dim: int) -> int:
+        """
+        Computes the dimension of the ripple weights for the decoder.
+
+        Args:
+            in_dim (int): The input dimension.
+            out_dim (int): The output dimension.
+
+        Returns:
+            int: The dimension of the ripple weights.
+        """
+        num_weights = 2 * in_dim * out_dim
+        num_biases = (in_dim + 1) * out_dim
+        return num_weights + num_biases
+
+    def _compute_mlp_output_dim(self) -> int:
+        """
+        Computes the output dimension of the MLP network in the decoder.
+
+        Returns:
+            int: The output dimension of the MLP network.
+        """
+        in_dim = self._compute_ripple_weight_dim(1, self.dec_params.ripl_hidden_dim)
+        out_dim = self._compute_ripple_weight_dim(self.dec_params.ripl_hidden_dim, 1)
+        middle_dim = (
+            self._compute_ripple_weight_dim(
+                self.dec_params.ripl_hidden_dim, self.dec_params.ripl_hidden_dim
+            )
+            * self.dec_params.mlp_num_layers
+        )
+        return in_dim + out_dim + middle_dim
+
+    def _split_mlp_output_to_ripple_layers(
+        self, mlp_output: torch.Tensor
+    ) -> nn.ModuleList:
+        """
+        Splits the output of the MLP into ripple layers.
+
+        Args:
+            mlp_output (torch.Tensor): The output tensor of the MLP.
+
+        Returns:
+            nn.ModuleList: A list of tensors representing the ripple layers.
+        """
+        in_dim = self._compute_ripple_weight_dim(1, self.dec_params.ripl_hidden_dim)
+        out_dim = self._compute_ripple_weight_dim(self.dec_params.ripl_hidden_dim, 1)
+        middle_dims = [
+            self._compute_ripple_weight_dim(
+                self.dec_params.ripl_hidden_dim, self.dec_params.ripl_hidden_dim
+            )
+        ] * self.dec_params.mlp_num_layers
+
+        # Compute the splitting via a running index
+        ripple_weight_layers = nn.ModuleList()
+        running_idx = 0
+        ripple_weight_layers.append(mlp_output[..., :in_dim])
+        running_idx += in_dim
+        for middle_dim in middle_dims:
+            ripple_weight_layers.append(
+                mlp_output[..., running_idx : running_idx + middle_dim]
+            )
+            running_idx += middle_dim
+        ripple_weight_layers.append(
+            mlp_output[..., running_idx : running_idx + out_dim]
+        )
+        return ripple_weight_layers
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass of the ripple decoder.
+
+        Args:
+            x (torch.Tensor): Input tensor.
+
+        Returns:
+            torch.Tensor: Output tensor.
+        """
+        mlp_output = self.mlp(x)
+        ripple_weight_layers = self._split_mlp_output_to_ripple_layers(mlp_output)
