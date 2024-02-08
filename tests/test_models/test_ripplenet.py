@@ -1,6 +1,10 @@
 import torch
 import pytest
-from models.multi_level_vqvae.ripplenet import RippleReconstructor, ripple_linear_func
+from models.multi_level_vqvae.ripplenet import (
+    RippleReconstructor,
+    batch_ripple_linear_func,
+    ripple_linear_func,
+)
 
 
 @pytest.fixture
@@ -59,3 +63,11 @@ def test_ripple_reconstructor_forward_gpu(
     ripple_reconstructor_input = ripple_reconstructor_input.to("cuda")
     output = ripple_reconstructor_model(ripple_reconstructor_input)
     assert output.shape == (10, 1)
+
+
+def test_batch_ripple_linear_func() -> None:
+    input = torch.randn(3, 5)
+    weight = torch.randn(3, 4, 5, 2)
+    bias = torch.randn(3, 4, 6)
+    output = batch_ripple_linear_func(input, weight, bias)
+    assert output.size() == (3, 4)

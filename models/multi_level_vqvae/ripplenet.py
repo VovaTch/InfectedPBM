@@ -56,6 +56,47 @@ def ripple_linear_func(
     return output_flattened.view(output_size)
 
 
+def batch_ripple_linear_func(
+    input: torch.Tensor, weight: torch.Tensor, bias: torch.Tensor
+) -> torch.Tensor:
+    """
+    Applies a batched ripple linear function to the input.
+
+    Args:
+        input (torch.Tensor): Input tensor of size BS x I.
+        weight (torch.Tensor): Weight tensor of size BS x O x I x 2.
+        bias (torch.Tensor): Bias tensor of size BS x O x (I + 1).
+
+    Returns:
+        torch.Tensor: Output tensor of size BS x O.
+
+    The function applies a batched ripple linear transformation to the input tensor.
+    It computes the output by taking the sine of the weighted sum of the input,
+    multiplied by a ripple factor, and adding a bias term.
+    """
+    output_dim = weight.size()[0]
+    input_flattened = input.view(-1, input.size()[-1], 1)
+
+    output_sin_mid = torch.sum(
+        weight[:, :, :, 0]
+        * torch.sin(
+            weight[:, :, :, 1] * input_flattened.repeat(1, 1, output_dim)
+            + bias[:, :, 1:]
+        ),
+        2,
+    )
+    output_with_bias = output_sin_mid + bias[:, :, 0]
+    return output_with_bias
+
+
+def test_batch_ripple_linear_func() -> None:
+    input = torch.randn(3, 5)
+    weight = torch.randn(3, 4, 5, 2)
+    bias = torch.randn(3, 4, 6)
+    output = batch_ripple_linear_func(input, weight, bias)
+    assert output.size() == (3, 4)
+
+
 class RippleLinear(nn.Module):
     """
     A simple trigonometric linear layer composed of trigonometric neurons; experimental
