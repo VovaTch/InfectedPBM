@@ -5,9 +5,12 @@ from omegaconf import DictConfig, OmegaConf
 import yaml
 
 from models.multi_level_vqvae.blocks import VQ1D
-from models.multi_level_vqvae.decoder import Decoder1D
+from models.multi_level_vqvae.decoder import Decoder1D, RippleDecoder
 from models.multi_level_vqvae.encoder import Encoder1D
-from models.multi_level_vqvae.multi_level_vqvae import MultiLvlVQVariationalAutoEncoder
+from models.multi_level_vqvae.multi_level_vqvae import (
+    MultiLvlVQVariationalAutoEncoder,
+    RippleVQVariationalAutoEncoder,
+)
 
 
 @pytest.fixture
@@ -83,3 +86,13 @@ def test_complete_model_forward(real_cfg: DictConfig) -> None:
     total_output = model.forward(input_tensor)
     assert isinstance(total_output, dict)
     assert total_output["slice"].size() == input_tensor.size()
+
+
+@pytest.fixture
+def ripple_vqvae() -> RippleVQVariationalAutoEncoder:
+    # Create a dummy instance of RippleVQVariationalAutoEncoder for testing
+    input_channels = 3
+    encoder = nn.Conv1d(3, 64, kernel_size=3, padding=1)
+    decoder = nn.Conv1d(64, 3, kernel_size=3, padding=1)
+    vq_module = VQ1D(64, 128)
+    return RippleVQVariationalAutoEncoder(input_channels, encoder, decoder, vq_module)

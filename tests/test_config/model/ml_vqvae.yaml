@@ -10,6 +10,7 @@ input_channels: 1
 vocabulary_size: 16384
 num_res_block_conv: 4
 dilation_factor: 3
+num_codebooks: 1
 activation_type: gelu
 
 # Encoder and decoder parameters

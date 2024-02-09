@@ -56,6 +56,7 @@ def ripple_linear_func(
     return output_flattened.view(output_size)
 
 
+@script
 def batch_ripple_linear_func(
     input: torch.Tensor, weight: torch.Tensor, bias: torch.Tensor
 ) -> torch.Tensor:
@@ -74,19 +75,30 @@ def batch_ripple_linear_func(
     It computes the output by taking the sine of the weighted sum of the input,
     multiplied by a ripple factor, and adding a bias term.
     """
-    output_dim = weight.size()[0]
-    input_flattened = input.view(-1, input.size()[-1], 1)
+
+    # Register output sizes
+    input_size = input.size()
+    output_size = list(input_size)
+    output_size[-1] = weight.size()[1]
+
+    output_dim = weight.size()[1]
+    input_flattened = input.view(-1, 1, input.size()[-1])
+    super_batch_size = input_flattened.size()[0]
+    batch_multiplier = super_batch_size // input.size()[0]
 
     output_sin_mid = torch.sum(
-        weight[:, :, :, 0]
+        weight[:, :, :, 0].repeat_interleave(batch_multiplier, dim=0)
         * torch.sin(
-            weight[:, :, :, 1] * input_flattened.repeat(1, 1, output_dim)
-            + bias[:, :, 1:]
+            weight[:, :, :, 1].repeat_interleave(batch_multiplier, dim=0)
+            * input_flattened.repeat((1, output_dim, 1))
+            + bias[:, :, 1:].repeat_interleave(batch_multiplier, dim=0)
         ),
         2,
     )
-    output_with_bias = output_sin_mid + bias[:, :, 0]
-    return output_with_bias
+    output_with_bias = output_sin_mid + bias[:, :, 0].repeat_interleave(
+        batch_multiplier, dim=0
+    )
+    return output_with_bias.view(output_size)
 
 
 def test_batch_ripple_linear_func() -> None:
@@ -209,6 +221,8 @@ class RippleReconstructor(nn.Module):
 
         # Layers
         self.in_layer = nn.Linear(1, hidden_size)
+        # self.in_layer = RippleLinear(1, hidden_size)
+        self.in_activation = nn.GELU()
         self.out_ripl = RippleLinear(hidden_size, 1)
         self.inner_ripl = nn.ModuleList(
             [RippleLinear(hidden_size, hidden_size) for _ in range(num_inner_layers)]
@@ -225,8 +239,10 @@ class RippleReconstructor(nn.Module):
             torch.Tensor: Output tensor.
         """
         x = self.in_layer(x.float())
+        # x = self.in_activation(x)
         for layer in self.inner_ripl:
             x = layer(x)
+            # x = self.in_activation(x)
         x = self.out_ripl(x)
         return x
 

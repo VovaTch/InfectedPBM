@@ -4,4 +4,7 @@ defaults:
   - model: "ml_vqvae"
   - loss: "none"
 
-model_name: vqvae_lvl1
+project_name: InfectedBPM-testing
+model_name: ml_vqvae_tokenizer
+resume: null
+use_wandb: false

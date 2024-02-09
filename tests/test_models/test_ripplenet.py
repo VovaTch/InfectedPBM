@@ -71,3 +71,11 @@ def test_batch_ripple_linear_func() -> None:
     bias = torch.randn(3, 4, 6)
     output = batch_ripple_linear_func(input, weight, bias)
     assert output.size() == (3, 4)
+
+
+def test_batch_ripple_linear_func_higher_dim_input() -> None:
+    input = torch.randn(3, 2, 5)
+    weight = torch.randn(3, 4, 5, 2)
+    bias = torch.randn(3, 4, 6)
+    output = batch_ripple_linear_func(input, weight, bias)
+    assert output.size() == (3, 2, 4)

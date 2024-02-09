@@ -32,7 +32,7 @@ def main(cfg: DictConfig) -> None:
 
     # Data
     dataset = registry.get_dataset(cfg.dataset.dataset_type).from_cfg(cfg)
-    single_sample_dataset = SingleSampleDataset(dataset, 2000, 16)  # type: ignore
+    single_sample_dataset = SingleSampleDataset(dataset, 2500, 1)  # type: ignore
 
     # Loader
     loader = DataLoader(single_sample_dataset, batch_size=1, shuffle=False)
