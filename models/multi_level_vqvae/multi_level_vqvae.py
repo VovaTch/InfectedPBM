@@ -79,7 +79,7 @@ class MultiLvlVQVariationalAutoEncoder(Tokenizer):
             torch.Tensor: The encoded tensor.
         """
         x_reshaped = x.reshape((x.shape[0], -1, self.input_channels)).permute((0, 2, 1))
-        z_e = self.encoder(x_reshaped)
+        z_e = self.encoder(x_reshaped.float())
         return z_e
 
     def tokenize(self, x: torch.Tensor) -> torch.Tensor:
@@ -295,7 +295,7 @@ class RippleVQVariationalAutoEncoder(MultiLvlVQVariationalAutoEncoder):
         projected_input_size: int = model_cfg.input_size
         dec_input_size = projected_input_size // np.prod(channel_change_dim_list) * latent_depth  # type: ignore
         ripl_parameters = RippleDecoderParameters(
-            input_dim=dec_input_size,
+            input_dim=int(dec_input_size),
             hidden_dim=model_cfg.decoder_params.hidden_dim,
             mlp_num_layers=model_cfg.decoder_params.mlp_num_layers,
             output_dim=projected_input_size,
