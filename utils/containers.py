@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Any, TypeVar
+from typing_extensions import Self
 
 from omegaconf import DictConfig
 
@@ -9,7 +10,6 @@ _T = TypeVar("_T")
 
 @dataclass
 class LearningParameters:
-
     """
     Class representing learning parameters for a model.
 
@@ -185,4 +185,31 @@ class MusicDatasetParameters:
             preload=dataset_cfg["preload"],
             preload_data_dir=dataset_cfg["preload_data_dir"],
             device=dataset_cfg["device"],
+        )
+
+
+@dataclass
+class MambaParams:
+    model_dim: int
+    ssm_state_dim: int
+    conv_width: int
+    expansion: int
+
+    @classmethod
+    def from_cfg(cls, cfg: DictConfig) -> Self:
+        """
+        Utility method to parse dataset parameters from a configuration dictionary
+
+        Args:
+            cfg (DictConfig): configuration dictionary
+
+        Returns:
+            MusicDatasetParameters: dataset parameters object
+        """
+        mamba_cfg = cfg.model
+        return cls(
+            model_dim=mamba_cfg["model_dim"],
+            ssm_state_dim=mamba_cfg["ssm_state_dim"],
+            conv_width=mamba_cfg["conv_width"],
+            expansion=mamba_cfg["expansion"],
         )
