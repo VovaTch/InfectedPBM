@@ -1,4 +1,5 @@
 defaults:
+  - _self_
   - loss: ml_vqvae
   - model: ripl_vqvae
   - learning: ml_vqvae

@@ -22,6 +22,7 @@ class MambaWrapper(nn.Module):
         )
         self.vocabulary_size = vocabulary_size
         self.in_embedding = nn.Embedding(vocabulary_size + 2, mamba_params.model_dim)
+        self.out_projection = nn.Linear(mamba_params.model_dim, vocabulary_size + 2)
 
     @classmethod
     def from_cfg(cls, cfg: DictConfig) -> Self:
@@ -30,8 +31,10 @@ class MambaWrapper(nn.Module):
         return cls(mamba_params, vocabulary_size)
 
     def forward(self, x: torch.Tensor) -> dict[str, torch.Tensor]:
+        # Input size BS x L
         embedding = self.in_embedding(x)
-        return {"logits": self.mamba(embedding)}  # size BS x L x dim
+        mamba_outputs = self.mamba(embedding)
+        return {"logits": self.out_projection(mamba_outputs)}  # size BS x L x Voc
 
     @property
     def model(self) -> Mamba:

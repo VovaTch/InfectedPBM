@@ -140,12 +140,12 @@ class RippleDecoder(nn.Module):
             [
                 nn.Linear(self.dec_params.input_dim, self.dec_params.hidden_dim),
                 nn.GELU(),
-                # nn.LayerNorm(self.dec_params.hidden_dim),
+                nn.LayerNorm(self.dec_params.hidden_dim),
             ]
             + [
                 nn.Linear(self.dec_params.hidden_dim, self.dec_params.hidden_dim),
                 nn.GELU(),
-                # nn.LayerNorm(self.dec_params.hidden_dim),
+                nn.LayerNorm(self.dec_params.hidden_dim),
             ]
             * self.dec_params.mlp_num_layers
             + [nn.Linear(self.dec_params.hidden_dim, ripple_weight_dim)]

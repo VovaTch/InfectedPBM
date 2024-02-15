@@ -74,6 +74,7 @@ def initialize_trainer(learning_parameters: LearningParameters) -> L.Trainer:
         log_every_n_steps=1,
         precision=precision,
         accelerator=accelerator,
+        strategy="ddp_find_unused_parameters_true",
     )
 
     return trainer

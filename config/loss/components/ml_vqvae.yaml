@@ -14,92 +14,92 @@ commitment_loss:
   weight: 0.5
   base_loss: 'mse'
 
-melspec_loss_1:
-  type: mel_spec
-  weight: 1.0
-  base_loss: 'mse'
-  lin_start: 1.00
-  lin_end: 1.0
+# melspec_loss_1:
+#   type: mel_spec
+#   weight: 1.0
+#   base_loss: 'mse'
+#   lin_start: 1.00
+#   lin_end: 1.0
   
-  melspec_params:
-    n_fft: 1024
-    f_min: 20
-    hop_length: 256
-    n_mels: 128
-    pad_mode: reflect
-    power: 2.0
-    norm: "slaney"
-    mel_scale: "htk"
-    pad: 0
+#   melspec_params:
+#     n_fft: 1024
+#     f_min: 20
+#     hop_length: 256
+#     n_mels: 128
+#     pad_mode: reflect
+#     power: 2.0
+#     norm: "slaney"
+#     mel_scale: "htk"
+#     pad: 0
 
-melspec_loss_2:
-  type: mel_spec
-  weight: 1.0
-  base_loss: 'l1'
-  lin_start: 1.0
-  lin_end: 1.0
+# melspec_loss_2:
+#   type: mel_spec
+#   weight: 1.0
+#   base_loss: 'l1'
+#   lin_start: 1.0
+#   lin_end: 1.0
 
-  melspec_params:
-    n_fft: 1024
-    f_min: 20
-    hop_length: 128
-    n_mels: 128
-    pad_mode: reflect
-    power: 2.0
-    norm: "slaney"
-    mel_scale: "htk"
-    pad: 0
+#   melspec_params:
+#     n_fft: 1024
+#     f_min: 20
+#     hop_length: 128
+#     n_mels: 128
+#     pad_mode: reflect
+#     power: 2.0
+#     norm: "slaney"
+#     mel_scale: "htk"
+#     pad: 0
 
-melspec_loss_3:
-  type: mel_spec
-  weight: 1.0
-  base_loss: 'l1'
-  lin_start: 0.1
-  lin_end: 20
+# melspec_loss_3:
+#   type: mel_spec
+#   weight: 1.0
+#   base_loss: 'l1'
+#   lin_start: 0.1
+#   lin_end: 20
 
-  melspec_params:
-    n_fft: 512
-    f_min: 20
-    hop_length: 128
-    n_mels: 64
-    pad_mode: reflect
-    power: 1.0
-    norm: "slaney"
-    mel_scale: "htk"
-    pad: 0
+#   melspec_params:
+#     n_fft: 512
+#     f_min: 20
+#     hop_length: 128
+#     n_mels: 64
+#     pad_mode: reflect
+#     power: 1.0
+#     norm: "slaney"
+#     mel_scale: "htk"
+#     pad: 0
 
-melspec_loss_4:
-  type: mel_spec
-  weight: 5.0
-  base_loss: 'l1'
-  lin_start: 0.5
-  lin_end: 10.0
+# melspec_loss_4:
+#   type: mel_spec
+#   weight: 5.0
+#   base_loss: 'l1'
+#   lin_start: 0.5
+#   lin_end: 10.0
   
-  melspec_params:
-    n_fft: 1024
-    f_min: 20
-    hop_length: 256
-    n_mels: 128
-    pad_mode: reflect
-    power: 1.0
-    norm: "slaney"
-    mel_scale: "htk"
-    pad: 0
+#   melspec_params:
+#     n_fft: 1024
+#     f_min: 20
+#     hop_length: 256
+#     n_mels: 128
+#     pad_mode: reflect
+#     power: 1.0
+#     norm: "slaney"
+#     mel_scale: "htk"
+#     pad: 0
 
-melspec_loss_5:
-  type: mel_spec
-  weight: 5.0
-  base_loss: 'l1'
-  lin_start: 0.1
-  lin_end: 20
+# melspec_loss_5:
+#   type: mel_spec
+#   weight: 5.0
+#   base_loss: 'l1'
+#   lin_start: 0.1
+#   lin_end: 20
 
-  melspec_params:
-    n_fft: 512
-    f_min: 20
-    hop_length: 256
-    n_mels: 64
-    pad_mode: reflect
-    power: 2.0
-    norm: "slaney"
-    mel_scale: "htk"
-    pad: 0
+#   melspec_params:
+#     n_fft: 512
+#     f_min: 20
+#     hop_length: 256
+#     n_mels: 64
+#     pad_mode: reflect
+#     power: 2.0
+#     norm: "slaney"
+#     mel_scale: "htk"
+#     pad: 0

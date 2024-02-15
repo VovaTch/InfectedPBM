@@ -2,13 +2,13 @@ defaults:
   - scheduler: "none"
   - optimizer: "none"
 
-learning_rate: 0.000003
+learning_rate: 0.00003
 weight_decay: 0.002
-batch_size: 32
+batch_size: 128
 epochs: 500
 beta_ema: 0.9999
 gradient_clip: 0.1
-val_split: 0.01
+val_split: 0.001
 test_split: 0.0
 amp: False
 num_devices: 0
