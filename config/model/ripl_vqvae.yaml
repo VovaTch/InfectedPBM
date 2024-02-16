@@ -4,7 +4,7 @@ module_type: music
 
 # Model parameters
 hidden_size: 4
-latent_depth: 128
+latent_depth: 32
 channel_dim_change_list: [2, 2, 2, 2, 2, 2, 2, 2]
 input_channels: 1
 vocabulary_size: 4092
@@ -21,6 +21,6 @@ encoder_dim_change_kernel_size: 3
 input_size: 1024
 decoder_params:
   hidden_dim: 1024
-  mlp_num_layers: 3
+  mlp_num_layers: 5
   ripl_hidden_dim: 32
   ripl_num_layers: 3
