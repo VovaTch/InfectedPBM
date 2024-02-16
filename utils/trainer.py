@@ -25,23 +25,25 @@ def initialize_trainer(learning_parameters: LearningParameters) -> L.Trainer:
     num_devices = learning_parameters.num_devices
     accelerator = "cpu" if num_devices == 0 else "gpu"
 
+    save_folder = learning_parameters.save_path
+
     # Configure trainer
     ema = EMA(learning_parameters.beta_ema)
     learning_rate_monitor = LearningRateMonitor(logging_interval="step")
     tensorboard_logger = TensorBoardLogger(
-        save_dir="saved/", name=learning_parameters.model_name
+        save_dir=save_folder, name=learning_parameters.model_name
     )
     loggers: list[Logger] = [tensorboard_logger]
 
     model_checkpoint_callback = ModelCheckpoint(
-        dirpath=os.path.join("saved", learning_parameters.model_name),
+        dirpath=os.path.join(save_folder, learning_parameters.model_name),
         filename=f"{learning_parameters.model_name}_best.ckpt",
         save_weights_only=True,
         save_top_k=1,
         monitor=learning_parameters.loss_monitor,
     )
     model_last_checkpoint_callback = ModelCheckpoint(
-        dirpath=os.path.join("saved", learning_parameters.model_name),
+        dirpath=os.path.join(save_folder, learning_parameters.model_name),
         filename=f"{learning_parameters.model_name}_last.ckpt",
         save_last=True,
         save_weights_only=True,
@@ -74,7 +76,6 @@ def initialize_trainer(learning_parameters: LearningParameters) -> L.Trainer:
         log_every_n_steps=1,
         precision=precision,
         accelerator=accelerator,
-        strategy="ddp_find_unused_parameters_true",
     )
 
     return trainer

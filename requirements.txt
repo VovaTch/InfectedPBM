@@ -7,3 +7,5 @@ hydra-core
 matplotlib
 tensorboard
 ipykernel
+causal-conv1d
+mamba-ssm
