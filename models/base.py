@@ -216,6 +216,7 @@ class BaseLightningModule(L.LightningModule):
                 self.parameters(),
                 lr=self.learning_params.learning_rate,
                 weight_decay=self.learning_params.weight_decay,
+                amsgrad=True,
             )
         return optimizer
 
