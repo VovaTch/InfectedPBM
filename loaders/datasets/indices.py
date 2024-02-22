@@ -1,7 +1,5 @@
 from __future__ import annotations
-import json
 import os
-from typing import Any
 import torch
 
 from torch.utils.data import Dataset, TensorDataset, DataLoader
@@ -32,6 +30,18 @@ class MP3TokenizedIndicesDataset(Dataset):
         buffer_process_batch_size: int = 32,
         epoch_size: int = 100000,
     ) -> None:
+        """
+        Initializes an instance of the Indices class.
+
+        Args:
+            dataset_params (MusicDatasetParameters): The parameters for the music dataset.
+            codebook_size (int): The size of the codebook.
+            index_series_length (int, optional): The length of the index series. Defaults to 1024.
+            slice_dataset (MP3SliceDataset | None, optional): The slice dataset. Defaults to None.
+            tokenizer (Tokenizer | None, optional): The tokenizer. Defaults to None.
+            buffer_process_batch_size (int, optional): The batch size for buffer processing. Defaults to 32.
+            epoch_size (int, optional): The size of each epoch. Defaults to 100000.
+        """
         super().__init__()
 
         self.tokenized_data = torch.zeros((0)).to(device=self.device)
@@ -59,7 +69,12 @@ class MP3TokenizedIndicesDataset(Dataset):
             self._dump_data(dataset_params.data_dir)
 
     def _generate_data(self) -> None:
+        """
+        Generates tokenized data for the dataset.
 
+        Raises:
+            ValueError: If slice_dataset or tokenizer is not provided.
+        """
         if self.slice_dataset is None:
             raise ValueError("Slice dataset must be provided if dataset doesn't exist")
 
@@ -77,7 +92,15 @@ class MP3TokenizedIndicesDataset(Dataset):
             self.tokenized_data = torch.cat([self.tokenized_data, index_track], dim=0)
 
     def _process_single_track(self, track_name: str) -> torch.Tensor:
+        """
+        Process a single track and return the corresponding index tensor.
 
+        Args:
+            track_name (str): The name of the track to process.
+
+        Returns:
+            torch.Tensor: The index tensor representing the processed track.
+        """
         if self.slice_dataset is None:
             raise ValueError("Slice dataset must be provided if dataset doesn't exist")
 
@@ -121,6 +144,15 @@ class MP3TokenizedIndicesDataset(Dataset):
         )
 
     def _dump_data(self, path: str) -> None:
+        """
+        Dump the tokenized data to the specified path.
+
+        Args:
+            path (str): The path to save the tokenized data.
+
+        Returns:
+            None
+        """
         # Make slice folder
         tokenized_data_path = os.path.join(path, "token_indices")
         if not os.path.exists(tokenized_data_path):
@@ -132,12 +164,27 @@ class MP3TokenizedIndicesDataset(Dataset):
         )
 
     def _load_data(self, path: str) -> None:
+        """
+        Load tokenized data from the specified path.
+
+        Args:
+            path (str): The path to the directory containing the tokenized data.
+
+        Returns:
+            None
+        """
         tokenized_data_path = os.path.join(path, "token_indices")
         self.tokenized_data = torch.load(
             os.path.join(tokenized_data_path, "tokenized_data.pt")
         )
 
     def __len__(self) -> int:
+        """
+        Returns the length of the dataset.
+
+        Returns:
+            int: The number of items in the dataset.
+        """
         return self.tokenized_data.shape[0] - 1
 
     def __getitem__(self, index: int) -> dict[str, torch.Tensor]:
