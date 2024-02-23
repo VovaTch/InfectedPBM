@@ -1,5 +1,6 @@
 import pytest
 import torch
+from omegaconf import DictConfig
 
 from loaders.datasets import MP3TokenizedIndicesDataset
 from loaders.datasets.music import MP3SliceDataset
@@ -7,26 +8,15 @@ from utils.containers import MusicDatasetParameters
 
 
 @pytest.fixture
-def dataset_params():
+def dataset_params(cfg: DictConfig) -> MusicDatasetParameters:
     # Define the dataset parameters with dummy values
-    return MusicDatasetParameters(
-        data_dir="/path/to/data",
-        preload=True,
-        slice_length=1024,
-        sample_rate=44100,
-        device="cuda",
-    )
+    return MusicDatasetParameters.from_cfg(cfg)
 
 
 @pytest.fixture
-def slice_dataset():
+def slice_dataset(cfg: DictConfig) -> MP3SliceDataset:
     # Define the slice dataset with dummy values
-    return MP3SliceDataset(
-        buffer={
-            "track_name": ["track1", "track2"],
-            "slice": [torch.tensor([1, 2, 3]), torch.tensor([4, 5, 6])],
-        }
-    )
+    return MP3SliceDataset.from_cfg(cfg)
 
 
 @pytest.fixture

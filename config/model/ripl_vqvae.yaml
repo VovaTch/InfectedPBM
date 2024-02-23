@@ -7,7 +7,7 @@ hidden_size: 4
 latent_depth: 256
 channel_dim_change_list: [2, 2, 2, 2, 2, 2, 2, 2]
 input_channels: 1
-vocabulary_size: 32
+vocabulary_size: 64
 num_codebooks: 1
 num_res_block_conv: 4
 dilation_factor: 3
@@ -20,7 +20,7 @@ encoder_dim_change_kernel_size: 3
 # Decoder parameters
 input_size: 1024
 decoder_params:
-  hidden_dim: 1024
+  hidden_dim: 4096
   mlp_num_layers: 0
   ripl_hidden_dim: 32
   ripl_num_layers: 3

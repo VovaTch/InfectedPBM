@@ -3,6 +3,7 @@ from typing_extensions import Self
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from omegaconf import DictConfig
 
 from models.multi_level_vqvae.ripplenet import batch_ripple_linear_func
@@ -170,6 +171,7 @@ class RippleDecoder(nn.Module):
         lc_x = self._run_ripple_linear(
             lc_x, out_weights, self.dec_params.ripl_hidden_dim, 1
         )
+        lc_x = F.tanh(lc_x)
 
         return lc_x.transpose(1, 2)
 
