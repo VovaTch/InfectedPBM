@@ -59,6 +59,7 @@ class RippleDecoder(nn.Module):
             * self.dec_params.mlp_num_layers
             + [nn.Linear(self.dec_params.hidden_dim, ripple_weight_dim)]
         )
+        self.activation = nn.GELU()
         self.mlp = nn.Sequential(*layer_list)
         self.bypass = RippleLinear(1, 1)
         self.sequence_length = self.dec_params.output_dim
@@ -170,6 +171,7 @@ class RippleDecoder(nn.Module):
                 self.dec_params.ripl_hidden_dim,
                 self.dec_params.ripl_hidden_dim,
             )
+            lc_x = self.activation(lc_x)
 
         # Output layer
         lc_x = self._run_ripple_linear(
