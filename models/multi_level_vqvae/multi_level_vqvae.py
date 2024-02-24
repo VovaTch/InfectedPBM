@@ -301,6 +301,7 @@ class RippleVQVariationalAutoEncoder(MultiLvlVQVariationalAutoEncoder):
             output_dim=projected_input_size,
             ripl_hidden_dim=model_cfg.decoder_params.ripl_hidden_dim,
             ripl_num_layers=model_cfg.decoder_params.ripl_num_layers,
+            ripl_coordinate_multipler=model_cfg.decoder_params.ripl_coordinate_multipler,
         )
 
         encoder = Encoder1D(

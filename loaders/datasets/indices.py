@@ -44,13 +44,14 @@ class MP3TokenizedIndicesDataset(Dataset):
         """
         super().__init__()
 
+        self.device = dataset_params.device
         self.tokenized_data = torch.zeros((0)).to(device=self.device)
 
         self.dataset_params = dataset_params
         self.preload = dataset_params.preload
         self.slice_length = dataset_params.slice_length
         self.sample_rate = dataset_params.sample_rate
-        self.device = dataset_params.device
+
         self.tokenizer = tokenizer
         self.slice_dataset = slice_dataset
         self.buffer_process_batch_size = buffer_process_batch_size
@@ -126,7 +127,7 @@ class MP3TokenizedIndicesDataset(Dataset):
             slice_data_dataset, batch_size=self.buffer_process_batch_size
         )
 
-        index_track = torch.tensor((self.codebook_size))
+        index_track = torch.tensor((self.codebook_size)).unsqueeze(0)
         for slice_data_batch in tqdm.tqdm(
             slice_data_loader,
             desc=f"Processing slice batches for file {track_name}...",

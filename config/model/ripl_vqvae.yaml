@@ -24,3 +24,4 @@ decoder_params:
   mlp_num_layers: 0
   ripl_hidden_dim: 32
   ripl_num_layers: 3
+  ripl_coordinate_multipler: 10

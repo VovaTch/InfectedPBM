@@ -5,6 +5,7 @@ from omegaconf import DictConfig
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.jit._script import script
 
 from common import registry
@@ -219,14 +220,23 @@ class RippleReconstructor(nn.Module):
         if num_inner_layers < 0:
             raise ValueError("Number of inner layers must be a positive integer.")
 
+        # Bypasser
+        self.bypass = RippleLinear(1, 1)
+
         # Layers
         self.in_layer = nn.Linear(1, hidden_size)
         # self.in_layer = RippleLinear(1, hidden_size)
         self.in_activation = nn.GELU()
         self.out_ripl = RippleLinear(hidden_size, 1)
-        self.inner_ripl = nn.ModuleList(
-            [RippleLinear(hidden_size, hidden_size) for _ in range(num_inner_layers)]
-        )
+        # self.inner_ripl = nn.ModuleList(
+        #     [RippleLinear(hidden_size, hidden_size) for _ in range(num_inner_layers)]
+        # )
+        inner_layers = []
+        for _ in range(num_inner_layers):
+            inner_layers.append(RippleLinear(hidden_size, hidden_size))
+            # inner_layers.append(nn.Linear(hidden_size, hidden_size))
+            inner_layers.append(nn.GELU())
+        self.inner_ripl = nn.Sequential(*inner_layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -238,13 +248,17 @@ class RippleReconstructor(nn.Module):
         Returns:
             torch.Tensor: Output tensor.
         """
+
+        x *= 5
+        x_saved = x
         x = self.in_layer(x.float())
         # x = self.in_activation(x)
         for layer in self.inner_ripl:
             x = layer(x)
             # x = self.in_activation(x)
         x = self.out_ripl(x)
-        return x
+        x += self.bypass(x_saved)
+        return F.tanh(x)
 
     @classmethod
     def from_cfg(cls, cfg: DictConfig) -> Self:

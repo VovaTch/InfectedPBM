@@ -14,8 +14,8 @@ mse_loss:
 #   melspec_params:
 #     n_fft: 1024
 #     f_min: 20
-#     hop_length: 256
-#     n_mels: 128
+#     hop_length: 64
+#     n_mels: 32
 #     pad_mode: reflect
 #     power: 2.0
 #     norm: "slaney"
@@ -32,8 +32,8 @@ mse_loss:
 #   melspec_params:
 #     n_fft: 1024
 #     f_min: 20
-#     hop_length: 128
-#     n_mels: 128
+#     hop_length: 32
+#     n_mels: 32
 #     pad_mode: reflect
 #     power: 2.0
 #     norm: "slaney"
@@ -50,8 +50,8 @@ mse_loss:
 #   melspec_params:
 #     n_fft: 512
 #     f_min: 20
-#     hop_length: 128
-#     n_mels: 64
+#     hop_length: 32
+#     n_mels: 16
 #     pad_mode: reflect
 #     power: 1.0
 #     norm: "slaney"
@@ -68,8 +68,8 @@ mse_loss:
 #   melspec_params:
 #     n_fft: 1024
 #     f_min: 20
-#     hop_length: 256
-#     n_mels: 128
+#     hop_length: 64
+#     n_mels: 32
 #     pad_mode: reflect
 #     power: 1.0
 #     norm: "slaney"
@@ -86,8 +86,8 @@ mse_loss:
 #   melspec_params:
 #     n_fft: 512
 #     f_min: 20
-#     hop_length: 256
-#     n_mels: 64
+#     hop_length: 64
+#     n_mels: 16
 #     pad_mode: reflect
 #     power: 2.0
 #     norm: "slaney"

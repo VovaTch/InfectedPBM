@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from omegaconf import DictConfig
 
-from models.multi_level_vqvae.ripplenet import batch_ripple_linear_func
+from models.multi_level_vqvae.ripplenet import RippleLinear, batch_ripple_linear_func
 
 
 @dataclass
@@ -17,6 +17,7 @@ class RippleDecoderParameters:
     output_dim: int
     ripl_hidden_dim: int
     ripl_num_layers: int
+    ripl_coordinate_multipler: int
 
     @classmethod
     def from_cfg(cls, cfg: DictConfig) -> Self:
@@ -27,6 +28,7 @@ class RippleDecoderParameters:
             output_dim=cfg.model.output_dim,
             ripl_hidden_dim=cfg.model.ripl_hidden_dim,
             ripl_num_layers=cfg.model.ripl_num_layers,
+            ripl_coordinate_multipler=cfg.model.ripl_coordinate_multipler,
         )
 
 
@@ -58,6 +60,7 @@ class RippleDecoder(nn.Module):
             + [nn.Linear(self.dec_params.hidden_dim, ripple_weight_dim)]
         )
         self.mlp = nn.Sequential(*layer_list)
+        self.bypass = RippleLinear(1, 1)
         self.sequence_length = self.dec_params.output_dim
         self.ripl_fully_connected_layer = nn.Linear(1, self.dec_params.ripl_hidden_dim)
 
@@ -153,10 +156,11 @@ class RippleDecoder(nn.Module):
             .unsqueeze(0)
             .unsqueeze(-1)
             .repeat(x.shape[0], 1, 1)
-        )  # Size BS x L x 1
+        ) * self.dec_params.ripl_coordinate_multipler  # Size BS x L x 1
 
         # Input layer
         lc_x = self.ripl_fully_connected_layer(line_coordinates)
+        lc_bypass = lc_x.clone()
 
         # Middle layers
         for middle_weight in middle_weights:
@@ -171,7 +175,8 @@ class RippleDecoder(nn.Module):
         lc_x = self._run_ripple_linear(
             lc_x, out_weights, self.dec_params.ripl_hidden_dim, 1
         )
-        lc_x = F.tanh(lc_x)
+        lc_x += self.bypass(lc_bypass)
+        # lc_x = F.tanh(lc_x)
 
         return lc_x.transpose(1, 2)
 
