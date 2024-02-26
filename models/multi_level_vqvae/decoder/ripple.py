@@ -61,7 +61,6 @@ class RippleDecoder(nn.Module):
         )
         self.activation = nn.GELU()
         self.mlp = nn.Sequential(*layer_list)
-        self.bypass = RippleLinear(1, 1)
         self.sequence_length = self.dec_params.output_dim
         self.ripl_fully_connected_layer = nn.Linear(1, self.dec_params.ripl_hidden_dim)
 
@@ -95,7 +94,8 @@ class RippleDecoder(nn.Module):
             )
             * self.dec_params.ripl_num_layers
         )
-        return out_dim + middle_dim
+        bypass_dim = self._compute_ripple_weight_dim(1, 1)
+        return out_dim + middle_dim + bypass_dim
 
     def _split_mlp_output_to_ripple_layers(
         self, mlp_output: torch.Tensor
@@ -116,6 +116,7 @@ class RippleDecoder(nn.Module):
                 self.dec_params.ripl_hidden_dim, self.dec_params.ripl_hidden_dim
             )
         ] * self.dec_params.ripl_num_layers
+        bypass_dim = self._compute_ripple_weight_dim(1, 1)
 
         # Compute the splitting via a running index
         ripple_weight_layers = []
@@ -127,6 +128,9 @@ class RippleDecoder(nn.Module):
             running_idx += middle_dim
         ripple_weight_layers.append(
             mlp_output[..., running_idx : running_idx + out_dim]
+        )
+        ripple_weight_layers.append(
+            mlp_output[..., running_idx : running_idx + bypass_dim]
         )
         return ripple_weight_layers
 
@@ -146,8 +150,9 @@ class RippleDecoder(nn.Module):
 
         mlp_output = self.mlp(x.flatten(start_dim=1))
         ripple_weight_layers = self._split_mlp_output_to_ripple_layers(mlp_output)
-        out_weights = ripple_weight_layers[-1]
-        middle_weights = ripple_weight_layers[:-1]
+        out_weights = ripple_weight_layers[-2]
+        bypass_weights = ripple_weight_layers[-1]
+        middle_weights = ripple_weight_layers[:-2]
 
         # Forward pass through the ripple-linear layers
         line_coordinates = (
@@ -161,7 +166,7 @@ class RippleDecoder(nn.Module):
 
         # Input layer
         lc_x = self.ripl_fully_connected_layer(line_coordinates)
-        lc_bypass = lc_x.clone()
+        # lc_x = self.activation(lc_x)
 
         # Middle layers
         for middle_weight in middle_weights:
@@ -177,7 +182,7 @@ class RippleDecoder(nn.Module):
         lc_x = self._run_ripple_linear(
             lc_x, out_weights, self.dec_params.ripl_hidden_dim, 1
         )
-        lc_x += self.bypass(lc_bypass)
+        lc_x += self._run_ripple_linear(lc_x, bypass_weights, 1, 1)
         # lc_x = F.tanh(lc_x)
 
         return lc_x.transpose(1, 2)

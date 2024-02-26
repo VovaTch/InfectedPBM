@@ -1,7 +1,7 @@
 defaults:
   - _self_
   - loss: ml_vqvae
-  - model: ripl_vqvae
+  - model: ml_vqvae
   - learning: ml_vqvae
   - dataset: music_slices
 
