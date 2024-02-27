@@ -28,6 +28,7 @@ def get_args() -> argparse.Namespace:
 
 @hydra.main(version_base=None, config_path="../config", config_name="config")
 def main(cfg: DictConfig) -> None:
+
     args = get_args()
     learning_parameters = LearningParameters.from_cfg(cfg)
     cfg.learning.num_devices = args.num_devices

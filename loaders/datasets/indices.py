@@ -8,6 +8,7 @@ import tqdm
 from common import registry
 from loaders.datasets.music import MP3SliceDataset
 from models.base import Tokenizer
+from models.music_module import MusicLightningModule
 from utils.containers import MusicDatasetParameters
 
 
@@ -26,7 +27,7 @@ class MP3TokenizedIndicesDataset(Dataset):
         codebook_size: int,
         index_series_length: int = 1024,
         slice_dataset: MP3SliceDataset | None = None,
-        tokenizer: Tokenizer | None = None,
+        tokenizer: MusicLightningModule | None = None,
         buffer_process_batch_size: int = 32,
         epoch_size: int = 100000,
     ) -> None:
@@ -127,14 +128,14 @@ class MP3TokenizedIndicesDataset(Dataset):
             slice_data_dataset, batch_size=self.buffer_process_batch_size
         )
 
-        index_track = torch.tensor((self.codebook_size)).unsqueeze(0)
+        index_track = torch.tensor((self.codebook_size)).unsqueeze(0).to(self.device)
         for slice_data_batch in tqdm.tqdm(
             slice_data_loader,
             desc=f"Processing slice batches for file {track_name}...",
         ):
             slice_data_batch = slice_data_batch[0].to(self.device)
             with torch.no_grad():
-                tokenized_slice = self.tokenizer.tokenize(slice_data_batch)
+                tokenized_slice = self.tokenizer.model.tokenize(slice_data_batch)
             index_track = torch.cat([index_track, tokenized_slice.flatten()], dim=0)
         return torch.cat(
             [

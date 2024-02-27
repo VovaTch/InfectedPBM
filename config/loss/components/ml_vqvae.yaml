@@ -1,6 +1,6 @@
 reconstruction_loss:
   type: rec
-  weight: 1.0
+  weight: 10.0
   base_loss: 'huber'
   phase_parameter: 1
 
@@ -23,7 +23,7 @@ melspec_loss_1:
   
   melspec_params:
     n_fft: 1024
-    f_min: 20
+    f_min: 0
     hop_length: 64
     n_mels: 32
     pad_mode: reflect
@@ -41,7 +41,7 @@ melspec_loss_2:
 
   melspec_params:
     n_fft: 1024
-    f_min: 20
+    f_min: 0
     hop_length: 32
     n_mels: 32
     pad_mode: reflect
@@ -59,7 +59,7 @@ melspec_loss_3:
 
   melspec_params:
     n_fft: 512
-    f_min: 20
+    f_min: 0
     hop_length: 32
     n_mels: 16
     pad_mode: reflect
@@ -77,7 +77,7 @@ melspec_loss_4:
   
   melspec_params:
     n_fft: 1024
-    f_min: 20
+    f_min: 0
     hop_length: 64
     n_mels: 32
     pad_mode: reflect
@@ -90,12 +90,12 @@ melspec_loss_5:
   type: mel_spec
   weight: 5.0
   base_loss: 'l1'
-  lin_start: 0.1
-  lin_end: 20
+  lin_start: 1.1
+  lin_end: 1.2
 
   melspec_params:
     n_fft: 512
-    f_min: 20
+    f_min: 0
     hop_length: 64
     n_mels: 16
     pad_mode: reflect

@@ -35,6 +35,14 @@
             "module": "scripts.train_ripl",
             "console": "integratedTerminal",
             "justMyCode": true
+        },
+        {
+            "name": "Python: Tokenize Data",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.datasets.tokenize",
+            "console": "integratedTerminal",
+            "justMyCode": true
         }
     ]
 }

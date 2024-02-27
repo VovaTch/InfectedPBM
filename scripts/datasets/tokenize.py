@@ -1,19 +1,23 @@
 import hydra
 from omegaconf import DictConfig
+import torch
 from loaders.datasets.indices import MP3TokenizedIndicesDataset
 
 from utils.containers import MusicDatasetParameters
 from common import registry, logger
 
 
-@hydra.main(config_path="../config", config_name="config")
+@hydra.main(version_base=None, config_path="../../config", config_name="config")
 def main(cfg: DictConfig) -> None:
 
     dataset_parameters = MusicDatasetParameters.from_cfg(cfg)
+    dataset_parameters.device = "cuda" if torch.cuda.is_available() else "cpu"
     slice_dataset = registry.get_dataset(cfg.dataset.dataset_type).from_cfg(cfg)
-    tokenizer = registry.get_lightning_module(cfg.model.module_type).from_cfg(cfg)
-
-    dataset_parameters.device = "cuda"
+    tokenizer = (
+        registry.get_lightning_module(cfg.model.module_type)
+        .from_cfg(cfg)
+        .to(dataset_parameters.device)
+    )
 
     tokenized_dataset = MP3TokenizedIndicesDataset(
         dataset_parameters,
