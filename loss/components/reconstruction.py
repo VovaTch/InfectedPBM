@@ -98,6 +98,72 @@ class RecLoss:
         )
 
 
+@registry.register_loss_component("edge_rec")
+@dataclass
+class EdgeRecLoss:
+    """
+    Edge reconstruction loss, focuses on the slice edges to prevent as much as possible parasite
+    sounds from stitching slices together.
+    """
+
+    name: str
+    weight: float
+    base_loss: nn.Module
+    differentiable: bool = True
+
+    # Loss-specific parameters
+    transform_func: Callable[[torch.Tensor], torch.Tensor] = lambda x: x
+    edge_power: float = 1.0
+
+    def __call__(
+        self, estimation: dict[str, torch.Tensor], target: dict[str, torch.Tensor]
+    ) -> torch.Tensor:
+        """
+        Forward method for this loss
+
+        Args:
+            estimation (dict[str, torch.Tensor]): Estimation dictionary, expects a "slice" key
+            target (dict[str, torch.Tensor]): Target dictionary, expects a "slice" key
+
+        Returns:
+            torch.Tensor: Loss output
+        """
+
+        pred_slice = estimation["slice"]
+        batch_size, channels, length = pred_slice.shape
+        target_slice = target["slice"]
+
+        linspace_slice = torch.arange(0, length).to(pred_slice.device) / (length - 1)
+        weight_slice = (
+            4 * (1 - linspace_slice * (1 - linspace_slice)) ** self.edge_power
+        )
+        weight_slice = weight_slice.repeat(batch_size, channels, 1)
+
+        return self.base_loss(pred_slice * weight_slice, target_slice * weight_slice)
+
+    @classmethod
+    def from_cfg(cls, name: str, loss_cfg: dict[str, Any]) -> Self:
+        """
+        Builds the loss component from the configuration dictionary.
+
+        Args:
+            name (str): Loss name
+            loss_cfg (dict[str, Any]): Loss configuration
+
+        Returns:
+            Self: Edge reconstruction loss instance
+        """
+        return cls(
+            name,
+            loss_cfg.get("weight", 1.0),
+            registry.get_loss_module(loss_cfg.get("base_loss", "mse")),
+            transform_func=registry.get_transform_function(
+                loss_cfg.get("transform_func", "none")
+            ),
+            edge_power=loss_cfg.get("edge_power", 1.0),
+        )
+
+
 @registry.register_loss_component("noise_pred")  # type: ignore
 @dataclass
 class NoisePredLoss:

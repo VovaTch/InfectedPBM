@@ -4,6 +4,12 @@ reconstruction_loss:
   base_loss: 'huber'
   phase_parameter: 1
 
+edge_reconstruction_loss:
+  type: edge_rec
+  weight: 10.0
+  base_loss: "mse"
+  edge_power: 3.0
+
 alignment_loss:
   type: align
   weight: 0.5
