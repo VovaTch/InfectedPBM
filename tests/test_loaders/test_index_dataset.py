@@ -69,7 +69,7 @@ def test_MP3TokenizedIndicesDataset_init(
         codebook_size=codebook_size,
         index_series_length=index_series_length,
         slice_dataset=slice_dataset,
-        tokenizer=tokenizer,
+        tokenizer=tokenizer,  # type: ignore
         buffer_process_batch_size=buffer_process_batch_size,
         epoch_size=epoch_size,
     )
@@ -92,7 +92,7 @@ def test_MP3TokenizedIndicesDataset_len(
         codebook_size=codebook_size,
         index_series_length=index_series_length,
         slice_dataset=slice_dataset,
-        tokenizer=tokenizer,
+        tokenizer=tokenizer,  # type: ignore
         buffer_process_batch_size=buffer_process_batch_size,
         epoch_size=epoch_size,
     )
@@ -114,7 +114,7 @@ def test_MP3TokenizedIndicesDataset_getitem(
         codebook_size=codebook_size,
         index_series_length=index_series_length,
         slice_dataset=slice_dataset,
-        tokenizer=tokenizer,
+        tokenizer=tokenizer,  # type: ignore
         buffer_process_batch_size=buffer_process_batch_size,
         epoch_size=epoch_size,
     )
