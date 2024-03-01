@@ -39,6 +39,7 @@ def ripple_decoder() -> RippleDecoder:
         output_dim=1024,
         ripl_hidden_dim=16,
         ripl_num_layers=1,
+        ripl_coordinate_multipler=10,
     )
     return RippleDecoder(dec_params)
 

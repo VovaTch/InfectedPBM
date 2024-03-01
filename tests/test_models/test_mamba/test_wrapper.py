@@ -24,19 +24,23 @@ def mamba_wrapper(mamba_params, vocabulary_size):
     return MambaWrapper(mamba_params, vocabulary_size).to("cuda")
 
 
-def test_mamba_wrapper_forward(mamba_wrapper):
+def test_mamba_wrapper_forward(
+    mamba_wrapper: MambaWrapper, vocabulary_size: int
+) -> None:
     # Test the forward method of MambaWrapper
     x = torch.tensor([[1, 2, 3], [4, 5, 6]]).to("cuda")  # Example input tensor
     output = mamba_wrapper.forward(x)
     assert "logits" in output
-    assert output["logits"].shape == (2, 3, mamba_wrapper.mamba_params.model_dim)
+    assert output["logits"].shape == (2, 3, vocabulary_size + 2)
 
 
-def test_mamba_wrapper_get_last_logits(mamba_wrapper):
+def test_mamba_wrapper_get_last_logits(
+    mamba_wrapper: MambaWrapper, vocabulary_size: int
+) -> None:
     # Test the get_last_logits method of MambaWrapper
     x = torch.tensor([[1, 2, 3], [4, 5, 6]]).to("cuda")  # Example input tensor
     last_logits = mamba_wrapper.get_last_logits(x)
-    assert last_logits.shape == (2, mamba_wrapper.mamba_params.model_dim)
+    assert last_logits.shape == (2, vocabulary_size + 2)
 
 
 def test_mamba_wrapper_from_cfg():

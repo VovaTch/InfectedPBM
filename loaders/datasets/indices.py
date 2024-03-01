@@ -61,7 +61,7 @@ class MP3TokenizedIndicesDataset(Dataset):
         self.index_series_length = index_series_length
 
         # Check if the data is loaded
-        indices_path = os.path.join(dataset_params.data_dir, "indices")
+        indices_path = os.path.join(dataset_params.data_dir, "token_indices")
         if os.path.exists(indices_path):
             self._load_data(dataset_params.data_dir)
         else:
@@ -140,7 +140,9 @@ class MP3TokenizedIndicesDataset(Dataset):
         return torch.cat(
             [
                 index_track,
-                torch.tensor(self.codebook_size + 1).unsqueeze(0),
+                torch.tensor(self.codebook_size + 1)
+                .unsqueeze(0)
+                .to(index_track.device),
             ],
             dim=0,
         )
@@ -191,8 +193,8 @@ class MP3TokenizedIndicesDataset(Dataset):
 
     def __getitem__(self, index: int) -> dict[str, torch.Tensor]:
         return {
-            "indices": self._get_tokenized_data_slice_by_index(index),
-            "target": self._get_tokenized_data_slice_by_index(index + 1),
+            "indices": self._get_tokenized_data_slice_by_index(index).int(),
+            "target": self._get_tokenized_data_slice_by_index(index + 1).int(),
         }
 
     def _get_tokenized_data_slice_by_index(self, index: int) -> torch.Tensor:

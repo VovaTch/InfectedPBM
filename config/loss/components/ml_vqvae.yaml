@@ -1,12 +1,12 @@
 reconstruction_loss:
   type: rec
-  weight: 10.0
+  weight: 1.0
   base_loss: 'huber'
   phase_parameter: 1
 
 edge_reconstruction_loss:
   type: edge_rec
-  weight: 10.0
+  weight: 1.0
   base_loss: "mse"
   edge_power: 3.0
 

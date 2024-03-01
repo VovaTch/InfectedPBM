@@ -1,9 +1,10 @@
 import json
 import os
+import random
 from typing import Any
 from typing_extensions import Self
-from matplotlib.pyplot import step
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
+from pytest import MonkeyPatch
 
 import torch
 from torch.utils.data import Dataset
@@ -12,7 +13,6 @@ import torch.nn.functional as F
 import tqdm
 
 from common import registry
-from tests.test_loaders.test_datasets import dataset_params
 from utils.containers import MusicDatasetParameters
 
 
@@ -28,7 +28,11 @@ class MP3LongDataset(Dataset):
     file_list: list[str] = []
 
     def __init__(
-        self, dataset_params: MusicDatasetParameters, steps_per_epoch: int = int(1e3)
+        self,
+        dataset_params: MusicDatasetParameters,
+        steps_per_epoch: int = int(1e3),
+        random_slice_length: bool = False,
+        random_max_length_multiplier: int = 128,
     ) -> None:
         super().__init__()
         self.dataset_params = dataset_params
@@ -36,6 +40,8 @@ class MP3LongDataset(Dataset):
         self.sample_rate = dataset_params.sample_rate
         self.device = dataset_params.device
         self.steps_per_epoch = steps_per_epoch
+        self.random_slice_length = random_slice_length
+        self.random_slice_length_multiplier = random_max_length_multiplier
 
         # Check if the data is loaded
         track_path = os.path.join(dataset_params.data_dir, "tracks")
@@ -150,7 +156,7 @@ class MP3LongDataset(Dataset):
         metadata_path = os.path.join(path, "metadata_long.json")
         metadata_for_json = [
             {key: value[idx] for (key, value) in self.buffer.items() if key != "slice"}
-            for idx in range(len(self.buffer["slice_idx"]))
+            for idx in range(len(self.buffer["track_idx"]))
         ]
         with open(metadata_path, "w") as f:
             json.dump(metadata_for_json, f, indent=4)
@@ -238,22 +244,23 @@ class MP3LongDataset(Dataset):
             - "track_name": The name of the track.
             - "track_idx": The index of the track.
         """
+        length_multiplier = (
+            random.randint(1, self.random_slice_length_multiplier)
+            if self.random_slice_length
+            else 1
+        )
+        slice_length = length_multiplier * self.dataset_params.slice_length
         random_track_idx = torch.randint(0, len(self.buffer["slice"]), (1,)).item()
         random_idx = torch.randint(
             0, self.buffer["slice"][random_track_idx].shape[1], (1,)
         ).item()
-        if (
-            random_idx + self.dataset_params.slice_length
-            > self.buffer["slice"][random_track_idx].shape[1]
-        ):
-            slice = self.buffer["slice"][:, random_track_idx:]
-            slice = self._right_pad_if_necessary(
-                slice, self.dataset_params.slice_length
-            )
+        if random_idx + slice_length > self.buffer["slice"][random_track_idx].shape[1]:
+            slice = self.buffer["slice"][random_track_idx][:, random_track_idx:]
+            slice = self._right_pad_if_necessary(slice, slice_length)
 
         else:
-            slice = self.buffer["slice"][
-                random_track_idx,
+            slice = self.buffer["slice"][random_track_idx][
+                :,
                 random_idx : random_idx + self.dataset_params.slice_length,
             ]
 

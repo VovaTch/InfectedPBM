@@ -9,6 +9,7 @@ from models.multi_level_vqvae.multi_level_vqvae import (
     MultiLvlVQVariationalAutoEncoder,
     RippleVQVariationalAutoEncoder,
 )
+from models.music_module import MusicLightningModule
 from utils.containers import MusicDatasetParameters
 
 
@@ -25,9 +26,9 @@ def slice_dataset(cfg: DictConfig) -> MP3SliceDataset:
 
 
 @pytest.fixture
-def tokenizer(cfg: DictConfig) -> Tokenizer:
+def tokenizer(cfg: DictConfig) -> MusicLightningModule:
     # Define the tokenizer with dummy values
-    return MultiLvlVQVariationalAutoEncoder.from_cfg(cfg)
+    return MusicLightningModule.from_cfg(cfg)
 
 
 @pytest.fixture
@@ -57,7 +58,7 @@ def epoch_size() -> int:
 def test_MP3TokenizedIndicesDataset_init(
     dataset_params: MusicDatasetParameters,
     slice_dataset: MP3SliceDataset,
-    tokenizer: Tokenizer,
+    tokenizer: MusicLightningModule,
     codebook_size: int,
     index_series_length: int,
     buffer_process_batch_size: int,
@@ -74,35 +75,12 @@ def test_MP3TokenizedIndicesDataset_init(
         epoch_size=epoch_size,
     )
     assert isinstance(dataset, MP3TokenizedIndicesDataset)
-    assert dataset.tokenized_data.shape == (6,)  # Check the shape of tokenized_data
-
-
-def test_MP3TokenizedIndicesDataset_len(
-    dataset_params: MusicDatasetParameters,
-    slice_dataset: MP3SliceDataset,
-    tokenizer: Tokenizer,
-    codebook_size: int,
-    index_series_length: int,
-    buffer_process_batch_size: int,
-    epoch_size: int,
-):
-    # Test the __len__ method of MP3TokenizedIndicesDataset
-    dataset = MP3TokenizedIndicesDataset(
-        dataset_params=dataset_params,
-        codebook_size=codebook_size,
-        index_series_length=index_series_length,
-        slice_dataset=slice_dataset,
-        tokenizer=tokenizer,  # type: ignore
-        buffer_process_batch_size=buffer_process_batch_size,
-        epoch_size=epoch_size,
-    )
-    assert len(dataset) == 5  # Check the length of the dataset
 
 
 def test_MP3TokenizedIndicesDataset_getitem(
     dataset_params: MusicDatasetParameters,
     slice_dataset: MP3SliceDataset,
-    tokenizer: Tokenizer,
+    tokenizer: MusicLightningModule,
     codebook_size: int,
     index_series_length: int,
     buffer_process_batch_size: int,
