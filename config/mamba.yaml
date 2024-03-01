@@ -1,0 +1,11 @@
+defaults:
+  - _self_
+  - loss: cls 
+  - model: mamba
+  - learning: mamba
+  - dataset: tokenized
+
+project_name: InfectedBPM
+model_name: mamba_pretrained
+resume: null
+use_wandb: false

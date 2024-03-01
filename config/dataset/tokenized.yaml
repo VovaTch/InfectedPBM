@@ -1,0 +1,11 @@
+dataset_type: mp3_indices
+slice_dataset: mp3_slices
+data_module_type: "music_data_module"
+sample_rate: 44100
+data_dir: "data"
+slice_length: 1024
+preload: True
+preload_data_dir: "data/token_indices"
+device: "cpu"
+index_series_length: 1024
+epoch_size: 100000

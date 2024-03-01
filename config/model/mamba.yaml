@@ -1,8 +1,8 @@
 type: mamba
-module_type: music
+module_type: autoregressor
 
 # Model parameters
-vocabulary_size: 4092
+vocabulary_size: 256
 model_dim: 256
 ssm_state_dim: 16
 conv_width: 3

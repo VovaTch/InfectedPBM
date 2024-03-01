@@ -30,8 +30,8 @@ def test_mamba_wrapper_forward(
     # Test the forward method of MambaWrapper
     x = torch.tensor([[1, 2, 3], [4, 5, 6]]).to("cuda")  # Example input tensor
     output = mamba_wrapper.forward(x)
-    assert "logits" in output
-    assert output["logits"].shape == (2, 3, vocabulary_size + 2)
+    assert "pred_logits" in output
+    assert output["pred_logits"].shape == (2, 3, vocabulary_size + 2)
 
 
 def test_mamba_wrapper_get_last_logits(

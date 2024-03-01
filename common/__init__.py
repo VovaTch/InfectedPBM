@@ -10,6 +10,7 @@ from models.multi_level_vqvae import *  # noqa: F403
 from models.music_module import *  # noqa: F403
 from models.ripl_module import *  # noqa: F403
 from models.mamba import *  # noqa: F403
+from models.autoregressor_module import *  # noqa: F403
 from loaders.data_modules import *  # noqa: F403
 from loss.components import *  # noqa: F403
 from loss.aggregators import *  # noqa: F403

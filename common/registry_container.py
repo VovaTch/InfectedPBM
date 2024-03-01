@@ -267,9 +267,7 @@ class Registry:
         del self.loss_aggregators[name]
 
     # SCHEDULERS
-    def register_scheduler(
-        self, name: str
-    ) -> Callable[
+    def register_scheduler(self, name: str) -> Callable[
         [type[torch.optim.lr_scheduler._LRScheduler]],
         type[torch.optim.lr_scheduler._LRScheduler],
     ]:

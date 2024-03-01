@@ -1,13 +1,14 @@
 from __future__ import annotations
 import os
-import torch
 
+from omegaconf import DictConfig
+import torch
+import torch.nn.functional as F
 from torch.utils.data import Dataset, TensorDataset, DataLoader
 import tqdm
 
 from common import registry
 from loaders.datasets.music import MP3SliceDataset
-from models.base import Tokenizer
 from models.music_module import MusicLightningModule
 from utils.containers import MusicDatasetParameters
 
@@ -180,7 +181,7 @@ class MP3TokenizedIndicesDataset(Dataset):
         tokenized_data_path = os.path.join(path, "token_indices")
         self.tokenized_data = torch.load(
             os.path.join(tokenized_data_path, "tokenized_data.pt")
-        )
+        ).to(self.device)
 
     def __len__(self) -> int:
         """
@@ -194,7 +195,7 @@ class MP3TokenizedIndicesDataset(Dataset):
     def __getitem__(self, index: int) -> dict[str, torch.Tensor]:
         return {
             "indices": self._get_tokenized_data_slice_by_index(index).int(),
-            "target": self._get_tokenized_data_slice_by_index(index + 1).int(),
+            "target": self._get_tokenized_data_slice_by_index(index + 1).long(),
         }
 
     def _get_tokenized_data_slice_by_index(self, index: int) -> torch.Tensor:
@@ -214,10 +215,59 @@ class MP3TokenizedIndicesDataset(Dataset):
         end_token = torch.where(tokenized_data_slice == self.codebook_size + 1)[0]
         if len(end_token) > 0:
             first_end_index = end_token[0]
-            ones_slice = torch.ones_like(tokenized_data_slice) * (
+            ones_slice = torch.ones_like(tokenized_data_slice).to(self.device) * (
                 self.codebook_size + 1
             )
-            ones_slice = tokenized_data_slice[:first_end_index]
+            ones_slice[:first_end_index] = tokenized_data_slice[:first_end_index]
             tokenized_data_slice = ones_slice
 
         return tokenized_data_slice
+
+    @classmethod
+    def from_cfg(cls, cfg: DictConfig) -> MP3TokenizedIndicesDataset:
+        """
+        Utility method to parse dataset parameters from a configuration dictionary.
+        NOTE: This method is used to create an instance that only loads the dataset without creating it.
+
+        Args:
+            cfg (dict): The configuration dictionary.
+
+        Returns:
+            MP3TokenizedIndicesDataset: An instance of the class.
+        """
+        dataset_params = MusicDatasetParameters.from_cfg(cfg)
+        codebook_size = cfg.model.vocabulary_size
+        index_series_length = cfg.dataset.index_series_length
+        slice_dataset = None
+        tokenizer = None
+        buffer_process_batch_size = 32
+        epoch_size = cfg.dataset.epoch_size
+        return cls(
+            dataset_params,
+            codebook_size,
+            index_series_length,
+            slice_dataset,
+            tokenizer,
+            buffer_process_batch_size,
+            epoch_size,
+        )
+
+    def _right_pad_if_necessary(
+        self, signal: torch.Tensor, signal_length: int
+    ) -> torch.Tensor:
+        """
+        Helper function aimed to keep all the slices at a constant size, pad with 0 if the slice is too short.
+
+        Args:
+            signal (torch.Tensor): Input slice, shape `1 x L*`
+            slice_length (int): Desired length of the slice after padding.
+
+        Returns:
+            torch.Tensor: Output slice, shape `1 x L` padded with zeroes.
+        """
+        length_signal = signal.shape[1]
+        if length_signal % signal_length != 0:
+            num_missing_samples = signal_length - length_signal % signal_length
+            last_dim_padding = (0, num_missing_samples)
+            signal = F.pad(signal, last_dim_padding, value=self.codebook_size + 2)
+        return signal

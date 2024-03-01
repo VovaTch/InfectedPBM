@@ -9,7 +9,7 @@ from utils.containers import MambaParams
 from common import registry
 
 
-@registry.register_mel_spec_converter("mamba")
+@registry.register_model("mamba")
 class MambaWrapper(nn.Module):
     def __init__(self, mamba_params: MambaParams, vocabulary_size: int) -> None:
         super().__init__()
@@ -34,7 +34,9 @@ class MambaWrapper(nn.Module):
         # Input size BS x L
         embedding = self.in_embedding(x)
         mamba_outputs = self.mamba(embedding)
-        return {"logits": self.out_projection(mamba_outputs)}  # size BS x L x Voc
+        return {
+            "pred_logits": self.out_projection(mamba_outputs).transpose(1, 2)
+        }  # size BS x Voc + 2 x L
 
     @property
     def model(self) -> Mamba:
@@ -42,4 +44,4 @@ class MambaWrapper(nn.Module):
 
     def get_last_logits(self, x: torch.Tensor) -> torch.Tensor:
         outputs = self.forward(x)
-        return outputs["logits"][:, -1, :]
+        return outputs["pred_logits"][:, :, -1]

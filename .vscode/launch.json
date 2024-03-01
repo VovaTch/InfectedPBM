@@ -24,7 +24,7 @@
             "name": "Python: Train",
             "type": "debugpy",
             "request": "launch",
-            "module": "scripts.train",
+            "module": "scripts.train_tokenizer",
             "console": "integratedTerminal",
             "justMyCode": true
         },
@@ -41,6 +41,14 @@
             "type": "debugpy",
             "request": "launch",
             "module": "scripts.datasets.tokenize",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Run Mamba",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.train_pretrained_seq",
             "console": "integratedTerminal",
             "justMyCode": true
         }
