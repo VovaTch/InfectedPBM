@@ -13,7 +13,7 @@ from models.music_module import MusicLightningModule
 from utils.containers import MusicDatasetParameters
 
 
-@registry.register_dataset("mp3_indices")  # type: ignore
+@registry.register_dataset("mp3_indices")
 class MP3TokenizedIndicesDataset(Dataset):
     """
     MP3 dataset of tokenized indices, used to train the LLM-style models

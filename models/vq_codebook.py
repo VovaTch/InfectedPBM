@@ -40,6 +40,7 @@ class VQCodebook(nn.Module):
         Returns:
             torch.Tensor: The embedded codebook.
         """
+
         return self.code_embedding[indices]
 
     def apply_codebook(

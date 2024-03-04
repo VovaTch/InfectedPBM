@@ -3,7 +3,7 @@ module_type: autoregressor
 
 # Model parameters
 vocabulary_size: 256
-model_dim: 256
+model_dim: 2048
 ssm_state_dim: 16
 conv_width: 3
 expansion: 2
