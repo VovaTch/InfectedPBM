@@ -64,7 +64,7 @@ class VQCodebook(nn.Module):
         )  # type: ignore
         self.update_usage(indices)
 
-        return z_q, indices
+        return z_q.unsqueeze(1), indices
 
     # Everything below is the random restart code to try to use the entire codebook and avoid codebook
     # collapse according to OpenAI's Jukebox.
@@ -180,27 +180,35 @@ class ResidualCodebookCollection(nn.Module):
         """
         Applies the VQ codebook to the input tensor.
 
-        Args:
-            x_in (torch.Tensor): The input tensor to be encoded.
-            code_sg (bool, optional): Whether to use the straight-through gradient estimator during encoding.
+        ### Args:
+        *   x_in (torch.Tensor): The input tensor to be encoded.
+        *   code_sg (bool, optional): Whether to use the straight-through gradient estimator during encoding.
                 Defaults to False.
 
-        Returns:
-            tuple[torch.Tensor, torch.Tensor]: A tuple containing the encoded tensor and the indices of the codebook
-            vectors used.
+        ### Returns:
+        *   tuple[torch.Tensor, torch.Tensor]: A tuple containing the encoded tensor and the indices of the codebook
+            vectors used. The indices are at the size of BS x idx_slice x num_codebooks.
         """
         x_res = x_in.clone()
-        z_q = torch.zeros_like(x_in)
-        z_q_ind = z_q.clone()
+        z_q = torch.zeros((x_in.shape[0], 0, x_in.shape[1], x_in.shape[2])).to(
+            x_in.device
+        )
+        z_q_ind = torch.zeros((x_in.shape[0], 1, x_in.shape[1], x_in.shape[2])).to(
+            x_in.device
+        )
         indices = []
         for codebook in self.vq_codebooks:
-            x_res -= z_q_ind
+            x_res -= z_q_ind.squeeze(1)
             z_q_ind, indices_ind = codebook.apply_codebook(x_res, code_sg)
-            z_q += z_q_ind
+            z_q = torch.cat((z_q, z_q_ind), dim=1)
             indices.append(indices_ind)
 
         indices = torch.cat(indices, dim=-1)
-        return z_q, indices
+        return (
+            z_q,
+            indices,
+        )  # z_q has the dim of BS x num_codebooks x idx_slice_len x emb_size
+        # indices are BS x idx_slice_len x num_codebooks
 
     def embed_codebook(self, indices: torch.Tensor) -> torch.Tensor:
         """

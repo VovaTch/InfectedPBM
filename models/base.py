@@ -67,7 +67,8 @@ class Tokenizer(nn.Module, ABC):
             origin_shape (tuple[int, int, int] | None, optional): The shape of the original image. Defaults to None.
 
         Returns:
-            tuple[torch.Tensor, dict[str, torch.Tensor]]: A tuple containing the decoded image tensor and additional information.
+            tuple[torch.Tensor, dict[str, torch.Tensor]]: A tuple containing the decoded image tensor and additional
+            information.
         """
         ...
 
@@ -111,7 +112,9 @@ class Codebook(Protocol):
             code_sg (bool, optional): Whether to use codebook for stochastic gradient. Defaults to False.
 
         Returns:
-            tuple[torch.Tensor, torch.Tensor]: A tuple containing the transformed tensor and the codebook tensor.
+        *   tuple[torch.Tensor, torch.Tensor]: A tuple containing the transformed tensor and the codebook indices.
+            reconstructed_tensor size BS x num_codebooks x idx_slice_size x token_dim
+            indices size BS x idx_slice_size x num_codebooks
         """
         ...
 
@@ -360,7 +363,7 @@ class BaseLightningModule(L.LightningModule):
             self.log(
                 f"test_{ind_loss}", value, prog_bar=True, on_step=False, on_epoch=True
             )
-        self.log(f"test_total", loss.total, prog_bar=True, on_step=False, on_epoch=True)
+        self.log("test_total", loss.total, prog_bar=True, on_step=False, on_epoch=True)
 
     @abstractmethod
     def step(self, batch: dict[str, Any], phase: str) -> torch.Tensor | None:

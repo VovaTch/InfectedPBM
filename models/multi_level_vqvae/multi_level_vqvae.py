@@ -24,10 +24,18 @@ class InterfaceVQ1D(Protocol):
 
     def __call__(
         self, z_e: torch.Tensor, extract_losses: bool = False
-    ) -> dict[str, torch.Tensor]: ...
+    ) -> dict[str, torch.Tensor]:
+        """
+        Call method for the VQ1D class.
+        """
+        ...
 
     @property
-    def vq_codebook(self) -> Codebook: ...
+    def vq_codebook(self) -> Codebook:
+        """
+        Codebook property for the VQ1D class.
+        """
+        ...
 
 
 @registry.register_model("multi_lvl_vqvae")
@@ -106,8 +114,8 @@ class MultiLvlVQVariationalAutoEncoder(Tokenizer):
             torch.Tensor: The decoded tensor of shape (batch_size, seq_len, input_channels).
         """
         z_q = self.vq_module.vq_codebook.embed_codebook(indices)
-        z_q = z_q.permute((0, 2, 1))
-        x_out = self.decoder(z_q)
+        quantized_outputs = z_q[:, -1, :, :].permute((0, 2, 1))
+        x_out = self.decoder(quantized_outputs)
         return x_out
 
     def decode(
@@ -126,7 +134,7 @@ class MultiLvlVQVariationalAutoEncoder(Tokenizer):
                 `total_output` that includes the output of the VQ module and other intermediate results.
         """
         vq_block_output = self.vq_module(z_e, extract_losses=True)
-        x_out = self.decoder(vq_block_output["v_q"])
+        x_out = self.decoder(vq_block_output["v_q"][:, -1, ...])
 
         if origin_shape is None:
             origin_shape = (int(z_e.shape[0]), self.input_channels, -1)

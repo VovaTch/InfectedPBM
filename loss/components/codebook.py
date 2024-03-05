@@ -36,7 +36,11 @@ class AlignLoss:
         emb = estimation["emb"]
         z_e = target["z_e"]
 
-        return self.base_loss(emb, z_e.detach())
+        loss = torch.tensor((0.0)).to(z_e.device)
+        for codebook_idx in range(emb.shape[1]):
+            loss += self.base_loss(emb[:, codebook_idx, ...], z_e.detach())
+
+        return loss
 
     @classmethod
     def from_cfg(cls, name: str, loss_cfg: dict[str, Any]) -> Self:
@@ -85,7 +89,11 @@ class CommitLoss:
         emb = estimation["emb"]
         z_e = target["z_e"]
 
-        return self.base_loss(emb.detach(), z_e)
+        loss = torch.tensor((0.0)).to(z_e.device)
+        for codebook_idx in range(emb.shape[1]):
+            loss += self.base_loss(emb[:, codebook_idx, ...].detach(), z_e)
+
+        return loss
 
     @classmethod
     def from_cfg(cls, name: str, loss_cfg: dict[str, Any]) -> Self:

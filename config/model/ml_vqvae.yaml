@@ -5,13 +5,13 @@ module_type: music
 # Model parameters
 hidden_size: 32
 latent_depth: 16
-channel_dim_change_list: [4, 4, 4, 4]
+channel_dim_change_list: [4, 4, 4, 4, 4]
 input_channels: 1
-vocabulary_size: 256
-num_codebooks: 1
+vocabulary_size: 2048
+num_codebooks: 4
 num_res_block_conv: 4
 dilation_factor: 3
-activation_type: gelu
+activation_type: relu
 
 # Encoder and decoder parameters
 encoder_kernel_size: 3
