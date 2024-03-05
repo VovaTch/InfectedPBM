@@ -190,22 +190,24 @@ class ResidualCodebookCollection(nn.Module):
             vectors used. The indices are at the size of BS x idx_slice x num_codebooks.
         """
         x_res = x_in.clone()
-        z_q = torch.zeros((x_in.shape[0], 0, x_in.shape[1], x_in.shape[2])).to(
-            x_in.device
-        )
+        z_q_aggregated = torch.zeros(
+            (x_in.shape[0], 0, x_in.shape[1], x_in.shape[2])
+        ).to(x_in.device)
         z_q_ind = torch.zeros((x_in.shape[0], 1, x_in.shape[1], x_in.shape[2])).to(
             x_in.device
         )
+        z_q = z_q_ind.clone()
         indices = []
         for codebook in self.vq_codebooks:
             x_res -= z_q_ind.squeeze(1)
             z_q_ind, indices_ind = codebook.apply_codebook(x_res, code_sg)
-            z_q = torch.cat((z_q, z_q_ind), dim=1)
+            z_q += z_q_ind
+            z_q_aggregated = torch.cat((z_q_aggregated, z_q), dim=1)
             indices.append(indices_ind)
 
         indices = torch.cat(indices, dim=-1)
         return (
-            z_q,
+            z_q_aggregated,
             indices,
         )  # z_q has the dim of BS x num_codebooks x idx_slice_len x emb_size
         # indices are BS x idx_slice_len x num_codebooks
