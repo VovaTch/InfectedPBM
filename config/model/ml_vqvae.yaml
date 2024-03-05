@@ -7,7 +7,7 @@ hidden_size: 32
 latent_depth: 16
 channel_dim_change_list: [4, 4, 4, 4, 4]
 input_channels: 1
-vocabulary_size: 2048
+vocabulary_size: 256
 num_codebooks: 4
 num_res_block_conv: 4
 dilation_factor: 3
