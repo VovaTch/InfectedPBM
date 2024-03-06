@@ -190,6 +190,13 @@ class MusicDatasetParameters:
 
 @dataclass
 class MambaParams:
+    """
+    Class representing the parameters for the Mamba model.
+
+    ### Attributes:
+    * model_dim (int): Mamba model dimension.
+    """
+
     model_dim: int
     ssm_state_dim: int
     conv_width: int

@@ -3,8 +3,7 @@ import os
 import random
 from typing import Any
 from typing_extensions import Self
-from omegaconf import DictConfig, OmegaConf
-from pytest import MonkeyPatch
+from omegaconf import DictConfig
 
 import torch
 from torch.utils.data import Dataset
