@@ -3,14 +3,14 @@ from utils.waveform_tokenization import (
     decode_waveform_256,
     dequantize_waveform_256,
     encode_waveform_256,
-    generate_merges_256,
+    merge_and_tokenize_256,
 )
 
 
 def test_generate_merges_256() -> None:
     ids = [0, 0, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 2, 3]
     num_merges = 2
-    merges = generate_merges_256(ids, num_merges)
+    merges = merge_and_tokenize_256(ids, num_merges)
     assert merges == {(0, 0): 256, (2, 3): 257}
 
 
