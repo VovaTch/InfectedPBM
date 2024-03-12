@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import pytest
 
@@ -5,6 +6,7 @@ from models.multi_level_vqvae.decoder import (
     Decoder1D,
     RippleDecoder,
     RippleDecoderParameters,
+    ExpandingMLPDecoder,
 )
 
 
@@ -48,3 +50,57 @@ def test_RippleDecoder_forward(ripple_decoder: RippleDecoder) -> None:
     input_tensor = torch.randn(6, 4, 16)
     output_tensor = ripple_decoder(input_tensor)
     assert output_tensor.shape == (6, 1, 1024)
+
+
+def test_expanding_mlp_decoder_forward() -> None:
+    hidden_dim = 64
+    input_len = 128
+    outout_multiplier = 8
+    num_layers = 4
+    activation_type = "relu"
+    output_channels = 1
+
+    decoder = ExpandingMLPDecoder(
+        hidden_dim,
+        input_len,
+        outout_multiplier,
+        num_layers,
+        activation_type,
+        output_channels,
+    )
+
+    batch_size = 10
+    z = torch.randn(batch_size, input_len // 4, 4)
+
+    output = decoder.forward(z)
+
+    assert output.shape == (batch_size, 1, input_len * outout_multiplier)
+
+
+def test_expanding_mlp_decoder_output_channels() -> None:
+    hidden_dim = 64
+    input_len = 128
+    outout_multiplier = 8
+    num_layers = 4
+    activation_type = "relu"
+    output_channels = 3
+
+    decoder = ExpandingMLPDecoder(
+        hidden_dim,
+        input_len,
+        outout_multiplier,
+        num_layers,
+        activation_type,
+        output_channels,
+    )
+
+    batch_size = 10
+    z = torch.randn(batch_size, input_len // 4, 4)
+
+    output = decoder.forward(z)
+
+    assert output.shape == (
+        batch_size,
+        output_channels,
+        input_len * outout_multiplier,
+    )

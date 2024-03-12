@@ -5,7 +5,7 @@ module_type: music
 # Model parameters
 hidden_size: 32
 latent_depth: 64
-channel_dim_change_list: [4, 4, 4, 4, 4]
+channel_dim_change_list: [4, 4, 4, 4]
 input_channels: 1
 vocabulary_size: 256
 num_codebooks: 4

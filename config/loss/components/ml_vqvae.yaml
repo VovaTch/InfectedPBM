@@ -1,12 +1,12 @@
 reconstruction_loss:
   type: rec
-  weight: 3.0
+  weight: 1.0
   base_loss: 'huber'
   phase_parameter: 10
 
 edge_reconstruction_loss:
   type: edge_rec
-  weight: 3.0
+  weight: 1.0
   base_loss: "mse"
   edge_power: 3.0
 
@@ -28,7 +28,7 @@ melspec_loss_1:
   lin_end: 1.0
   
   melspec_params:
-    n_fft: 1024
+    n_fft: 256
     f_min: 0
     hop_length: 64
     n_mels: 32
@@ -46,7 +46,7 @@ melspec_loss_2:
   lin_end: 1.0
 
   melspec_params:
-    n_fft: 1024
+    n_fft: 128
     f_min: 0
     hop_length: 32
     n_mels: 32
@@ -64,7 +64,7 @@ melspec_loss_3:
   lin_end: 20
 
   melspec_params:
-    n_fft: 512
+    n_fft: 128
     f_min: 0
     hop_length: 32
     n_mels: 16
@@ -82,7 +82,7 @@ melspec_loss_4:
   lin_end: 10.0
   
   melspec_params:
-    n_fft: 1024
+    n_fft: 256
     f_min: 0
     hop_length: 64
     n_mels: 32
@@ -100,7 +100,7 @@ melspec_loss_5:
   lin_end: 20.0
 
   melspec_params:
-    n_fft: 512
+    n_fft: 128
     f_min: 0
     hop_length: 64
     n_mels: 16
