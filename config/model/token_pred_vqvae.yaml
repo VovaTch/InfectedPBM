@@ -1,14 +1,15 @@
 # Model type
-type: multi_lvl_vqvae
+type: token_predictor
 module_type: music
 
 # Model parameters
-hidden_size: 32
+hidden_size: 48
 latent_depth: 64
 channel_dim_change_list: [4, 4, 4, 4]
 input_channels: 1
+conv_out_channels: 32
 vocabulary_size: 256
-num_codebooks: 16
+num_codebooks: 4
 num_res_block_conv: 4
 dilation_factor: 3
 activation_type: relu

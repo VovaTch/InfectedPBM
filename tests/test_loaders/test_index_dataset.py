@@ -99,5 +99,5 @@ def test_MP3TokenizedIndicesDataset_getitem(
     item = dataset[0]
     assert "indices" in item
     assert "target" in item
-    assert item["indices"].shape == (1024,)
-    assert item["target"].shape == (1024,)
+    assert item["indices"].shape == (1024, 4)
+    assert item["target"].shape == (1024, 4)

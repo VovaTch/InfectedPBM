@@ -1,0 +1,17 @@
+ce_loss: 
+  type: "basic_cls"
+  weight: 1.0
+  base_loss: "ce"
+
+correct_ratio_metric:
+  type: "percent_correct"
+
+alignment_loss:
+  type: align
+  weight: 0.5
+  base_loss: 'mse'
+
+commitment_loss:
+  type: commit
+  weight: 0.5
+  base_loss: 'mse'

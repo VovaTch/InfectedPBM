@@ -8,6 +8,7 @@ from common import registry
 from loss.aggregators import LossOutput
 from models.base import BaseLightningModule
 from utils.containers import LearningParameters
+from utils.waveform_tokenization import quantize_waveform_256
 
 
 @registry.register_lightning_module("music")
@@ -57,7 +58,11 @@ class MusicLightningModule(BaseLightningModule):
         output = self.forward(batch)
         if self.loss_aggregator is None:
             return
-        targets = {"z_e": output["z_e"], "slice": batch["slice"]}
+        targets = {
+            "z_e": output["z_e"],
+            "slice": batch["slice"],
+            "class": quantize_waveform_256(batch["slice"]).long(),
+        }
         loss = self.loss_aggregator(output, targets)
         loss_total = self.handle_loss(loss, phase)
         return loss_total

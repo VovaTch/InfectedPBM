@@ -129,21 +129,33 @@ class MP3TokenizedIndicesDataset(Dataset):
             slice_data_dataset, batch_size=self.buffer_process_batch_size
         )
 
-        index_track = torch.tensor((self.codebook_size)).unsqueeze(0).to(self.device)
+        index_track = None  # type: ignore
         for slice_data_batch in tqdm.tqdm(
             slice_data_loader,
             desc=f"Processing slice batches for file {track_name}...",
         ):
             slice_data_batch = slice_data_batch[0].to(self.device)
             with torch.no_grad():
-                tokenized_slice = self.tokenizer.model.tokenize(slice_data_batch)
-            index_track = torch.cat([index_track, tokenized_slice.flatten()], dim=0)
+                tokenized_slice: torch.Tensor = self.tokenizer.model.tokenize(
+                    slice_data_batch
+                )
+
+            if index_track is None:
+                index_track: torch.Tensor = (
+                    torch.ones_like(tokenized_slice.flatten(end_dim=1)[0].unsqueeze(0))
+                    * self.codebook_size
+                )
+
+            index_track = torch.cat(
+                [index_track, tokenized_slice.flatten(end_dim=1)], dim=0
+            )
         return torch.cat(
             [
                 index_track,
-                torch.tensor(self.codebook_size + 1)
-                .unsqueeze(0)
-                .to(index_track.device),
+                torch.ones_like(tokenized_slice.flatten(end_dim=1)[0].unsqueeze(0)).to(
+                    index_track.device
+                )
+                * (self.codebook_size + 1),
             ],
             dim=0,
         )
@@ -200,9 +212,9 @@ class MP3TokenizedIndicesDataset(Dataset):
 
     def _get_tokenized_data_slice_by_index(self, index: int) -> torch.Tensor:
         if index + self.index_series_length > self.tokenized_data.shape[0]:
-            tokenized_data_slice = torch.ones(self.index_series_length).to(
-                device=self.device
-            ) * (self.codebook_size + 1)
+            tokenized_data_slice = torch.ones(
+                (self.index_series_length, self.tokenized_data.shape[1])
+            ).to(device=self.device) * (self.codebook_size + 1)
             tokenized_data_slice[: self.tokenized_data.shape[0] - index] = (
                 self.tokenized_data[index : self.tokenized_data.shape[0]]
             )
