@@ -1,7 +1,7 @@
 defaults:
   - _self_
-  - loss: token_pred_vqvae
-  - model: token_pred_vqvae
+  - loss: ml_vqvae
+  - model: ml_vqvae
   - learning: ml_vqvae
   - dataset: music_slices
 
