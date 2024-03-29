@@ -1,8 +1,8 @@
 reconstruction_loss:
   type: rec
   weight: 0.1
-  base_loss: 'huber'
-  phase_parameter: 10
+  base_loss: 'mse'
+  phase_parameter: 1
 
 edge_reconstruction_loss:
   type: edge_rec
@@ -61,7 +61,7 @@ melspec_loss_3:
   weight: 3.0
   base_loss: 'l1'
   lin_start: 0.1
-  lin_end: 20
+  lin_end: 200
 
   melspec_params:
     n_fft: 128
@@ -77,9 +77,9 @@ melspec_loss_3:
 melspec_loss_4:
   type: mel_spec
   weight: 5.0
-  base_loss: 'l1'
-  lin_start: 0.5
-  lin_end: 10.0
+  base_loss: 'mse'
+  lin_start: 0.1
+  lin_end: 200.0
   
   melspec_params:
     n_fft: 256
@@ -95,9 +95,9 @@ melspec_loss_4:
 melspec_loss_5:
   type: mel_spec
   weight: 5.0
-  base_loss: 'mse'
-  lin_start: 0.1
-  lin_end: 20.0
+  base_loss: 'l1'
+  lin_start: 0.5
+  lin_end: 10.0
 
   melspec_params:
     n_fft: 128
