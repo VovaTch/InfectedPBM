@@ -1,4 +1,5 @@
 from __future__ import annotations
+from turtle import forward
 
 import torch
 import torch.nn as nn
@@ -96,6 +97,51 @@ class VQCodebook(nn.Module):
         with torch.no_grad():
             self.code_embedding[dead_codes] = self.code_embedding[rand_codes]
         return dead_codes.shape[0]
+
+
+class AttentionQuantizer(nn.Module):
+    """
+    Inputs:
+    - num_tokens (int): number of embeddings
+    - token_dim (int): dimension of embedding
+    - nheads (int): number of attn heads
+
+    """
+
+    def __init__(self, num_tokens: int, token_dim: int, nheads: int) -> None:
+        super().__init__()
+
+        self.num_tokens = num_tokens
+        self.token_dim = token_dim
+
+        self.codebook = nn.Embedding(self.num_tokens, self.token_dim)
+        self.codebook.weight.data.uniform_(
+            -1.0 / self.num_tokens, 1.0 / self.num_tokens
+        )
+
+        self.mha = nn.MultiheadAttention(
+            embed_dim=token_dim, num_heads=nheads, dropout=0.1, batch_first=True
+        )
+
+    def get_codebook(self) -> nn.Embedding:
+        return self.codebook
+
+    def forward(self, queries: torch.Tensor) -> torch.Tensor:
+        b, c, h, w = queries.shape
+
+        z = queries.permute(0, 2, 3, 1).contiguous()
+        z_flattened = z.view(b, h * w, self.token_dim)
+
+        kv = torch.repeat_interleave(
+            self.codebook.weight.unsqueeze(0), repeats=b, dim=0
+        )
+        out, _ = self.mha(z_flattened, kv, kv, need_weights=False)
+
+        out = out.permute(0, 2, 1).reshape(b, c, h, w)
+        return out
+
+    def apply_codebook(self, queries: torch.Tensor, sg: bool = False) -> torch.Tensor:
+        return self.forward(queries)
 
 
 class VQCodebookFunc(torch.autograd.Function):
