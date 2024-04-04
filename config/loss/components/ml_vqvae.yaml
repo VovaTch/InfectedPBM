@@ -2,7 +2,7 @@ reconstruction_loss:
   type: rec
   weight: 1.0
   base_loss: 'mse'
-  phase_parameter: 3
+  phase_parameter: 1
 
 edge_reconstruction_loss:
   type: edge_rec
