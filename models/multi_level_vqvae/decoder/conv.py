@@ -43,7 +43,8 @@ class Decoder1D(nn.Module):
             channel_list[-1], input_channels, kernel_size=3, padding=1
         )
         self.conv_list = nn.ModuleList(
-            [
+            [nn.Linear(channel_list[0], channel_list[0])]
+            + [
                 Res1DBlockReverse(
                     channel_list[idx],
                     num_res_block_conv,
@@ -51,14 +52,16 @@ class Decoder1D(nn.Module):
                     kernel_size,
                     activation_type,
                 )
-                for idx in range(len(dim_change_list))
+                for idx in range(1, len(dim_change_list))
             ]
         )
+
         if dim_add_kernel_add % 2 != 0:
             raise ValueError("dim_add_kernel_size must be an even number.")
 
         self.dim_change_list = nn.ModuleList(
-            [
+            [nn.Linear(channel_list[0], channel_list[1] * dim_change_list[0])]
+            + [
                 nn.ConvTranspose1d(
                     channel_list[idx],
                     channel_list[idx + 1],
@@ -66,9 +69,10 @@ class Decoder1D(nn.Module):
                     stride=dim_change_list[idx],
                     padding=dim_add_kernel_add // 2,
                 )
-                for idx in range(len(dim_change_list))
+                for idx in range(1, len(dim_change_list))
             ]
         )
+        self.required_post_channel_size = channel_list[1]
 
     def forward(self, z: torch.Tensor) -> torch.Tensor:
         """
@@ -80,11 +84,17 @@ class Decoder1D(nn.Module):
         Returns:
             torch.Tensor: Output tensor.
         """
-        for _, (conv, dim_change) in enumerate(
+        for idx, (conv, dim_change) in enumerate(
             zip(self.conv_list, self.dim_change_list)
         ):
-            z = conv(z)
-            z = dim_change(z)
+            if idx == 0:  # Avoid wasting parameters on dilations.
+                z = conv(z.transpose(1, 2)).transpose(1, 2)
+                z = self.activation(z)
+                z = dim_change(z.transpose(1, 2)).transpose(1, 2)
+                z = z.reshape(z.shape[0], self.required_post_channel_size, -1)
+            else:
+                z = conv(z)
+                z = dim_change(z)
             z = self.activation(z)
 
         x_out = self.end_conv(z)

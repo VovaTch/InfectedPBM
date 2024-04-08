@@ -3,9 +3,9 @@ type: multi_lvl_vqvae
 module_type: music
 
 # Model parameters
-hidden_size: 4
-latent_depth: 512
-channel_dim_change_list: [2, 2, 2, 2, 2, 2, 2, 2]
+hidden_size: 48
+latent_depth: 16
+channel_dim_change_list: [2, 2, 4, 16]
 input_channels: 1
 vocabulary_size: 1024
 num_codebooks: 4

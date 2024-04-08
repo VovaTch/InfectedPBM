@@ -4,7 +4,7 @@ defaults:
 
 learning_rate: 0.0001
 weight_decay: 0.0
-batch_size: 256
+batch_size: 128
 epochs: 1000
 beta_ema: 0.0
 gradient_clip: 0.5

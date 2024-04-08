@@ -71,6 +71,10 @@ class Encoder1D(nn.Module):
                     out_dim=channel_list[idx + 1],
                 )
                 for idx, dim_change_param in enumerate(dim_change_list)
+                # nn.MaxPool1d(
+                #     kernel_size=dim_change_list[idx], stride=dim_change_list[idx]
+                # )
+                # for idx in range(len(dim_change_list))
             ]
         )
 

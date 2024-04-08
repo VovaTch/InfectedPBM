@@ -24,6 +24,7 @@ melspec_loss_1:
   type: mel_spec
   weight: 3.0
   base_loss: 'mse'
+  transform_func: 'tanh'
   lin_start: 1.00
   lin_end: 1.0
   
@@ -41,6 +42,7 @@ melspec_loss_1:
 melspec_loss_2:
   type: mel_spec
   weight: 3.0
+  transform_func: 'tanh'
   base_loss: 'l1'
   lin_start: 1.0
   lin_end: 1.0
@@ -58,6 +60,7 @@ melspec_loss_2:
 
 melspec_loss_3:
   type: mel_spec
+  transform_func: 'tanh'
   weight: 3.0
   base_loss: 'l1'
   lin_start: 0.1
@@ -77,6 +80,7 @@ melspec_loss_3:
 melspec_loss_4:
   type: mel_spec
   weight: 5.0
+  transform_func: 'tanh'
   base_loss: 'mse'
   lin_start: 0.1
   lin_end: 200.0
@@ -95,6 +99,7 @@ melspec_loss_4:
 melspec_loss_5:
   type: mel_spec
   weight: 5.0
+  transform_func: 'tanh'
   base_loss: 'l1'
   lin_start: 0.5
   lin_end: 10.0

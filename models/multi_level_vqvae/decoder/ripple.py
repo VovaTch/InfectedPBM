@@ -36,6 +36,7 @@ class RippleDecoder(nn.Module):
     def __init__(
         self,
         dec_params: RippleDecoderParameters,
+        activation: nn.Module = nn.LeakyReLU(),
     ) -> None:
         super().__init__()
         self.dec_params = dec_params
@@ -49,17 +50,17 @@ class RippleDecoder(nn.Module):
         layer_list = (
             [
                 nn.Linear(self.dec_params.input_dim, self.dec_params.hidden_dim),
-                nn.GELU(),
+                activation,
             ]
             + [
                 nn.Linear(self.dec_params.hidden_dim, self.dec_params.hidden_dim),
                 nn.LayerNorm(self.dec_params.hidden_dim),
-                nn.GELU(),
+                activation,
             ]
             * self.dec_params.mlp_num_layers
             + [nn.Linear(self.dec_params.hidden_dim, ripple_weight_dim)]
         )
-        self.activation = nn.GELU()
+        self.activation = activation
         self.mlp = nn.Sequential(*layer_list)
         self.sequence_length = self.dec_params.output_dim
         self.ripl_fully_connected_layer = nn.Linear(1, self.dec_params.ripl_hidden_dim)
@@ -176,14 +177,14 @@ class RippleDecoder(nn.Module):
                 self.dec_params.ripl_hidden_dim,
                 self.dec_params.ripl_hidden_dim,
             )
-            lc_x = self.activation(lc_x)
+            # lc_x = self.activation(lc_x)
 
         # Output layer
         lc_x = self._run_ripple_linear(
             lc_x, out_weights, self.dec_params.ripl_hidden_dim, 1
         )
         lc_x += self._run_ripple_linear(lc_x, bypass_weights, 1, 1)
-        # lc_x = F.tanh(lc_x)
+        lc_x = F.tanh(lc_x)
 
         return lc_x.transpose(1, 2)
 

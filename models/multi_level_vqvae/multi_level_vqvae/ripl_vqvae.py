@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing_extensions import Self
 
+import numpy as np
 from omegaconf import DictConfig
 
 from common import registry

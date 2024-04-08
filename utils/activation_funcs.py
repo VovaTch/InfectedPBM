@@ -17,6 +17,7 @@ registry.activation_functions.update(
     {
         "relu": nn.ReLU(),
         "gelu": nn.GELU(),
+        "leaky_relu": nn.LeakyReLU(),
         "sigmoid": nn.Sigmoid(),
         "tanh": nn.Tanh(),
         "sin": SinActivation(),
