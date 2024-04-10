@@ -64,7 +64,7 @@ melspec_loss_3:
   weight: 3.0
   base_loss: 'l1'
   lin_start: 0.1
-  lin_end: 200
+  lin_end: 2
 
   melspec_params:
     n_fft: 128
@@ -79,11 +79,11 @@ melspec_loss_3:
 
 melspec_loss_4:
   type: mel_spec
-  weight: 5.0
+  weight: 50.0
   transform_func: 'tanh'
   base_loss: 'mse'
-  lin_start: 0.1
-  lin_end: 200.0
+  lin_start: 0.01
+  lin_end: 2.0
   
   melspec_params:
     n_fft: 256
@@ -99,7 +99,7 @@ melspec_loss_4:
 melspec_loss_5:
   type: mel_spec
   weight: 5.0
-  transform_func: 'tanh'
+  transform_func: 'none'
   base_loss: 'l1'
   lin_start: 0.5
   lin_end: 10.0

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 from common import registry
-from .blocks import Res1DBlock, ConvDownsample
+from ..blocks import Res1DBlock, ConvDownsample
 
 
 class Encoder1D(nn.Module):

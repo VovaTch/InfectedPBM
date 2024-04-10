@@ -3,9 +3,9 @@ type: ripl_vqvae
 module_type: music
 
 # Model parameters
-hidden_size: 32
+hidden_size: 48
 latent_depth: 16
-channel_dim_change_list: [2, 2, 4, 16]
+channel_dim_change_list: [2, 2, 2, 32]
 input_channels: 1
 vocabulary_size: 1024
 num_codebooks: 4
@@ -24,4 +24,4 @@ decoder_params:
   mlp_num_layers: 2
   ripl_hidden_dim: 32
   ripl_num_layers: 3
-  ripl_coordinate_multipler: 10
+  ripl_coordinate_multipler: 20

@@ -1,0 +1,15 @@
+reconstruction_loss:
+  type: rec
+  weight: 1.0
+  base_loss: 'mse'
+  phase_parameter: 1
+
+alignment_loss:
+  type: align
+  weight: 0.5
+  base_loss: 'mse'
+
+commitment_loss:
+  type: commit
+  weight: 0.5
+  base_loss: 'mse'
