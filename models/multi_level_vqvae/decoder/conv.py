@@ -5,6 +5,13 @@ from common import registry
 from models.multi_level_vqvae.blocks import Res1DBlockReverse
 
 
+class TransparentLayer(nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return x
+
 class Decoder1D(nn.Module):
     def __init__(
         self,
@@ -43,7 +50,7 @@ class Decoder1D(nn.Module):
             channel_list[-1], input_channels, kernel_size=3, padding=1
         )
         self.conv_list = nn.ModuleList(
-            [nn.Linear(channel_list[0], channel_list[0])]
+            [TransparentLayer()]
             + [
                 Res1DBlockReverse(
                     channel_list[idx],
@@ -89,7 +96,6 @@ class Decoder1D(nn.Module):
         ):
             if idx == 0:  # Avoid wasting parameters on dilations.
                 z = conv(z.transpose(1, 2)).transpose(1, 2)
-                z = self.activation(z)
                 z = dim_change(z.transpose(1, 2)).transpose(1, 2)
                 z = z.reshape(z.shape[0], self.required_post_channel_size, -1)
             else:
