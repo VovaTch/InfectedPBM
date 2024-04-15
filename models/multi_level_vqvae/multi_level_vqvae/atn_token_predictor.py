@@ -98,7 +98,7 @@ class AtnTokenPredictorVQVAE(TokenPredictorVQVAE):
         vq_block_output = self.vq_module(z_e, extract_losses=True)
         # logits_out = self.decoder(vq_block_output["v_q"][:, -1, ...])
         logits_out = self.decoder(
-            vq_block_output["v_q"].transpose(1, 3).flatten(start_dim=1, end_dim=-2)
+            vq_block_output["v_q"].flatten(start_dim=1, end_dim=-2)
         )
 
         if origin_shape is None:

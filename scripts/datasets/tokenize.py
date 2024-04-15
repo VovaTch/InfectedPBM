@@ -17,6 +17,7 @@ def main(cfg: DictConfig) -> None:
         registry.get_lightning_module(cfg.model.module_type)
         .from_cfg(cfg)
         .to(dataset_parameters.device)
+        .eval()
     )
 
     tokenized_dataset = MP3TokenizedIndicesDataset(

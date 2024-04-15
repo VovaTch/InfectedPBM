@@ -31,6 +31,7 @@ class MP3TokenizedIndicesDataset(Dataset):
         tokenizer: MusicLightningModule | None = None,
         buffer_process_batch_size: int = 32,
         epoch_size: int = 100000,
+        flatten_size_idx: bool = False,
     ) -> None:
         """
         Initializes an instance of the Indices class.
@@ -53,6 +54,7 @@ class MP3TokenizedIndicesDataset(Dataset):
         self.preload = dataset_params.preload
         self.slice_length = dataset_params.slice_length
         self.sample_rate = dataset_params.sample_rate
+        self.flatten_size_idx = flatten_size_idx
 
         self.tokenizer = tokenizer
         self.slice_dataset = slice_dataset
@@ -138,26 +140,51 @@ class MP3TokenizedIndicesDataset(Dataset):
             with torch.no_grad():
                 tokenized_slice: torch.Tensor = self.tokenizer.model.tokenize(
                     slice_data_batch
-                )
+                )  # BS x TL x NumC
 
+            # Index vocab_size is reserved for the beginning of the slice
             if index_track is None:
                 index_track: torch.Tensor = (
-                    torch.ones_like(tokenized_slice.flatten(end_dim=1)[0].unsqueeze(0))
-                    * self.codebook_size
+                    (
+                        torch.ones_like(
+                            tokenized_slice.flatten(end_dim=1)[0].unsqueeze(0)
+                        )
+                        * self.codebook_size
+                    )
+                    if self.flatten_size_idx
+                    else torch.ones_like(tokenized_slice[0].unsqueeze(0))
                 )
 
-            index_track = torch.cat(
-                [index_track, tokenized_slice.flatten(end_dim=1)], dim=0
+            # Concatenate the tokenized slice to the index track
+            index_track = (
+                torch.cat([index_track, tokenized_slice.flatten(end_dim=1)], dim=0)
+                if self.flatten_size_idx
+                else torch.cat([index_track, tokenized_slice], dim=0)
             )
-        return torch.cat(
-            [
-                index_track,
-                torch.ones_like(tokenized_slice.flatten(end_dim=1)[0].unsqueeze(0)).to(
-                    index_track.device
-                )
-                * (self.codebook_size + 1),
-            ],
-            dim=0,
+
+        # Index vocab_size + 1 is reserved for the end of the slice
+        return (
+            torch.cat(
+                [
+                    index_track,
+                    torch.ones_like(
+                        tokenized_slice.flatten(end_dim=1)[0].unsqueeze(0)
+                    ).to(index_track.device)
+                    * (self.codebook_size + 1),
+                ],
+                dim=0,
+            )
+            if self.flatten_size_idx
+            else torch.cat(
+                [
+                    index_track,
+                    torch.ones_like(tokenized_slice[0].unsqueeze(0)).to(
+                        index_track.device
+                    )
+                    * (self.codebook_size + 1),
+                ],
+                dim=0,
+            )
         )
 
     def _dump_data(self, path: str) -> None:
@@ -254,6 +281,7 @@ class MP3TokenizedIndicesDataset(Dataset):
         tokenizer = None
         buffer_process_batch_size = 32
         epoch_size = cfg.dataset.epoch_size
+        flatten_size_idx = cfg.dataset.flatten_size_idx
         return cls(
             dataset_params,
             codebook_size,
@@ -262,6 +290,7 @@ class MP3TokenizedIndicesDataset(Dataset):
             tokenizer,
             buffer_process_batch_size,
             epoch_size,
+            flatten_size_idx,
         )
 
     def _right_pad_if_necessary(

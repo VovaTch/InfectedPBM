@@ -3,11 +3,11 @@ type: multi_lvl_vqvae
 module_type: music
 
 # Model parameters
-hidden_size: 48
+hidden_size: 24
 latent_depth: 16
-channel_dim_change_list: [2, 2, 2, 8]
+channel_dim_change_list: [2, 2, 2, 2, 8]
 input_channels: 1
-vocabulary_size: 2048
+vocabulary_size: 1024
 num_codebooks: 1
 num_res_block_conv: 3
 dilation_factor: 3
