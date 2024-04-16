@@ -34,7 +34,9 @@ class DecoderCrossEntropy:
         """
         logits = estimation["logits"][:-1]
         target_indices = target["latent indices"][1:]
-        return self.base_loss(logits.transpose(1, 2), target_indices.long())
+        return self.base_loss(
+            logits.transpose(1, 2).contiguous(), target_indices.long()
+        )
 
     @classmethod
     def from_cfg(cls, name: str, loss_cfg: dict[str, Any]) -> Self:

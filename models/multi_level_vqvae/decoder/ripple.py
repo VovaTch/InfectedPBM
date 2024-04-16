@@ -186,7 +186,7 @@ class RippleDecoder(nn.Module):
         lc_x += self._run_ripple_linear(lc_x, bypass_weights, 1, 1)
         lc_x = F.tanh(lc_x)
 
-        return lc_x.transpose(1, 2)
+        return lc_x.transpose(1, 2).contiguous()
 
     @staticmethod
     def _run_ripple_linear(

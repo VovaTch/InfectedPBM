@@ -58,7 +58,7 @@ class VQCodebook(nn.Module):
             torch.Tensor: The quantized tensor.
             torch.Tensor: The indices of the selected codebook entries.
         """
-        embedding_weights = self.code_embedding.transpose(0, 1)
+        embedding_weights = self.code_embedding.transpose(0, 1).contiguous()
         z_q, indices = vq_codebook_select(
             x_in, embedding_weights.detach() if code_sg else embedding_weights
         )  # type: ignore

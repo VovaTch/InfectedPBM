@@ -46,9 +46,13 @@ class TokenPredictorVQVAE(MultiLvlVQVariationalAutoEncoder):
             origin_shape = (int(z_e.shape[0]), self.conv_out_channels, -1)
 
         x_pre_cls, total_outputs = super().decode(z_e, origin_shape)
-        logits_out = self.output_projection(
-            self.activation(x_pre_cls).transpose(1, 2)
-        ).transpose(1, 2)
+        logits_out = (
+            self.output_projection(
+                self.activation(x_pre_cls).transpose(1, 2).contiguous()
+            )
+            .transpose(1, 2)
+            .contiguous()
+        )
         logits_out = logits_out.view((x_pre_cls.shape[0], 256, self.input_channels, -1))
 
         x_out_q = torch.argmax(logits_out, dim=1)

@@ -363,7 +363,13 @@ class BaseLightningModule(L.LightningModule):
             self.log(
                 f"test_{ind_loss}", value, prog_bar=True, on_step=False, on_epoch=True
             )
-        self.log("test_total", loss.total, prog_bar=True, on_step=False, on_epoch=True)
+        self.log(
+            "test_total",
+            loss.total,
+            prog_bar=True,
+            on_step=False,
+            on_epoch=True,
+        )
 
     @abstractmethod
     def step(self, batch: dict[str, Any], phase: str) -> torch.Tensor | None:

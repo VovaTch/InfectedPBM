@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from turtle import forward
 from typing_extensions import Self
 
 from omegaconf import DictConfig
@@ -96,7 +95,7 @@ class TransformerMusicDecoder(nn.Module):
             torch.Tensor: Tensor size BS x SliceLen x VocabSize.
         """
         z = z.flatten(start_dim=1, end_dim=-2)
-        proj_input = self.input_projection(z.transpose(1, 2))
+        proj_input = self.input_projection(z.transpose(1, 2).contiguous())
         proj_input = apply_pos_encoding(proj_input, self.positional_embedding)
         memory = self.encoder(proj_input)
 
@@ -105,4 +104,8 @@ class TransformerMusicDecoder(nn.Module):
             torch.arange(self.slice_length).to(z.device).unsqueeze(0)
         ).repeat(z.shape[0], 1, 1)
         decoder_output = self.decoder(query, memory)
-        return self.output_projection(self.activation(decoder_output)).transpose(1, 2)
+        return (
+            self.output_projection(self.activation(decoder_output))
+            .transpose(1, 2)
+            .contiguous()
+        )

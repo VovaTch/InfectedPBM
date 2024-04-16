@@ -177,7 +177,8 @@ class ChaosHydra(nn.Module):
         embeddings = torch.cat(embeddings, dim=-1)  # BS x L x num_CB * model_dim
         mamba_outputs = self.mamba(embeddings)  # BS x L x num_CB * model_dim
         pred_logits = [
-            proj(mamba_outputs).transpose(1, 2) for proj in self.out_projections
+            proj(mamba_outputs).transpose(1, 2).contiguous()
+            for proj in self.out_projections
         ]  # For each, size BS x (Voc + 2) x L
         pred_logits = torch.stack(pred_logits, dim=-1)  # BS x (Voc + 2) x L x num_CB
         return {"pred_logits": pred_logits}

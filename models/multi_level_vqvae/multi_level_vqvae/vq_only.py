@@ -38,7 +38,7 @@ class VQOnlyTokenizer(Tokenizer):
     def encode(self, x: torch.Tensor) -> torch.Tensor:
         x = self.encoder_projection(x)
         x = self.activation(x)
-        return x.permute((0, 2, 1))
+        return x.permute((0, 2, 1)).contiguous()
 
     def tokenize(self, x: torch.Tensor) -> torch.Tensor:
         z_e = self.encode(x)
@@ -46,14 +46,14 @@ class VQOnlyTokenizer(Tokenizer):
 
     def from_tokens(self, indices: torch.Tensor) -> torch.Tensor:
         z_q = self.vq_module.vq_codebook.embed_codebook(indices)
-        x_out = z_q.transpose(1, 2)
+        x_out = z_q.transpose(1, 2).contiguous()
         return x_out
 
     def decode(
         self, z_e: torch.Tensor, origin_shape: tuple[int, int, int] | None = None
     ) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
         vq_block_output = self.vq_module(z_e, extract_losses=True)
-        x_out = vq_block_output["v_q"][:, -1, ...].transpose(1, 2)
+        x_out = vq_block_output["v_q"][:, -1, ...].transpose(1, 2).contiguous()
         x_out = self.activation(x_out)
         x_out = self.decoder_projection(x_out)
 

@@ -65,7 +65,11 @@ class MultiLvlVQVariationalAutoEncoder(Tokenizer):
         Returns:
             torch.Tensor: The encoded tensor.
         """
-        x_reshaped = x.reshape((x.shape[0], -1, self.input_channels)).permute((0, 2, 1))
+        x_reshaped = (
+            x.reshape((x.shape[0], -1, self.input_channels))
+            .permute((0, 2, 1))
+            .contiguous()
+        )
         z_e = self.encoder(x_reshaped.float())
         return z_e
 
@@ -93,7 +97,7 @@ class MultiLvlVQVariationalAutoEncoder(Tokenizer):
             torch.Tensor: The decoded tensor of shape (batch_size, seq_len, input_channels).
         """
         z_q = self.vq_module.vq_codebook.embed_codebook(indices)
-        quantized_outputs = z_q[:, -1, :, :].permute((0, 2, 1))
+        quantized_outputs = z_q[:, -1, :, :].permute((0, 2, 1)).contiguous()
         x_out = self.decoder(quantized_outputs)
         return x_out
 
@@ -118,7 +122,7 @@ class MultiLvlVQVariationalAutoEncoder(Tokenizer):
         if origin_shape is None:
             origin_shape = (int(z_e.shape[0]), self.input_channels, -1)
 
-        x_out = x_out.permute((0, 2, 1)).reshape(origin_shape)
+        x_out = x_out.permute((0, 2, 1)).contiguous().reshape(origin_shape)
 
         total_output = {**vq_block_output, "slice": x_out}
 

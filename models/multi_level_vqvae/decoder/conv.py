@@ -8,9 +8,10 @@ from models.multi_level_vqvae.blocks import Res1DBlockReverse
 class TransparentLayer(nn.Module):
     def __init__(self) -> None:
         super().__init__()
-        
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return x
+
 
 class Decoder1D(nn.Module):
     def __init__(
@@ -95,8 +96,12 @@ class Decoder1D(nn.Module):
             zip(self.conv_list, self.dim_change_list)
         ):
             if idx == 0:  # Avoid wasting parameters on dilations.
-                z = conv(z.transpose(1, 2)).transpose(1, 2)
-                z = dim_change(z.transpose(1, 2)).transpose(1, 2)
+                z = conv(z.transpose(1, 2).contiguous()).transpose(1, 2).contiguous()
+                z = (
+                    dim_change(z.transpose(1, 2).contiguous())
+                    .transpose(1, 2)
+                    .contiguous()
+                )
                 z = z.reshape(z.shape[0], self.required_post_channel_size, -1)
             else:
                 z = conv(z)

@@ -67,7 +67,7 @@ class ResidualCodebookCollection(nn.Module):
         for idx, codebook in enumerate(self.vq_codebooks):
             emb += codebook.embed_codebook(indices[..., idx])
 
-        return emb.transpose(1, 2)
+        return emb.transpose(1, 2).contiguous()
 
     def update_usage(self, min_enc: torch.Tensor) -> None:
         """

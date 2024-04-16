@@ -18,8 +18,8 @@ class VQCodebookFunc(torch.autograd.Function):
         ctx.batch_size = x_in.shape[0]
 
         embedding_batch = embedding_weights.unsqueeze(0).repeat((x_in.shape[0], 1, 1))
-        x_in_t = x_in.transpose(1, 2).float()
-        embedding_batch_t = embedding_batch.transpose(1, 2).float()
+        x_in_t = x_in.transpose(1, 2).contiguous().float()
+        embedding_batch_t = embedding_batch.transpose(1, 2).contiguous().float()
         embedding_batch_flat = embedding_batch_t.flatten(start_dim=0, end_dim=1)
 
         distances = torch.cdist(x_in_t, embedding_batch_t)  # 4 x 147 x 512
@@ -27,7 +27,7 @@ class VQCodebookFunc(torch.autograd.Function):
         x_out = torch.index_select(embedding_batch_flat, dim=0, index=indices.flatten())
 
         x_out = x_out.view((x_in.shape[0], x_in.shape[2], x_in.shape[1]))
-        x_out = x_out.transpose(1, 2)
+        x_out = x_out.transpose(1, 2).contiguous()
 
         ctx.save_for_backward(embedding_weights, indices)
 

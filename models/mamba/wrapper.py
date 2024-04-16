@@ -35,7 +35,9 @@ class MambaWrapper(nn.Module):
         embedding = self.in_embedding(x)
         mamba_outputs = self.mamba(embedding)
         return {
-            "pred_logits": self.out_projection(mamba_outputs).transpose(1, 2)
+            "pred_logits": self.out_projection(mamba_outputs)
+            .transpose(1, 2)
+            .contiguous()
         }  # size BS x Voc + 2 x L
 
     @property

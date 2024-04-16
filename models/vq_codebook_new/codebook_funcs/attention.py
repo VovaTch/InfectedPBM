@@ -8,8 +8,9 @@ import torch.nn as nn
 
 class AttentionQuantizer(nn.Module):
     """
-    Attention quantizer, according to Omkar this works well for quantizing images, so I wanted to test this in another setting.
-    The issue is that the input this module is not really quantized, but it is a linear combination of the rest of the codebooks.
+    Attention quantizer, according to Omkar this works well for quantizing images, so I wanted to test this in another
+    setting. The issue is that the input this module is not really quantized, but it is a linear combination of the
+    rest of the codebooks.
     """
 
     def __init__(self, num_tokens: int, token_dim: int, nheads: int) -> None:
@@ -55,5 +56,5 @@ class AttentionQuantizer(nn.Module):
         )
         out, _ = self.mha(z_flattened, kv, kv, need_weights=False)
 
-        out = out.permute(0, 2, 1).reshape(b, c, h, w)
+        out = out.permute(0, 2, 1).contiguous().reshape(b, c, h, w)
         return out

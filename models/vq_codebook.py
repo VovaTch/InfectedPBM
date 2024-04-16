@@ -1,5 +1,4 @@
 from __future__ import annotations
-from turtle import forward
 
 import torch
 import torch.nn as nn
@@ -59,7 +58,7 @@ class VQCodebook(nn.Module):
             torch.Tensor: The quantized tensor.
             torch.Tensor: The indices of the selected codebook entries.
         """
-        embedding_weights = self.code_embedding.transpose(0, 1)
+        embedding_weights = self.code_embedding.transpose(0, 1).contiguous()
         z_q, indices = vq_codebook_select(
             x_in, embedding_weights.detach() if code_sg else embedding_weights
         )  # type: ignore
@@ -137,7 +136,7 @@ class AttentionQuantizer(nn.Module):
         )
         out, _ = self.mha(z_flattened, kv, kv, need_weights=False)
 
-        out = out.permute(0, 2, 1).reshape(b, c, h, w)
+        out = out.permute(0, 2, 1).contiguous().reshape(b, c, h, w)
         return out
 
     def apply_codebook(self, queries: torch.Tensor, sg: bool = False) -> torch.Tensor:
@@ -161,7 +160,7 @@ class VQCodebookFunc(torch.autograd.Function):
         ctx.batch_size = x_in.shape[0]
 
         embedding_batch = embedding_weights.unsqueeze(0).repeat((x_in.shape[0], 1, 1))
-        x_in_t = x_in.transpose(1, 2).float()
+        x_in_t = x_in.transpose(1, 2).contiguous().float()
         embedding_batch_t = embedding_batch.transpose(1, 2).float()
         embedding_batch_flat = embedding_batch_t.flatten(start_dim=0, end_dim=1)
 
@@ -170,7 +169,7 @@ class VQCodebookFunc(torch.autograd.Function):
         x_out = torch.index_select(embedding_batch_flat, dim=0, index=indices.flatten())
 
         x_out = x_out.view((x_in.shape[0], x_in.shape[2], x_in.shape[1]))
-        x_out = x_out.transpose(1, 2)
+        x_out = x_out.transpose(1, 2).contiguous()
 
         ctx.save_for_backward(embedding_weights, indices)
 
@@ -275,7 +274,7 @@ class ResidualCodebookCollection(nn.Module):
         for idx, codebook in enumerate(self.vq_codebooks):
             emb += codebook.embed_codebook(indices[..., idx])
 
-        return emb.transpose(1, 2)
+        return emb.transpose(1, 2).contiguous()
 
     def update_usage(self, min_enc: torch.Tensor) -> None:
         """
