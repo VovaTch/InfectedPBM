@@ -1,0 +1,15 @@
+type: chaos_hydra
+module_type: autoregressor
+
+# Mamba parameters
+vocabulary_size: 1024
+model_dim: 2048
+ssm_state_dim: 16
+conv_width: 3
+expansion: 2
+
+# Chaos hydra parameters
+num_heads: 16
+mlp_hidden_dim: 32
+mlp_num_layers: 3
+mlp_activation: leaky_relu

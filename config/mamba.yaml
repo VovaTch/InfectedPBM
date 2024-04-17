@@ -1,7 +1,7 @@
 defaults:
   - _self_
   - loss: cls 
-  - model: mamba
+  - model: chaos_hydra
   - learning: mamba
   - dataset: tokenized
 
