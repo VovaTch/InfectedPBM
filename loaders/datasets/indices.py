@@ -233,16 +233,24 @@ class MP3TokenizedIndicesDataset(Dataset):
 
     def __getitem__(self, index: int) -> dict[str, torch.Tensor]:
         return {
-            "indices": self._get_tokenized_data_slice_by_index(index).int(),
-            "target": self._get_tokenized_data_slice_by_index(index + 1).long(),
+            "indices": self._get_tokenized_data_slice_by_index(index)
+            .flatten(start_dim=1)
+            .int(),
+            "target": self._get_tokenized_data_slice_by_index(index + 1)
+            .flatten(start_dim=1)
+            .long(),
         }
 
     def _get_tokenized_data_slice_by_index(self, index: int) -> torch.Tensor:
         if index + self.index_series_length > self.tokenized_data.shape[0]:
             tokenized_data_slice = torch.ones(
-                (self.index_series_length, self.tokenized_data.shape[1])
+                (
+                    self.index_series_length,
+                    self.tokenized_data.shape[1],
+                    self.tokenized_data.shape[2],
+                )
             ).to(device=self.device) * (self.codebook_size + 1)
-            tokenized_data_slice[: self.tokenized_data.shape[0] - index] = (
+            tokenized_data_slice[: self.tokenized_data.shape[0] - index, ...] = (
                 self.tokenized_data[index : self.tokenized_data.shape[0]]
             )
         else:

@@ -15,7 +15,7 @@ def main(cfg: DictConfig) -> None:
     slice_dataset = registry.get_dataset(cfg.dataset.dataset_type).from_cfg(cfg)
     tokenizer = (
         registry.get_lightning_module(cfg.model.module_type)
-        .from_cfg(cfg)
+        .from_cfg(cfg, "weights/tokenizer_best.ckpt")
         .to(dataset_parameters.device)
         .eval()
     )

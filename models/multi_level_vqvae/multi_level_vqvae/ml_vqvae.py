@@ -97,8 +97,8 @@ class MultiLvlVQVariationalAutoEncoder(Tokenizer):
             torch.Tensor: The decoded tensor of shape (batch_size, seq_len, input_channels).
         """
         z_q = self.vq_module.vq_codebook.embed_codebook(indices)
-        quantized_outputs = z_q[:, -1, :, :].permute((0, 2, 1)).contiguous()
-        x_out = self.decoder(quantized_outputs)
+        quantized_outputs = z_q.transpose(1, 2).contiguous()
+        x_out = self.decoder(quantized_outputs.transpose(1, 2))
         return x_out
 
     def decode(

@@ -96,3 +96,14 @@ def ripple_vqvae() -> RippleVQVariationalAutoEncoder:
     decoder = nn.Conv1d(64, 3, kernel_size=3, padding=1)
     vq_module = VQ1D(64, 128)
     return RippleVQVariationalAutoEncoder(input_channels, encoder, decoder, vq_module)
+
+
+def test_from_tokens(multi_lvl_vqvae: MultiLvlVQVariationalAutoEncoder) -> None:
+    # Create a sample indices tensor
+    indices = torch.randint(0, 128, (10, 1, 1))
+
+    # Test the from_tokens method
+    x_out = multi_lvl_vqvae.from_tokens(indices)
+
+    # Assert the shape of the output tensor
+    assert x_out.shape == (10, 3, 1)
