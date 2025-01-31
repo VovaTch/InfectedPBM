@@ -32,7 +32,7 @@ def main(cfg: DictConfig) -> None:
 
     # Data
     dataset = registry.get_dataset(cfg.dataset.dataset_type).from_cfg(cfg)
-    single_sample_dataset = SingleSampleDataset(dataset, 2500, 1)  # type: ignore
+    single_sample_dataset = SingleSampleDataset(dataset, 5500, 1)  # type: ignore
 
     # Loader
     loader = DataLoader(single_sample_dataset, batch_size=1, shuffle=False)
@@ -48,6 +48,8 @@ def main(cfg: DictConfig) -> None:
 
     plt.plot(single_sample_dataset[0]["slice"].squeeze().cpu().numpy())
     sample_slice = {"slice": single_sample_dataset[0]["slice"].unsqueeze(0).to("cpu")}
+    print(sample_slice["slice"].shape)
+    sample_slice = {"slice": torch.zeros((1, 1, 32768), dtype=torch.float32).to("cpu")}
     plt.plot(model(sample_slice)["slice"].squeeze().detach().cpu().numpy())
     plt.show()
 
