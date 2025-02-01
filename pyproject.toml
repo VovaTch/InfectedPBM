@@ -17,7 +17,8 @@ dependencies = [
     "matplotlib (>=3.10.0,<4.0.0)",
     "soundfile (>=0.13.1,<0.14.0)",
     "tensorboard (>=2.18.0,<3.0.0)",
-    "mamba-ssm (>=2.2.4,<3.0.0)"
+    "mamba-ssm (>=2.2.4,<3.0.0)",
+    "ipykernel (>=6.29.5,<7.0.0)"
 ]
 
 
