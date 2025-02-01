@@ -237,7 +237,12 @@ class BaseLightningModule(L.LightningModule):
         loss = self.loss_aggregator(output, batch)
         for ind_loss, value in loss.individual.items():
             self.log(
-                f"test_{ind_loss}", value, prog_bar=True, on_step=False, on_epoch=True
+                f"test_{ind_loss}",
+                value,
+                prog_bar=True,
+                on_step=False,
+                on_epoch=True,
+                batch_size=self.learning_params.batch_size,
             )
         self.log(
             "test_total",
@@ -245,6 +250,7 @@ class BaseLightningModule(L.LightningModule):
             prog_bar=True,
             on_step=False,
             on_epoch=True,
+            batch_size=self.learning_params.batch_size,
         )
 
     @abstractmethod

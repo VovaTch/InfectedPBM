@@ -35,8 +35,17 @@ class MusicLightningModule(BaseLightningModule):
         """
         for name in loss.individual:
             log_name = f"{phase} {name.replace('_', ' ')}"
-            self.log(log_name, loss.individual[name])
-        self.log(f"{phase} total loss", loss.total, prog_bar=True)
+            self.log(
+                log_name,
+                loss.individual[name],
+                batch_size=self.learning_params.batch_size,
+            )
+        self.log(
+            f"{phase} total loss",
+            loss.total,
+            prog_bar=True,
+            batch_size=self.learning_params.batch_size,
+        )
         return loss.total
 
     def step(self, batch: dict[str, Any], phase: str) -> torch.Tensor | None:
@@ -70,4 +79,8 @@ class MusicLightningModule(BaseLightningModule):
         if hasattr(self.model, "vq_module"):
             num_dead_codes = self.model.vq_module.vq_codebook.random_restart()  # type: ignore # TODO: check if right
             self.model.vq_module.vq_codebook.reset_usage()  # type: ignore # TODO: check if right
-            self.log("number of dead codes", num_dead_codes)
+            self.log(
+                "number of dead codes",
+                num_dead_codes,
+                batch_size=self.learning_params.batch_size,
+            )
