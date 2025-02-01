@@ -1,8 +1,4 @@
-from enum import Enum, auto
-from typing import Callable
-
-import lightning as L
-from omegaconf import DictConfig
+from enum import Enum
 
 
 class Stage(Enum):
@@ -14,9 +10,6 @@ class Stage(Enum):
     - `TEST`: Used for the testing phase to evaluate the model's performance on unseen data.
     """
 
-    TRAIN = auto()
-    VALIDATION = auto()
-    TEST = auto()
-
-
-DataModuleBuilder = Callable[[DictConfig], type[L.LightningDataModule]]
+    TRAIN = "train"
+    VALIDATION = "val"
+    TEST = "test"

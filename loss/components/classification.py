@@ -1,17 +1,14 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing_extensions import Self
-from omegaconf import DictConfig
 
 import torch
 import torch.nn as nn
 
-from common import registry
+from .base import LossComponent
 
 
-@registry.register_loss_component("basic_cls")
 @dataclass
-class BasicClassificationLoss:
+class BasicClassificationLoss(LossComponent):
     """
     Basic classification loss for classification purposes
     """
@@ -19,6 +16,8 @@ class BasicClassificationLoss:
     name: str
     weight: float
     base_loss: nn.Module
+    pred_key: str
+    ref_key: str
     differentiable: bool = True
 
     def __call__(
@@ -34,36 +33,19 @@ class BasicClassificationLoss:
         Returns:
             torch.Tensor: loss
         """
-        return self.base_loss(estimation["pred_logits"], target["class"])
-
-    @classmethod
-    def from_cfg(cls, name: str, loss_cfg: DictConfig) -> Self:
-        """
-        Utility method to parse loss parameters from a configuration dictionary
-
-        Args:
-            name (str): loss name
-            loss_cfg (DictConfig): configuration dictionary
-
-        Returns:
-            BasicClassificationLoss: Basic classification loss object
-        """
-        return cls(
-            name,
-            loss_cfg.get("weight", 1.0),
-            registry.get_loss_module(loss_cfg.get("base_loss", "ce")),
-        )
+        return self.base_loss(estimation[self.pred_key], target[self.ref_key])
 
 
-@registry.register_loss_component("percent_correct")
 @dataclass
-class PercentCorrect:
+class PercentCorrect(LossComponent):
     """
     Basic metric to count the ratio of the correct number of classifications
     """
 
     name: str
     weight: float
+    pred_key: str
+    ref_key: str
     base_loss: nn.Module | None = None
     differentiable: bool = False
 
@@ -80,24 +62,6 @@ class PercentCorrect:
         Returns:
             torch.Tensor: loss
         """
-        pred_logits_argmax = torch.argmax(estimation["pred_logits"], dim=1)
-        correct = torch.sum(pred_logits_argmax == target["class"])
+        pred_logits_argmax = torch.argmax(estimation[self.pred_key], dim=1)
+        correct = torch.sum(pred_logits_argmax == target[self.ref_key])
         return correct / torch.numel(pred_logits_argmax)
-
-    @classmethod
-    def from_cfg(cls, name: str, loss_cfg: DictConfig) -> Self:
-        """
-        Utility method to parse loss parameters from a configuration dictionary
-
-        Args:
-            name (str): loss name
-            loss_cfg (DictConfig): configuration dictionary
-
-        Returns:
-            BasicClassificationLoss: Basic classification loss object
-        """
-        return cls(
-            name,
-            loss_cfg.get("weight", 1.0),
-            None,
-        )

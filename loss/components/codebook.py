@@ -1,14 +1,9 @@
 from dataclasses import dataclass
-from typing import Any
-from typing_extensions import Self
 
 import torch
 import torch.nn as nn
 
-from common import registry
 
-
-@registry.register_loss_component("align")
 @dataclass
 class AlignLoss:
     """
@@ -43,26 +38,7 @@ class AlignLoss:
 
         return loss
 
-    @classmethod
-    def from_cfg(cls, name: str, loss_cfg: dict[str, Any]) -> Self:
-        """
-        Utility method to parse alignment loss parameters from a configuration dictionary
 
-        Args:
-            name (str): loss name
-            loss_cfg (DictConfig): configuration dictionary
-
-        Returns:
-            AlignLoss: align loss object
-        """
-        return cls(
-            name,
-            loss_cfg.get("weight", 1.0),
-            registry.get_loss_module(loss_cfg.get("base_loss", "mse")),
-        )
-
-
-@registry.register_loss_component("commit")
 @dataclass
 class CommitLoss:
     """
@@ -96,21 +72,3 @@ class CommitLoss:
             loss += self.base_loss(emb[:, codebook_idx, ...].detach(), z_e)
 
         return loss
-
-    @classmethod
-    def from_cfg(cls, name: str, loss_cfg: dict[str, Any]) -> Self:
-        """
-        Utility method to parse commitment loss parameters from a configuration dictionary
-
-        Args:
-            name (str): loss name
-            loss_cfg (DictConfig): configuration dictionary
-
-        Returns:
-            CommitLoss: commit loss object
-        """
-        return cls(
-            name,
-            loss_cfg.get("weight", 1.0),
-            registry.get_loss_module(loss_cfg.get("base_loss", "mse")),
-        )

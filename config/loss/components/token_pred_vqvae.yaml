@@ -1,17 +1,25 @@
-ce_loss: 
-  type: "basic_cls"
+- _target_: loss.components.LLMClassificationLoss
+  name: basic_cls
   weight: 1.0
-  base_loss: "ce"
+  pred_key: logits
+  ref_key: latent indices
+  base_loss:
+    _target_: torch.nn.CrossEntropyLoss
 
-correct_ratio_metric:
-  type: "percent_correct"
+- _target_: loss.components.LLMPercentCorrect
+  name: percent_correct
+  weight: 0.0
+  pred_key: logits
+  ref_key: latent indices
 
-alignment_loss:
-  type: align
+- _target_: loss.components.AlignLoss
+  name: align
   weight: 0.5
-  base_loss: 'mse'
+  base_loss:
+    _target_: torch.nn.MSELoss
 
-commitment_loss:
-  type: commit
+- _target_: loss.components.CommitLoss
+  name: commit
   weight: 0.5
-  base_loss: 'mse'
+  base_loss:
+    _target_: torch.nn.MSELoss

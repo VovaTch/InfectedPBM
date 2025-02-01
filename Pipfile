@@ -4,15 +4,16 @@ verify_ssl = false
 name = "pip_conf_index_global"
 
 [packages]
-lightning = "*"
-tqdm = "*"
+pandas = "*"
 numpy = "*"
-pytest = "*"
-pyyaml = "*"
-hydra-core = "*"
 matplotlib = "*"
-tensorboard = "*"
-ipykernel = "*"
+seaborn = "*"
+gffpandas = "*"
+scipy = "*"
+scikit-learn = "*"
+xgboost = "*"
+shap = "*"
+jupyter = "*"
 
 [dev-packages]
 

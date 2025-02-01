@@ -1,9 +1,14 @@
-ce_loss: 
-  type: "basic_cls"
+- _target_: loss.components.BasicClassificationLoss
+  name: ce_loss
   weight: 1.0
-  base_loss: "ce"
+  pred_key: logits
+  ref_key: class
+  base_loss:
+    _target_: torch.nn.CrossEntropyLoss
 
-correct_ratio_metric:
-  type: "percent_correct"
-
-
+- _target_: loss.components.PercentCorrect
+  name: percent_correct
+  weights: 0.0
+  pred_key: logits
+  ref_key: class
+  

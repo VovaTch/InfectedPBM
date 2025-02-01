@@ -1,0 +1,30 @@
+# Target for learning params object
+_target_: utils.learning.LearningParameters
+
+# Echo model name
+model_name: ${model_name}
+
+# Learning parameters
+learning_rate: 0.001
+weight_decay: 0.001
+batch_size: 96
+grad_accumulation: 1
+epochs: 20
+beta_ema: 0.999
+gradient_clip: 0.1
+save_path: saved/
+amp: False
+
+# Data parameters
+val_split: 0.05
+test_split: 0.01
+
+# Device parameters
+devices: auto
+num_workers: 8
+
+# Scheduler parameters
+loss_monitor: ${scheduler.module_params.loss_monitor}
+interval: ${scheduler.module_params.interval}
+frequency: ${scheduler.module_params.frequency}
+trigger_loss: ${scheduler.module_params.trigger_loss}

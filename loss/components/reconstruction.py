@@ -1,14 +1,10 @@
 from dataclasses import dataclass
-from typing import Any, Callable
-from typing_extensions import Self
+from typing import Callable
 
 import torch
 import torch.nn as nn
 
-from common import registry
 
-
-@registry.register_loss_component("rec")
 @dataclass
 class RecLoss:
     """Reconstruction loss for sound-waves"""
@@ -16,6 +12,8 @@ class RecLoss:
     name: str
     weight: float
     base_loss: nn.Module
+    pred_key: str
+    ref_key: str
     differentiable: bool = True
 
     # Loss-specific parameters
@@ -35,8 +33,8 @@ class RecLoss:
         Returns:
             torch.Tensor: Loss
         """
-        pred_slice = estimation["slice"]
-        target_slice = target["slice"]
+        pred_slice = estimation[self.pred_key]
+        target_slice = target[self.ref_key]
 
         return self._phased_loss(
             self.transform_func(pred_slice),
@@ -75,30 +73,7 @@ class RecLoss:
 
         return loss_vector.min()
 
-    @classmethod
-    def from_cfg(cls, name: str, loss_cfg: dict[str, Any]) -> Self:
-        """
-        Utility method to parse reconstruction loss parameters from a configuration dictionary
 
-        Args:
-            name (str): loss name
-            loss_cfg (DictConfig): configuration dictionary
-
-        Returns:
-            RecLoss: Reconstruction loss object
-        """
-        return cls(
-            name,
-            loss_cfg.get("weight", 1.0),
-            registry.get_loss_module(loss_cfg.get("base_loss", "mse")),
-            transform_func=registry.get_transform_function(
-                loss_cfg.get("transform_func", "none")
-            ),
-            phase_parameter=loss_cfg.get("phase_parameter", 1),
-        )
-
-
-@registry.register_loss_component("edge_rec")
 @dataclass
 class EdgeRecLoss:
     """
@@ -109,6 +84,8 @@ class EdgeRecLoss:
     name: str
     weight: float
     base_loss: nn.Module
+    pred_key: str
+    ref_key: str
     differentiable: bool = True
 
     # Loss-specific parameters
@@ -129,9 +106,9 @@ class EdgeRecLoss:
             torch.Tensor: Loss output
         """
 
-        pred_slice = estimation["slice"]
+        pred_slice = estimation[self.pred_key]
         batch_size, channels, length = pred_slice.shape
-        target_slice = target["slice"]
+        target_slice = target[self.ref_key]
 
         linspace_slice = torch.arange(0, length).to(pred_slice.device) / (length - 1)
         weight_slice = (
@@ -141,30 +118,7 @@ class EdgeRecLoss:
 
         return self.base_loss(pred_slice * weight_slice, target_slice * weight_slice)
 
-    @classmethod
-    def from_cfg(cls, name: str, loss_cfg: dict[str, Any]) -> Self:
-        """
-        Builds the loss component from the configuration dictionary.
 
-        Args:
-            name (str): Loss name
-            loss_cfg (dict[str, Any]): Loss configuration
-
-        Returns:
-            Self: Edge reconstruction loss instance
-        """
-        return cls(
-            name,
-            loss_cfg.get("weight", 1.0),
-            registry.get_loss_module(loss_cfg.get("base_loss", "mse")),
-            transform_func=registry.get_transform_function(
-                loss_cfg.get("transform_func", "none")
-            ),
-            edge_power=loss_cfg.get("edge_power", 1.0),
-        )
-
-
-@registry.register_loss_component("noise_pred")  # type: ignore
 @dataclass
 class NoisePredLoss:
     """
@@ -173,6 +127,8 @@ class NoisePredLoss:
 
     name: str
     weight: float
+    pred_key: str
+    ref_key: str
     base_loss: nn.Module
 
     def __call__(
@@ -188,31 +144,12 @@ class NoisePredLoss:
         Returns:
             torch.Tensor: Loss
         """
-        noise = target["noise"]
-        noise_pred = estimation["noise_pred"]
+        noise = target[self.pred_key]
+        noise_pred = estimation[self.ref_key]
 
         return self.base_loss(noise, noise_pred)
 
-    @classmethod
-    def from_cfg(cls, name: str, loss_cfg: dict[str, Any]) -> Self:
-        """
-        Utility method to parse noise prediction loss parameters from a configuration dictionary
 
-        Args:
-            name (str): loss name
-            loss_cfg (DictConfig): configuration dictionary
-
-        Returns:
-            NoisePredLoss: Noise prediction loss object
-        """
-        return cls(
-            name,
-            loss_cfg.get("weight", 1.0),
-            registry.get_loss_module(loss_cfg.get("base_loss", "mse")),
-        )
-
-
-@registry.register_loss_component("diff_rec")
 @dataclass
 class DiffReconstructionLoss:
     """
@@ -222,6 +159,10 @@ class DiffReconstructionLoss:
     name: str
     weight: float
     base_loss: nn.Module
+    ref_key: str
+    noise_pred_key: str
+    noise_ref_key: str
+    noise_scale_key: str
     differentiable: bool = True
 
     def __call__(
@@ -237,10 +178,10 @@ class DiffReconstructionLoss:
         Returns:
             torch.Tensor: Loss
         """
-        target_slice = target["slice"]
-        noisy_slice = target["noisy_slice"]
-        noise_scale = target["noise_scale"]
-        noise_pred = estimation["noise_pred"]
+        target_slice = target[self.ref_key]
+        noisy_slice = target[self.noise_ref_key]
+        noise_scale = target[self.noise_scale_key]
+        noise_pred = estimation[self.noise_pred_key]
         estimated_slice = (noisy_slice - (1.0 - noise_scale) ** 0.5 * noise_pred) / (
             noise_scale**0.5
         )
@@ -248,22 +189,4 @@ class DiffReconstructionLoss:
         return self.base_loss(
             estimated_slice,
             target_slice,
-        )
-
-    @classmethod
-    def from_cfg(cls, name: str, loss_cfg: dict[str, Any]) -> Self:
-        """
-        Utility method to parse diffusion reconstruction loss parameters from a configuration dictionary
-
-        Args:
-            name (str): loss name
-            loss_cfg (DictConfig): configuration dictionary
-
-        Returns:
-            DiffReconstructionLoss: Diffusion reconstruction loss object
-        """
-        return cls(
-            name,
-            loss_cfg.get("weight", 1.0),
-            registry.get_loss_module(loss_cfg.get("base_loss", "mse")),
         )

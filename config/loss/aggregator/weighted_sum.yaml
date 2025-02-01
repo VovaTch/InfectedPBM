@@ -1,1 +1,2 @@
-type: "weighted_sum"
+_target_: loss.aggregators.WeightedSumAggregator
+components: ${loss.components}

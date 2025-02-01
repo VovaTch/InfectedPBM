@@ -1,57 +1,87 @@
 from dataclasses import dataclass
-from typing import Any
-from typing_extensions import Self
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
-from common import registry
+from .base import LossComponent
 
 
-@registry.register_loss_component("decoder_ce")
 @dataclass
-class DecoderCrossEntropy:
+class LLMClassificationLoss(LossComponent):
     """
-    Standard cross-entropy-loss for training a decoder transformer for sequence generation.
+    Basic classification loss, most commonly cross entropy.
+
+    Args:
+        name (str): The name of the loss.
+        weight (float): The weight of the loss.
+        base_loss (nn.Module): The base loss function.
+        ref_key (str): The key for accessing the reference values in the target dictionary.
+        pred_key (str): The key for accessing the predicted values in the prediction dictionary.
+        differentiable (bool, optional): Whether the loss is differentiable. Defaults to True.
     """
 
     name: str
     weight: float
     base_loss: nn.Module
+    pred_key: str
+    ref_key: str
+    differentiable: bool = True
 
     def __call__(
-        self, estimation: dict[str, torch.Tensor], target: dict[str, torch.Tensor]
+        self, pred: dict[str, torch.Tensor], target: dict[str, torch.Tensor]
     ) -> torch.Tensor:
-        """
-        Forward method for this configuration
+        logits = pred[self.pred_key].transpose(1, 2).contiguous()[..., :-1]
+        target_indices = target[self.ref_key][..., 1:].long()
+        return self.base_loss(logits, target_indices)
 
-        Args:
-            est (Dict[str, torch.Tensor]): Dictionary expecting BS x V x cls in key "logits"
-            ref (Dict[str, torch.Tensor]): Dictionary expecting BS x V in key "latent indices"
 
-        Returns:
-            torch.Tensor: Loss
-        """
-        logits = estimation["logits"][:-1]
-        target_indices = target["latent indices"][1:]
-        return self.base_loss(
-            logits.transpose(1, 2).contiguous(), target_indices.long()
-        )
+@dataclass
+class TokenEntropy(LossComponent):
+    """
+    Computes the entropy of the token distribution.
 
-    @classmethod
-    def from_cfg(cls, name: str, loss_cfg: dict[str, Any]) -> Self:
-        """
-        Utility method to parse loss parameters from a configuration dictionary
+    Attributes:
+        name (str): The name of the loss component.
+        weight (float): The weight of the loss component.
+        logit_key (str): The key for accessing the logits in the prediction dictionary.
+        differentiable (bool): Whether the loss component is differentiable.
+    """
 
-        Args:
-            name (str): loss name
-            loss_cfg (DictConfig): configuration dictionary
+    name: str
+    weight: float
+    logit_key: str
+    differentiable: bool = False
 
-        Returns:
-            AlignLoss: align loss object
-        """
-        return cls(
-            name,
-            loss_cfg.get("weight", 1.0),
-            registry.get_loss_module(loss_cfg.get("base_loss", "ce")),
-        )
+    def __call__(
+        self, pred: dict[str, torch.Tensor], target: dict[str, torch.Tensor]
+    ) -> torch.Tensor:
+        probs = F.softmax(pred[self.logit_key], dim=-1)
+        return -torch.sum(probs * torch.log(probs + 1e-8), dim=-1).mean()
+
+
+@dataclass
+class LLMPercentCorrect(LossComponent):
+    """
+    Computes the percentage of correct predictions.
+
+    Attributes:
+        name (str): The name of the loss component.
+        weight (float): The weight of the loss component.
+        logit_key (str): The key for accessing the logits in the prediction dictionary.
+        target_key (str): The key for accessing the target values in the target dictionary.
+        differentiable (bool): Whether the loss component is differentiable.
+    """
+
+    name: str
+    weight: float
+    pred_key: str
+    ref_key: str
+    differentiable: bool = False
+
+    def __call__(
+        self, pred: dict[str, torch.Tensor], target: dict[str, torch.Tensor]
+    ) -> torch.Tensor:
+        logits = pred[self.pred_key][:, :-1, :]
+        target_indices = target[self.ref_key][..., 1:]
+        return torch.mean((torch.argmax(logits, dim=-1) == target_indices).float())

@@ -1,9 +1,0 @@
-type: mamba
-module_type: music
-
-# Model parameters
-vocabulary_size: 4092
-model_dim: 256
-ssm_state_dim: 16
-conv_width: 3
-expansion: 2
