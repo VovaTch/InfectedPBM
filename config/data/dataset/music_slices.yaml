@@ -1,0 +1,7 @@
+_target_: loaders.datasets.MP3SliceDataset
+data_path: data/tracks
+sample_rate: 44100
+slice_length: 1024
+device: cpu
+processed_path: data/slices
+save_processed: True
