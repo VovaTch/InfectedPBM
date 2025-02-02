@@ -38,7 +38,9 @@ class RQCodeBook(VQCodeBook):
         for _ in range(self._num_rq_steps):
             z_q_ind, indices_ind = super().apply_codebook(x_res, code_sg)
             x_res -= z_q_ind.squeeze(1)
-            z_q_aggregated.append(z_q_ind)
+            z_q_aggregated.append(
+                z_q_ind if len(z_q_aggregated) == 0 else z_q_aggregated[-1] + z_q_ind
+            )
             indices.append(indices_ind)
 
         return torch.cat(z_q_aggregated, dim=1), torch.cat(indices, dim=-1)
