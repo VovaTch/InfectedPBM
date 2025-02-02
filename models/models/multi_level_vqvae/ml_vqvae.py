@@ -100,7 +100,7 @@ class MultiLvlVQVariationalAutoEncoder(Tokenizer):
         """
         z_q = self.vq_module.vq_codebook.embed_codebook(indices)
         quantized_outputs = z_q.transpose(1, 2).contiguous()
-        x_out = self.decoder(quantized_outputs.transpose(1, 2))
+        x_out = self.decoder(quantized_outputs.transpose(1, 2).contiguous())
         return x_out
 
     def decode(

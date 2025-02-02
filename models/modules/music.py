@@ -38,12 +38,14 @@ class MusicLightningModule(BaseLightningModule):
             self.log(
                 log_name,
                 loss.individual[name],
+                sync_dist=True,
                 batch_size=self.learning_params.batch_size,
             )
         self.log(
             f"{phase} total loss",
             loss.total,
             prog_bar=True,
+            sync_dist=True,
             batch_size=self.learning_params.batch_size,
         )
         return loss.total
@@ -82,5 +84,6 @@ class MusicLightningModule(BaseLightningModule):
             self.log(
                 "number of dead codes",
                 num_dead_codes,
+                sync_dist=True,
                 batch_size=self.learning_params.batch_size,
             )

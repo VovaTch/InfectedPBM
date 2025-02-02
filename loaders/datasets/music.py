@@ -149,7 +149,7 @@ class MP3SliceDataset(Dataset):
         long_data = self._resample_if_necessary(long_data, sr)
         long_data = self._mix_down_if_necessary(long_data)
         long_data = self._right_pad_if_necessary(long_data)
-        slices = long_data.view((-1, 1, self._slice_length))
+        slices = long_data.contiguous().view((-1, 1, self._slice_length))
         slice_file_name = self._get_slices_file_name_from_path(file, processed_path)
 
         data_points: list[DataPoint] = []

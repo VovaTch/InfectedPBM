@@ -26,7 +26,7 @@ class VQCodeBookFunc(torch.autograd.Function):
         indices = torch.argmin(distances, dim=2, keepdim=True)  # 4 x 147 x 1
         x_out = torch.index_select(embedding_batch_flat, dim=0, index=indices.flatten())
 
-        x_out = x_out.view((x_in.shape[0], x_in.shape[2], x_in.shape[1]))
+        x_out = x_out.contiguous().view((x_in.shape[0], x_in.shape[2], x_in.shape[1]))
         x_out = x_out.transpose(1, 2).contiguous()
 
         ctx.save_for_backward(embedding_weights, indices)
@@ -54,7 +54,7 @@ class VQCodeBookFunc(torch.autograd.Function):
                 for idx in batch:
                     idx_value = idx.item()
 
-                    grad_emb[:, idx_value] += grad_outputs[ # type: ignore
+                    grad_emb[:, idx_value] += grad_outputs[  # type: ignore
                         batch_idx, :, running_idx
                     ] / (indices.flatten().shape[0])
                     running_idx += 1

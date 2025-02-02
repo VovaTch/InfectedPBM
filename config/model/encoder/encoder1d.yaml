@@ -1,5 +1,5 @@
 _target_: models.models.multi_level_vqvae.encoder.Encoder1D
-channel_list: [1, 2, 4, 8, 32, 128, 256]
+channel_list: [2, 4, 8, 16, 64, 256, 256]
 dim_change_list: [2, 2, 2, 2, 4, 4]
 input_channels: 1
 kernel_size: 3

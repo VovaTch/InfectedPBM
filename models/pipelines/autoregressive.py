@@ -53,19 +53,23 @@ class AutoRegressivePipeline(Pipeline):
             # Top-k
             if top_k > 0:
                 values, indices = torch.topk(
-                    last_pred_logits.transpose(1, 2), top_k, dim=2
+                    last_pred_logits.transpose(1, 2).contiguous(), top_k, dim=2
                 )
                 dist = torch.distributions.Categorical(logits=values)
                 sample = dist.sample().unsqueeze(1)
                 # sampled_tokens = indices.gather(1, sample.unsqueeze(1)).squeeze(1)
-                sampled_tokens = torch.gather(
-                    indices, 2, sample.transpose(1, 2)
-                ).transpose(1, 2)
+                sampled_tokens = (
+                    torch.gather(indices, 2, sample.transpose(1, 2).contiguous())
+                    .transpose(1, 2)
+                    .contiguous()
+                )
             else:
                 dist = torch.distributions.Categorical(
-                    logits=last_pred_logits.transpose(1, 2)
+                    logits=last_pred_logits.transpose(1, 2).contiguous()
                 )
-                sampled_tokens = dist.sample().unsqueeze(-1).transpose(1, 2)
+                sampled_tokens = (
+                    dist.sample().unsqueeze(-1).transpose(1, 2).contiguous()
+                )
 
             return sampled_tokens  # BS x 1 x num_CB
 

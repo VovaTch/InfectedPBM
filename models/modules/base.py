@@ -242,6 +242,7 @@ class BaseLightningModule(L.LightningModule):
                 prog_bar=True,
                 on_step=False,
                 on_epoch=True,
+                sync_dist=True,
                 batch_size=self.learning_params.batch_size,
             )
         self.log(
@@ -250,6 +251,7 @@ class BaseLightningModule(L.LightningModule):
             prog_bar=True,
             on_step=False,
             on_epoch=True,
+            sync_dist=True,
             batch_size=self.learning_params.batch_size,
         )
 
