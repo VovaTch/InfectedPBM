@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from omegaconf import DictConfig
 
-from models.experimental.ripplenet import batch_ripple_linear_func
+from models.experimental.ripplenet_batch import ripple_linear_func_batch
 
 
 @dataclass
@@ -223,4 +223,4 @@ class RippleDecoder(nn.Module):
                 input_dim + 1,
             )
         )
-        return batch_ripple_linear_func(lc_x, ripl_weights, ripl_bias)
+        return ripple_linear_func_batch(lc_x, output_dim, ripl_weights, ripl_bias)

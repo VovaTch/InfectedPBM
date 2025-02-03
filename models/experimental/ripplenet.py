@@ -1,11 +1,8 @@
 from __future__ import annotations
 import math
-from typing_extensions import Self
-from omegaconf import DictConfig
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torch.jit._script import script
 
 
@@ -53,6 +50,34 @@ def ripple_linear_func(
 
     # return unflattened tensor
     return output_flattened.view(output_size)
+
+
+@script
+def ripple_linear_func_new(
+    input: torch.Tensor, out_features: int, weight: torch.Tensor, bias: torch.Tensor
+) -> torch.Tensor:
+
+    # Register output sizes
+    input_size = input.size()
+    output_size = list(input_size)
+    output_size[-1] = out_features
+
+    # flatten the input
+    flattened_input = input.flatten(end_dim=-2)
+
+    operation_result = (
+        torch.einsum(
+            "io,bio->bo",
+            weight[:, :, 0],
+            torch.sin(
+                torch.einsum("bi,io->bio", flattened_input, weight[:, :, 1])
+                + bias[1:, :]
+            ),
+        )
+        + bias[0, :]
+    )
+
+    return operation_result.view(output_size)
 
 
 @script
@@ -185,85 +210,11 @@ class RippleLinear(nn.Module):
         )
 
 
-class RippleReconstructor(nn.Module):
-    """
-    Simple fully connected neural network with RippleLinear layers.
-    """
-
-    def __init__(self, hidden_size: int, num_inner_layers: int = 1) -> None:
-        """
-        Initializes the RippleNet model.
-
-        Args:
-            hidden_size (int): The size of the hidden layer.
-            num_inner_layers (int, optional): The number of inner layers. Defaults to 1.
-
-        Raises:
-            ValueError: If the number of inner layers is less than 0.
-        """
-
-        super().__init__()
-        self.hidden_size = hidden_size
-
-        # Safeguard for the number of inner layers
-        if num_inner_layers < 0:
-            raise ValueError("Number of inner layers must be a positive integer.")
-
-        # Bypasser
-        self.bypass = RippleLinear(1, 1)
-
-        # Layers
-        self.in_layer = nn.Linear(1, hidden_size)
-        # self.in_layer = RippleLinear(1, hidden_size)
-        self.in_activation = nn.GELU()
-        self.out_ripl = RippleLinear(hidden_size, 1)
-        # self.inner_ripl = nn.ModuleList(
-        #     [RippleLinear(hidden_size, hidden_size) for _ in range(num_inner_layers)]
-        # )
-        inner_layers = []
-        for _ in range(num_inner_layers):
-            inner_layers.append(RippleLinear(hidden_size, hidden_size))
-            # inner_layers.append(nn.Linear(hidden_size, hidden_size))
-            inner_layers.append(nn.GELU())
-        self.inner_ripl = nn.Sequential(*inner_layers)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """
-        Forward pass of the RippleNet model.
-
-        Args:
-            x (torch.Tensor): Input tensor.
-
-        Returns:
-            torch.Tensor: Output tensor.
-        """
-
-        x *= 5
-        x_saved = x
-        x = self.in_layer(x.float())
-        # x = self.in_activation(x)
-        for layer in self.inner_ripl:
-            x = layer(x)
-            # x = self.in_activation(x)
-        x = self.out_ripl(x)
-        x += self.bypass(x_saved)
-        return F.tanh(x)
-
-    @classmethod
-    def from_cfg(cls, cfg: DictConfig) -> Self:
-        """
-        Create an instance of the RippleNet model from a configuration.
-
-        Args:
-            cfg (DictConfig): The configuration for the model.
-
-        Returns:
-            Self: An instance of the RippleNet model.
-        """
-
-        model_cfg: DictConfig = cfg.model
-
-        hidden_size: int = model_cfg.hidden_size
-        num_inner_layers: int = model_cfg.num_inner_layers
-
-        return cls(hidden_size, num_inner_layers)
+class RippleLinearNew(RippleLinear):
+    def forward(self, input: torch.Tensor) -> torch.Tensor:
+        return ripple_linear_func_new(
+            input,
+            self.out_features,
+            self.weight.permute((1, 0, 2)),
+            self.bias.permute((1, 0)),
+        )

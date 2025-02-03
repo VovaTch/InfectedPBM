@@ -1,1 +1,1 @@
-from .ripplenet import RippleLinear, RippleReconstructor
+from .ripplenet import RippleLinear
