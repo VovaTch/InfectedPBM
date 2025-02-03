@@ -17,7 +17,7 @@ class RippleDecoderParameters:
     output_dim: int
     ripl_hidden_dim: int
     ripl_num_layers: int
-    ripl_coordinate_multipler: int
+    ripl_coordinate_multiplier: int
 
     @classmethod
     def from_cfg(cls, cfg: DictConfig) -> Self:
@@ -28,7 +28,7 @@ class RippleDecoderParameters:
             output_dim=cfg.model.output_dim,
             ripl_hidden_dim=cfg.model.ripl_hidden_dim,
             ripl_num_layers=cfg.model.ripl_num_layers,
-            ripl_coordinate_multipler=cfg.model.ripl_coordinate_multipler,
+            ripl_coordinate_multiplier=cfg.model.ripl_coordinate_multiplier,
         )
 
 
@@ -126,7 +126,7 @@ class RippleDecoder(nn.Module):
             ripple_weight_layers.append(
                 mlp_output[..., running_idx : running_idx + middle_dim]
             )
-            running_idx += middle_dim
+            running_idx = running_idx + middle_dim
         ripple_weight_layers.append(
             mlp_output[..., running_idx : running_idx + out_dim]
         )
@@ -163,7 +163,7 @@ class RippleDecoder(nn.Module):
             .unsqueeze(0)
             .unsqueeze(-1)
             .repeat(x.shape[0], 1, 1)
-        ) * self.dec_params.ripl_coordinate_multipler  # Size BS x L x 1
+        ) * self.dec_params.ripl_coordinate_multiplier  # Size BS x L x 1
 
         # Input layer
         lc_x = self.ripl_fully_connected_layer(line_coordinates)
@@ -183,7 +183,7 @@ class RippleDecoder(nn.Module):
         lc_x = self._run_ripple_linear(
             lc_x, out_weights, self.dec_params.ripl_hidden_dim, 1
         )
-        lc_x += self._run_ripple_linear(lc_x, bypass_weights, 1, 1)
+        lc_x = lc_x + self._run_ripple_linear(lc_x, bypass_weights, 1, 1)
         lc_x = F.tanh(lc_x)
 
         return lc_x.transpose(1, 2).contiguous()
@@ -211,16 +211,16 @@ class RippleDecoder(nn.Module):
         ripl_weights = flattened_weights[:, :ripl_weight_dim].view(
             (
                 -1,
-                output_dim,
                 input_dim,
+                output_dim,
                 2,
             )
         )
         ripl_bias = flattened_weights[:, ripl_weight_dim:].view(
             (
                 -1,
-                output_dim,
                 input_dim + 1,
+                output_dim,
             )
         )
         return ripple_linear_func_batch(lc_x, output_dim, ripl_weights, ripl_bias)

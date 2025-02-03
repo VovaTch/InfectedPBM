@@ -7,7 +7,7 @@ from utils.logger import logger
 from utils.learning import get_trainer
 
 
-@hydra.main(version_base=None, config_path="../config", config_name="lvl1_vqvae")
+@hydra.main(version_base=None, config_path="../config", config_name="lvl1_vqvae_ripl")
 def main(cfg: DictConfig) -> None:
     """
     Main function for training. Initializes the data, model, and trainer and starts the training.

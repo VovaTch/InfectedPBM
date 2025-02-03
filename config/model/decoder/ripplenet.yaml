@@ -1,0 +1,13 @@
+_target_: models.models.multi_level_vqvae.decoder.RippleDecoder
+activation:
+  _target_: torch.nn.LeakyReLU
+  negative_slope: 0.1
+dec_params:
+  _target_: models.models.multi_level_vqvae.decoder.ripple.RippleDecoderParameters
+  input_dim: 1024
+  hidden_dim: 128
+  mlp_num_layers: 3
+  output_dim: 1024
+  ripl_hidden_dim: 16
+  ripl_num_layers: 4
+  ripl_coordinate_multiplier: 1
