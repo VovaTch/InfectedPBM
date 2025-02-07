@@ -1,13 +1,13 @@
 defaults:
   - _self_
-  - encoder: encoder1d_small
-  - decoder: decoder1d_small
+  - encoder: encoder1d_random_long
+  - decoder: decoder1d_random_long
 
 _target_: models.models.multi_level_vqvae.ml_vqvae.MultiLvlVQVariationalAutoEncoder
 input_channels: 1
 vq_module:
   _target_: models.models.multi_level_vqvae.blocks.VQ1D
-  token_dim: 8
+  token_dim: 16
   num_tokens: 1024
   num_rq_steps: 4
 loss_aggregator: ${loss.aggregator}

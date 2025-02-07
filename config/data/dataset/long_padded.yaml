@@ -1,0 +1,4 @@
+_target_: loaders.datasets.MP3VariableLongDataset
+data_path: data/tracks
+slice_length: 65536
+sample_rate: 44100
