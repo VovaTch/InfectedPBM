@@ -7,7 +7,7 @@ _target_: models.models.multi_level_vqvae.ml_vqvae.MultiLvlVQVariationalAutoEnco
 input_channels: 1
 vq_module:
   _target_: models.models.multi_level_vqvae.blocks.VQ1D
-  token_dim: 16
+  token_dim: 8
   num_tokens: 1024
   num_rq_steps: 4
 loss_aggregator: ${loss.aggregator}
