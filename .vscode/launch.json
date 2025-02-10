@@ -16,7 +16,10 @@
             "type": "debugpy",
             "request": "launch",
             "module": "scripts.train",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "args": [
+                "--config-name=lvl1_vqvae_ripl"
+            ]
         },
     ]
 }

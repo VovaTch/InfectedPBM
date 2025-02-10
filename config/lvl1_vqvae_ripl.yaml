@@ -1,8 +1,8 @@
 defaults: 
   - _self_
-  - data: lvl1_vqvae
-  - learning: standard
-  - loss: ml_vqvae
+  - data: lvl1_long
+  - learning: long
+  - loss: ml_vqvae_long
   - model: ml_vqvae_ripl
   - module: music
   - optimizer: adamw_standard

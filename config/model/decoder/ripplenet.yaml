@@ -4,10 +4,10 @@ activation:
   negative_slope: 0.1
 dec_params:
   _target_: models.models.multi_level_vqvae.decoder.ripple.RippleDecoderParameters
-  input_dim: 1024
-  hidden_dim: 128
+  input_dim: 8192 # Needs to be token_dim * num tokens in sequence
+  hidden_dim: 256
   mlp_num_layers: 3
-  output_dim: 1024
-  ripl_hidden_dim: 16
-  ripl_num_layers: 4
+  output_dim: 32768
+  ripl_hidden_dim: 64
+  ripl_num_layers: 3
   ripl_coordinate_multiplier: 1
