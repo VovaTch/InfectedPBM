@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from typing_extensions import Self
 
-from omegaconf import DictConfig
 import torch
 import torch.nn as nn
 
