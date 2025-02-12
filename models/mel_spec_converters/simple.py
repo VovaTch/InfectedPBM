@@ -18,7 +18,8 @@ class SimpleMelSpecConverter(MelSpecConverter):
 
     Methods:
         convert(slice: torch.Tensor) -> torch.Tensor: Converts an audio slice to a Mel spectrogram.
-        from_cfg(cls: type[_T], cfg: dict[str, Any]) -> _T: Creates an instance of SimpleMelSpecConverter from a configuration dictionary.
+        from_cfg(cls: type[_T], cfg: dict[str, Any]) -> _T: Creates an instance of SimpleMelSpecConverter from a
+        configuration dictionary.
     """
 
     mel_spec: MelSpectrogram

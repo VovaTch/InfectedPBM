@@ -7,7 +7,7 @@ model_name: ${model_name}
 # Learning parameters
 learning_rate: 0.0005
 weight_decay: 0.0
-batch_size: 16
+batch_size: 24
 grad_accumulation: 1
 epochs: 10000
 beta_ema: 0.99
@@ -20,8 +20,8 @@ val_split: 0.05
 test_split: 0.01
 
 # Device parameters
-devices: [1]
-num_workers: 0
+devices: auto
+num_workers: 16
 
 # Scheduler parameters
 loss_monitor: ${scheduler.module_params.loss_monitor}

@@ -8,6 +8,6 @@ input_channels: 1
 vq_module:
   _target_: models.models.multi_level_vqvae.blocks.VQ1D
   token_dim: 32
-  num_tokens: 4096
-  num_rq_steps: 4
+  num_tokens: 131072
+  num_rq_steps: 8
 loss_aggregator: ${loss.aggregator}
