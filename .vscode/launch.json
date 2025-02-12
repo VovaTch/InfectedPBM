@@ -18,7 +18,7 @@
             "module": "scripts.train",
             "console": "integratedTerminal",
             "args": [
-                "--config-name=lvl1_vqvae_ripl"
+                "--config-name=lvl1_vqvae_random_long"
             ]
         },
     ]

@@ -65,7 +65,7 @@ class ISTFT(nn.Module):
 
         # Inverse FFT
         ifft = torch.fft.irfft(spec, self.n_fft, dim=1, norm="backward")
-        ifft = ifft * self.window[None, :, None]
+        ifft = ifft * self.window[None, :, None]  # type: ignore
 
         # Overlap and Add
         output_size = (T - 1) * self.hop_length + self.win_length
@@ -77,7 +77,7 @@ class ISTFT(nn.Module):
         )[:, 0, 0, pad:-pad]
 
         # Window envelope
-        window_sq = self.window.square().expand(1, T, -1).transpose(1, 2)
+        window_sq = self.window.square().expand(1, T, -1).transpose(1, 2)  # type: ignore
         window_envelope = torch.nn.functional.fold(
             window_sq,
             output_size=(1, output_size),
