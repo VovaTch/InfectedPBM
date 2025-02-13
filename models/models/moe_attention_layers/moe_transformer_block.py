@@ -28,9 +28,11 @@ class MoETransformerDecoderBlock(nn.Module):
         Args:
             hidden_dim (int): The dimension of the hidden layer.
             attention (nn.Module): The attention module to be used.
-            norm_type (Literal["rmsnorm", "layernorm"], optional): The type of normalization to be used. Defaults to "layernorm".
+            norm_type (Literal["rmsnorm", "layernorm"], optional): The type of normalization to be used.
+                Defaults to "layernorm".
             num_experts (int, optional): The number of expert layers. Must be at least 1. Defaults to 1.
-            top_k_gating (int, optional): The number of top experts to use for gating. Must be at least 1. Defaults to 1.
+            top_k_gating (int, optional): The number of top experts to use for gating. Must be at least 1.
+                Defaults to 1.
             ff_hidden_dim (int, optional): The dimension of the feed-forward hidden layer. Defaults to 2048.
 
         Raises:

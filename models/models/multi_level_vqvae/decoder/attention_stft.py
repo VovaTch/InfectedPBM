@@ -93,6 +93,10 @@ class ISTFT(nn.Module):
 
 
 class AttentionStftDecoder(nn.Module):
+    """
+    Inspired by WavTokenizer, this is a decoder module that uses inverse STFT to map VQ tokens into waveforms.
+    """
+
     def __init__(
         self,
         hidden_dim: int,
@@ -105,6 +109,23 @@ class AttentionStftDecoder(nn.Module):
         dropout: float = 0.1,
         padding: Literal["center", "same"] = "same",
     ) -> None:
+        """
+        Initializes the AttentionSTFT class.
+
+        Args:
+            hidden_dim (int): The dimension of the hidden layers. Must be an even number.
+            input_dim (int): The dimension of the input features.
+            num_layers (int): The number of layers in the transformer encoder.
+            num_heads (int): The number of attention heads in the transformer encoder.
+            n_fft (int): The number of FFT components.
+            hop_length (int): The hop length for the ISTFT.
+            win_length (int): The window length for the ISTFT.
+            dropout (float, optional): The dropout rate. Default is 0.1.
+            padding (Literal["center", "same"], optional): The padding type for the ISTFT. Default is "same".
+
+        Raises:
+            ValueError: If `hidden_dim` is not an even number.
+        """
         super().__init__()
 
         if hidden_dim % 2 != 0:

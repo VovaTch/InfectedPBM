@@ -30,7 +30,8 @@ class Encoder1D(nn.Module):
             kernel_size (int, optional): Kernel size for the initial convolutional layer. Defaults to 5.
             num_res_block_conv (int, optional): Number of residual blocks in each convolutional layer. Defaults to 3.
             dilation_factor (int, optional): Dilation factor for the residual blocks. Defaults to 3.
-            dim_change_kernel_size (int, optional): Kernel size for the dimension change convolutional layers. Defaults to 5.
+            dim_change_kernel_size (int, optional): Kernel size for the dimension change convolutional layers.
+                Defaults to 5.
             activation_fn (Module, optional): Activation function to be used. Defaults to nn.GELU().
         """
         super().__init__()
