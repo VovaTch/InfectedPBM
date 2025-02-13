@@ -124,7 +124,7 @@ class AttentionStftDecoder(nn.Module):
         self._pos_encoding = SinusoidalPositionEmbeddings(hidden_dim)
 
         # Transformers
-        self._transformer_encoder_layer = nn.TransformerEncoderLayer(
+        transformer_encoder_layer = nn.TransformerEncoderLayer(
             d_model=hidden_dim,
             nhead=num_heads,
             norm_first=True,
@@ -132,7 +132,7 @@ class AttentionStftDecoder(nn.Module):
             dropout=dropout,
         )
         self._transformer_encoder = nn.TransformerEncoder(
-            self._transformer_encoder_layer,
+            transformer_encoder_layer,
             num_layers,
         )
 
