@@ -36,6 +36,9 @@
   lin_end: 1.0
   pred_key: slice
   ref_key: slice
+  transform_func: 
+    _target_: utils.transform_func.log_normal
+    _partial_: true
   mel_spec_converter:
     _target_: models.mel_spec_converters.SimpleMelSpecConverter
     mel_spec_params: 
@@ -103,6 +106,9 @@
     _target_: torch.nn.L1Loss
   lin_start: 0.5
   lin_end: 10.0
+  transform_func: 
+    _target_: utils.transform_func.log_normal
+    _partial_: true
   pred_key: slice
   ref_key: slice
   mel_spec_converter:

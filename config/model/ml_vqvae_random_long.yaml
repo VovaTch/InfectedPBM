@@ -1,7 +1,7 @@
 defaults:
   - _self_
   - encoder: encoder1d_random_long
-  - decoder: attention_stft
+  - decoder: moe_rope_stft
 
 _target_: models.models.multi_level_vqvae.ml_vqvae.MultiLvlVQVariationalAutoEncoder
 input_channels: 1

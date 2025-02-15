@@ -3,8 +3,8 @@ input_dim: 512
 num_heads: 4
 hidden_dim: 512
 num_layers: 6
-n_fft: 512
-hop_length: 256 # Must be equal to the sequence length reduction ration in the encoder
-win_length: 512
+n_fft: 2048
+hop_length: 1024 # Must be equal to the sequence length reduction ration in the encoder
+win_length: 2048
 dropout: 0.1
 padding: same

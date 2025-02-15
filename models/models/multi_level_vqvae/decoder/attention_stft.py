@@ -1,3 +1,4 @@
+from curses import window
 from typing import Literal
 
 import torch
@@ -125,11 +126,14 @@ class AttentionStftDecoder(nn.Module):
 
         Raises:
             ValueError: If `hidden_dim` is not an even number.
+            ValueError: If `hop_length` is greater than `win_length`.
         """
         super().__init__()
 
         if hidden_dim % 2 != 0:
             raise ValueError("Hidden dimension must be even.")
+        if hop_length > win_length:
+            raise ValueError("Hop length must be less than or equal to window length.")
         self._hidden_dim = hidden_dim
         self._input_dim = input_dim
         self._num_layers = num_layers
@@ -158,6 +162,16 @@ class AttentionStftDecoder(nn.Module):
         )
 
     def forward(self, z: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass of the decoder.
+
+        Args:
+            z (torch.Tensor): Input tensor of shape (batch_size, channels, length).
+
+        Returns:
+            torch.Tensor: Output tensor after applying the inverse short-time Fourier transform (iSTFT),
+                            with shape (batch_size, 1, length).
+        """
         z = self._in_projection(
             z.transpose(1, 2).contiguous()
         )  # z: BS x C x Len -> BS x Len x H

@@ -21,6 +21,7 @@ class MoETransformerDecoderBlock(nn.Module):
         num_experts: int = 1,
         top_k_gating: int = 1,
         ff_hidden_dim: int = 2048,
+        bin_bias_update_rate: float = 0.001,
     ) -> None:
         """
         Initializes the base transformer layer.
@@ -57,17 +58,27 @@ class MoETransformerDecoderBlock(nn.Module):
             raise ValueError("The number of experts must be at least 1")
         elif num_experts > 1:
             self._gate = nn.Linear(hidden_dim, num_experts)
+            self._gating_score_bias = torch.zeros(num_experts)
         else:
             self._gate = None
+            self._gating_score_bias = None
 
         if top_k_gating < 1:
             raise ValueError("The top_k_gating must be at least 1")
 
         self._num_experts = num_experts
         self._ff_hidden_dim = ff_hidden_dim
+        self._bin_bias_update_rate = bin_bias_update_rate
 
         self._experts_layers = nn.ModuleList(
-            [nn.Linear(hidden_dim, hidden_dim) for _ in range(num_experts)]
+            [
+                nn.Sequential(
+                    nn.Linear(hidden_dim, ff_hidden_dim),
+                    nn.GELU(),
+                    nn.Linear(ff_hidden_dim, hidden_dim),
+                )
+                for _ in range(num_experts)
+            ]
         )
         self._top_k_gating = top_k_gating if num_experts > top_k_gating else num_experts
 
@@ -118,10 +129,20 @@ class MoETransformerDecoderBlock(nn.Module):
         ):  # Shouldn't get there, just in case, also makes the type checker happy
             raise ValueError("The gating layer is not defined")
         gate_scores = self._gate(x)
-        gate_probs = F.softmax(gate_scores, dim=-1)
+        gating_score_bias = (
+            self._gating_score_bias.to(x.device)
+            if self._gating_score_bias is not None and self.training
+            else 0
+        )
+        gate_probs = F.softmax(gate_scores + gating_score_bias, dim=-1)
         top_k_values, top_k_indices = torch.topk(gate_probs, self._top_k_gating, dim=-1)
 
-        final_output = torch.zeros_like(x)
+        if self._gating_score_bias is not None:
+            self._gating_score_bias = self._bin_tokens_to_experts(
+                top_k_indices, self._gating_score_bias
+            )
+
+        all_expert_output = torch.zeros_like(x)
 
         for idx in range(self._top_k_gating):
             expert_idx = top_k_indices[..., idx]
@@ -131,8 +152,36 @@ class MoETransformerDecoderBlock(nn.Module):
                 mask = expert_idx == mask_idx
                 if not mask.any():
                     continue
-                expert_input = torch.zeros_like(x)
-                expert_input[mask] = x[mask]
-                expert_output = self._experts_layers[mask_idx](expert_input)
-                final_output[mask] += expert_weight[mask] * expert_output[mask]
-        return final_output
+                all_expert_output[mask] += (
+                    self._experts_layers[mask_idx](x[mask]) * expert_weight[mask]
+                )
+        return all_expert_output
+
+    @torch.no_grad()
+    def _bin_tokens_to_experts(
+        self, top_k_indices: torch.Tensor, gating_score_bias: torch.Tensor
+    ) -> torch.Tensor:
+        """
+        Bins the tokens to the experts based on the top-k indices. Updates a bias term based on the binning
+        to encourage the model to use different experts. Based on the paper: https://arxiv.org/pdf/2408.15664
+
+        Args:
+            top_k_indices (torch.Tensor): The top-k indices for each token.
+
+        Returns:
+            torch.Tensor: The expert indices for each token.
+        """
+        if self._num_experts == 1:
+            raise ValueError(
+                "The gating score bias is not defined for a single-expert network"
+            )
+
+        gating_score_bins = (
+            torch.bincount(top_k_indices.flatten(), minlength=self._num_experts)
+            .to(gating_score_bias.dtype)
+            .to(gating_score_bias.device)
+        )
+
+        return gating_score_bias + self._bin_bias_update_rate * torch.sign(
+            gating_score_bins.mean() - gating_score_bins
+        ).to(gating_score_bias.device)

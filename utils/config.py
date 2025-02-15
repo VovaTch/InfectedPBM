@@ -1,8 +1,12 @@
+from __future__ import annotations
+
 import hydra
 from omegaconf import DictConfig
 
 
-def load_cfg_from_hydra(config_path: str, config_name: str) -> DictConfig:
+def load_cfg_from_hydra(
+    config_path: str, config_name: str, overrides: list[str] | None = None
+) -> DictConfig:
     """
     Load a configuration from Hydra.
 
@@ -14,6 +18,6 @@ def load_cfg_from_hydra(config_path: str, config_name: str) -> DictConfig:
         DictConfig: The configuration as a DictConfig.
     """
     with hydra.initialize(version_base=None, config_path=config_path):
-        cfg = hydra.compose(config_name=config_name)
+        cfg = hydra.compose(config_name=config_name, overrides=overrides)
 
     return cfg
