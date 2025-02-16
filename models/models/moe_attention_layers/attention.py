@@ -82,6 +82,7 @@ class FlashRotarySelfAttention(nn.Module):
             attn_mask=mask,
             is_causal=mask is None,
         )
+        attention_output = self.dropout.forward(attention_output)
 
         x = (
             attention_output.transpose(1, 2).contiguous().view(batch, seq, hidden_dim)

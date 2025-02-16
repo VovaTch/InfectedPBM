@@ -51,7 +51,8 @@ class MixtureOfExpertsRotaryStftDecoder(nn.Module):
             win_length (int): Window length for STFT.
             max_seq_len (int, optional): Maximum sequence length. Defaults to 32768.
             ff_hidden_dim (int, optional): Dimension of the feed-forward hidden layer. Defaults to 2048.
-            norm_type (Literal["rmsnorm", "layernorm"], optional): Type of normalization to use. Defaults to "layernorm".
+            norm_type (Literal["rmsnorm", "layernorm"], optional): Type of normalization to use.
+                Defaults to "layernorm".
             dropout (float, optional): Dropout rate. Defaults to 0.1.
             padding (Literal["center", "same"], optional): Padding type for STFT. Defaults to "same".
             use_causal (bool, optional): Whether to use causal attention. Defaults to True.
@@ -104,6 +105,7 @@ class MixtureOfExpertsRotaryStftDecoder(nn.Module):
                 num_experts=num_experts,
                 top_k_gating=top_k_gating,
                 ff_hidden_dim=ff_hidden_dim,
+                dropout=dropout,
             )
             self._transformer_layers.append(transformer_decoder_layer)
 

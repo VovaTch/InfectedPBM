@@ -1,7 +1,7 @@
 defaults: 
   - _self_
-  - data: lvl1_long
-  - learning: long
+  - data: lvl1_vqvae
+  - learning: standard
   - loss: ml_vqvae_long
   - model: ml_vqvae_random_long
   - module: music

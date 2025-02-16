@@ -8,8 +8,8 @@ hop_length: 512 # Must be equal to the sequence length reduction ration in the e
 win_length: 2048
 max_seq_len: 32768
 ff_hidden_dim: 2048
-num_experts: 4
-top_k_gating: 1
+num_experts: 8
+top_k_gating: 2
 dropout: 0.1
 padding: same
 

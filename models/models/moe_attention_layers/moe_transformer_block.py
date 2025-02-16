@@ -22,6 +22,7 @@ class MoETransformerDecoderBlock(nn.Module):
         top_k_gating: int = 1,
         ff_hidden_dim: int = 2048,
         bin_bias_update_rate: float = 0.001,
+        dropout: float = 0.1,
     ) -> None:
         """
         Initializes the base transformer layer.
@@ -69,12 +70,14 @@ class MoETransformerDecoderBlock(nn.Module):
         self._num_experts = num_experts
         self._ff_hidden_dim = ff_hidden_dim
         self._bin_bias_update_rate = bin_bias_update_rate
+        self._dropout = nn.Dropout(dropout)
 
         self._experts_layers = nn.ModuleList(
             [
                 nn.Sequential(
                     nn.Linear(hidden_dim, ff_hidden_dim),
                     nn.GELU(),
+                    nn.Dropout(dropout),
                     nn.Linear(ff_hidden_dim, hidden_dim),
                 )
                 for _ in range(num_experts)
@@ -103,6 +106,7 @@ class MoETransformerDecoderBlock(nn.Module):
         # Apply gating mechanism with top k if the number of experts is greater than 1
         elif self._gate:
             x = x + self._norm_2(self._route_to_experts(x))
+        x = self._dropout(x)
 
         return x
 
