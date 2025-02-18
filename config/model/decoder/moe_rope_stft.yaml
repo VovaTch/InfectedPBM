@@ -1,15 +1,15 @@
 _target_: models.models.multi_level_vqvae.decoder.MixtureOfExpertsRotaryStftDecoder
-input_dim: 512
+input_dim: 32
 num_heads: 4
 hidden_dim: 512
 num_layers: 6
-n_fft: 2048
+n_fft: 768
 hop_length: 512 # Must be equal to the sequence length reduction ration in the encoder
-win_length: 2048
+win_length: 768
 max_seq_len: 32768
 ff_hidden_dim: 2048
-num_experts: 8
-top_k_gating: 2
+num_experts: 4
+top_k_gating: 1
 dropout: 0.1
 padding: same
 
