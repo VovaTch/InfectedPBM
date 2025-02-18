@@ -33,6 +33,7 @@ class MixtureOfExpertsRotaryStftDecoder(nn.Module):
         ff_hidden_dim: int = 2048,
         norm_type: Literal["rmsnorm", "layernorm"] = "layernorm",
         dropout: float = 0.1,
+        expansion_factor: int = 1,
         padding: Literal["center", "same"] = "same",
         use_causal: bool = True,
     ) -> None:
@@ -54,6 +55,8 @@ class MixtureOfExpertsRotaryStftDecoder(nn.Module):
             norm_type (Literal["rmsnorm", "layernorm"], optional): Type of normalization to use.
                 Defaults to "layernorm".
             dropout (float, optional): Dropout rate. Defaults to 0.1.
+            expansion_factor (int, optional): The expansion factor for the initial convolutional layer.
+                Default is 1.
             padding (Literal["center", "same"], optional): Padding type for STFT. Defaults to "same".
             use_causal (bool, optional): Whether to use causal attention. Defaults to True.
 
@@ -83,7 +86,12 @@ class MixtureOfExpertsRotaryStftDecoder(nn.Module):
         # STFT parameters
         self._before_istft_dim = n_fft // 2 + 1
         self.istft = ISTFT(n_fft, hop_length, win_length, padding)
-        self._in_projection = nn.Linear(input_dim, hidden_dim)
+        self._in_projection = nn.ConvTranspose1d(
+            in_channels=input_dim,
+            out_channels=hidden_dim,
+            kernel_size=expansion_factor,
+            stride=expansion_factor,
+        )
         self._before_istft_projection = nn.Linear(
             hidden_dim, self._before_istft_dim * 2
         )
@@ -119,7 +127,7 @@ class MixtureOfExpertsRotaryStftDecoder(nn.Module):
         Returns:
             torch.Tensor: output tensor, size BS x 1 x OutLen
         """
-        z = self._in_projection(z.transpose(1, 2).contiguous())
+        z = self._in_projection.forward(z).transpose(1, 2).contiguous()
         for transformer_layer in self._transformer_layers:
             z = transformer_layer(
                 z,

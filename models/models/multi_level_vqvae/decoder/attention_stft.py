@@ -1,4 +1,3 @@
-from curses import window
 from typing import Literal
 
 import torch
@@ -108,6 +107,7 @@ class AttentionStftDecoder(nn.Module):
         hop_length: int,
         win_length: int,
         dropout: float = 0.1,
+        expansion_factor: int = 1,
         padding: Literal["center", "same"] = "same",
     ) -> None:
         """
@@ -122,6 +122,8 @@ class AttentionStftDecoder(nn.Module):
             hop_length (int): The hop length for the ISTFT.
             win_length (int): The window length for the ISTFT.
             dropout (float, optional): The dropout rate. Default is 0.1.
+            expansion_factor (int, optional): The expansion factor for the initial convolutional layer.
+                Default is 1.
             padding (Literal["center", "same"], optional): The padding type for the ISTFT. Default is "same".
 
         Raises:
@@ -142,7 +144,12 @@ class AttentionStftDecoder(nn.Module):
 
         self._before_istft_dim = n_fft // 2 + 1
         self.istft = ISTFT(n_fft, hop_length, win_length, padding)
-        self._in_projection = nn.Linear(input_dim, hidden_dim)
+        self._in_projection = nn.ConvTranspose1d(
+            in_channels=input_dim,
+            out_channels=hidden_dim,
+            kernel_size=expansion_factor,
+            stride=expansion_factor,
+        )
         self._before_istft_projection = nn.Linear(
             hidden_dim, self._before_istft_dim * 2
         )
@@ -172,8 +179,8 @@ class AttentionStftDecoder(nn.Module):
             torch.Tensor: Output tensor after applying the inverse short-time Fourier transform (iSTFT),
                             with shape (batch_size, 1, length).
         """
-        z = self._in_projection(
-            z.transpose(1, 2).contiguous()
+        z = (
+            (self._in_projection.forward(z)).transpose(1, 2).contiguous()
         )  # z: BS x C x Len -> BS x Len x H
         z = apply_pos_encoding(z, self._pos_encoding)
         z = self._transformer_encoder(z)
