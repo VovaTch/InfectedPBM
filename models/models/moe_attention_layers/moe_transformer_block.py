@@ -59,7 +59,9 @@ class MoETransformerDecoderBlock(nn.Module):
             raise ValueError("The number of experts must be at least 1")
         elif num_experts > 1:
             self._gate = nn.Linear(hidden_dim, num_experts)
-            self._gating_score_bias = torch.zeros(num_experts)
+            self._gating_score_bias = nn.Parameter(
+                torch.zeros(num_experts)
+            ).requires_grad_(False)
         else:
             self._gate = None
             self._gating_score_bias = None
@@ -135,7 +137,7 @@ class MoETransformerDecoderBlock(nn.Module):
         gate_scores = self._gate(x)
         gating_score_bias = (
             self._gating_score_bias.to(x.device)
-            if self._gating_score_bias is not None and self.training
+            if self._gating_score_bias is not None
             else 0
         )
         gate_probs = F.softmax(gate_scores + gating_score_bias, dim=-1)

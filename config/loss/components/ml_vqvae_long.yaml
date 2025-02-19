@@ -1,6 +1,6 @@
 - _target_: loss.components.RecLoss
   name: rec
-  weight: 1.0
+  weight: 0.1
   pred_key: slice
   ref_key: slice
   base_loss:
@@ -8,7 +8,7 @@
 
 - _target_: loss.components.reconstruction.EdgeRecLoss
   name: edge_rec
-  weight: 1.0
+  weight: 0.1
   pred_key: slice
   ref_key: slice
   edge_power: 3.0
@@ -27,124 +27,124 @@
   base_loss:
     _target_: torch.nn.MSELoss
 
-# - _target_: loss.components.MelSpecLoss
-#   name: melspec_loss_1
-#   weight: 1.0
-#   base_loss:
-#     _target_: torch.nn.MSELoss
-#   lin_start: 1.0
-#   lin_end: 1.0
-#   pred_key: slice
-#   ref_key: slice
-#   transform_func: 
-#     _target_: utils.transform_func.log_normal
-#     _partial_: true
-#   mel_spec_converter:
-#     _target_: models.mel_spec_converters.SimpleMelSpecConverter
-#     mel_spec_params: 
-#       _target_: utils.containers.MelSpecParameters
-#       n_fft: 2048
-#       f_min: 0
-#       hop_length: 256
-#       n_mels: 128
-#       pad_mode: reflect
-#       power: 2.0
-#       norm: slaney
-#       mel_scale: htk
-#       pad: 0
+- _target_: loss.components.MelSpecLoss
+  name: melspec_loss_1
+  weight: 1.0
+  base_loss:
+    _target_: torch.nn.MSELoss
+  lin_start: 1.0
+  lin_end: 1.0
+  pred_key: slice
+  ref_key: slice
+  transform_func: 
+    _target_: utils.transform_func.log_normal
+    _partial_: true
+  mel_spec_converter:
+    _target_: models.mel_spec_converters.SimpleMelSpecConverter
+    mel_spec_params: 
+      _target_: utils.containers.MelSpecParameters
+      n_fft: 2048
+      f_min: 0
+      hop_length: 256
+      n_mels: 128
+      pad_mode: reflect
+      power: 2.0
+      norm: slaney
+      mel_scale: htk
+      pad: 0
 
-# - _target_: loss.components.MelSpecLoss
-#   name: melspec_loss_2
-#   weight: 1.0
-#   base_loss:
-#     _target_: torch.nn.L1Loss
-#   lin_start: 1.0
-#   lin_end: 1.0
-#   pred_key: slice
-#   ref_key: slice
-#   mel_spec_converter:
-#     _target_: models.mel_spec_converters.SimpleMelSpecConverter
-#     mel_spec_params: 
-#       _target_: utils.containers.MelSpecParameters
-#       n_fft: 1024
-#       f_min: 0
-#       hop_length: 128
-#       n_mels: 128
-#       pad_mode: reflect
-#       power: 2.0
-#       norm: slaney
-#       mel_scale: htk
-#       pad: 0
+- _target_: loss.components.MelSpecLoss
+  name: melspec_loss_2
+  weight: 1.0
+  base_loss:
+    _target_: torch.nn.L1Loss
+  lin_start: 1.0
+  lin_end: 1.0
+  pred_key: slice
+  ref_key: slice
+  mel_spec_converter:
+    _target_: models.mel_spec_converters.SimpleMelSpecConverter
+    mel_spec_params: 
+      _target_: utils.containers.MelSpecParameters
+      n_fft: 1024
+      f_min: 0
+      hop_length: 128
+      n_mels: 128
+      pad_mode: reflect
+      power: 2.0
+      norm: slaney
+      mel_scale: htk
+      pad: 0
 
-# - _target_: loss.components.MelSpecLoss
-#   name: melspec_loss_3
-#   weight: 1.0
-#   base_loss:
-#     _target_: torch.nn.L1Loss
-#   lin_start: 0.1
-#   lin_end: 20
-#   pred_key: slice
-#   ref_key: slice
-#   mel_spec_converter:
-#     _target_: models.mel_spec_converters.SimpleMelSpecConverter
-#     mel_spec_params: 
-#       _target_: utils.containers.MelSpecParameters
-#       n_fft: 512
-#       f_min: 0
-#       hop_length: 128
-#       n_mels: 64
-#       pad_mode: reflect
-#       power: 1.0
-#       norm: slaney
-#       mel_scale: htk
-#       pad: 0
+- _target_: loss.components.MelSpecLoss
+  name: melspec_loss_3
+  weight: 1.0
+  base_loss:
+    _target_: torch.nn.L1Loss
+  lin_start: 0.1
+  lin_end: 20
+  pred_key: slice
+  ref_key: slice
+  mel_spec_converter:
+    _target_: models.mel_spec_converters.SimpleMelSpecConverter
+    mel_spec_params: 
+      _target_: utils.containers.MelSpecParameters
+      n_fft: 512
+      f_min: 0
+      hop_length: 128
+      n_mels: 64
+      pad_mode: reflect
+      power: 1.0
+      norm: slaney
+      mel_scale: htk
+      pad: 0
 
-# - _target_: loss.components.MelSpecLoss
-#   name: melspec_loss_4
-#   weight: 5.0
-#   base_loss:
-#     _target_: torch.nn.L1Loss
-#   lin_start: 0.5
-#   lin_end: 10.0
-#   transform_func: 
-#     _target_: utils.transform_func.log_normal
-#     _partial_: true
-#   pred_key: slice
-#   ref_key: slice
-#   mel_spec_converter:
-#     _target_: models.mel_spec_converters.SimpleMelSpecConverter
-#     mel_spec_params: 
-#       _target_: utils.containers.MelSpecParameters
-#       n_fft: 2048
-#       f_min: 0
-#       hop_length: 256
-#       n_mels: 128
-#       pad_mode: reflect
-#       power: 1.0
-#       norm: slaney
-#       mel_scale: htk
-#       pad: 0
+- _target_: loss.components.MelSpecLoss
+  name: melspec_loss_4
+  weight: 5.0
+  base_loss:
+    _target_: torch.nn.L1Loss
+  lin_start: 0.5
+  lin_end: 10.0
+  transform_func: 
+    _target_: utils.transform_func.log_normal
+    _partial_: true
+  pred_key: slice
+  ref_key: slice
+  mel_spec_converter:
+    _target_: models.mel_spec_converters.SimpleMelSpecConverter
+    mel_spec_params: 
+      _target_: utils.containers.MelSpecParameters
+      n_fft: 2048
+      f_min: 0
+      hop_length: 256
+      n_mels: 128
+      pad_mode: reflect
+      power: 1.0
+      norm: slaney
+      mel_scale: htk
+      pad: 0
 
 
-# - _target_: loss.components.MelSpecLoss
-#   name: melspec_loss_5
-#   weight: 5.0
-#   base_loss:
-#     _target_: torch.nn.L1Loss
-#   lin_start: 0.1
-#   lin_end: 20.0
-#   pred_key: slice
-#   ref_key: slice
-#   mel_spec_converter:
-#     _target_: models.mel_spec_converters.SimpleMelSpecConverter
-#     mel_spec_params: 
-#       _target_: utils.containers.MelSpecParameters
-#       n_fft: 512
-#       f_min: 0
-#       hop_length: 256
-#       n_mels: 64
-#       pad_mode: reflect
-#       power: 2.0
-#       norm: slaney
-#       mel_scale: htk
-#       pad: 0
+- _target_: loss.components.MelSpecLoss
+  name: melspec_loss_5
+  weight: 5.0
+  base_loss:
+    _target_: torch.nn.L1Loss
+  lin_start: 0.1
+  lin_end: 20.0
+  pred_key: slice
+  ref_key: slice
+  mel_spec_converter:
+    _target_: models.mel_spec_converters.SimpleMelSpecConverter
+    mel_spec_params: 
+      _target_: utils.containers.MelSpecParameters
+      n_fft: 512
+      f_min: 0
+      hop_length: 256
+      n_mels: 64
+      pad_mode: reflect
+      power: 2.0
+      norm: slaney
+      mel_scale: htk
+      pad: 0
