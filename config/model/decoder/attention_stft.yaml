@@ -1,5 +1,5 @@
 _target_: models.models.multi_level_vqvae.decoder.AttentionStftDecoder
-input_dim: 32
+input_dim: 512
 num_heads: 16
 hidden_dim: 512
 num_layers: 6

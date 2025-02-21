@@ -144,8 +144,8 @@ class MoETransformerDecoderBlock(nn.Module):
         top_k_values, top_k_indices = torch.topk(gate_probs, self._top_k_gating, dim=-1)
 
         if self._gating_score_bias is not None:
-            self._gating_score_bias = self._bin_tokens_to_experts(
-                top_k_indices, self._gating_score_bias
+            self._gating_score_bias = nn.Parameter(
+                self._bin_tokens_to_experts(top_k_indices, self._gating_score_bias)
             )
 
         all_expert_output = torch.zeros_like(x)

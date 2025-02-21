@@ -116,7 +116,7 @@ class MP3SliceDataset(Dataset):
                     self.file_list.append(os.path.join(root, file))
         self.file_list = sorted(self.file_list)
 
-        # Initialize mel spectrogram
+        # Load data from tracks
         running_idx = 0
         data_collection = []
         for idx, file in tqdm.tqdm(
@@ -149,7 +149,7 @@ class MP3SliceDataset(Dataset):
         long_data = self._resample_if_necessary(long_data, sr)
         long_data = self._mix_down_if_necessary(long_data)
         long_data = self._right_pad_if_necessary(long_data)
-        slices = long_data.contiguous().view((-1, 1, self._slice_length))
+        slices = long_data.view((-1, 1, self._slice_length)).contiguous()
         slice_file_name = self._get_slices_file_name_from_path(file, processed_path)
 
         data_points: list[DataPoint] = []

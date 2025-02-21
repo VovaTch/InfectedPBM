@@ -1,6 +1,6 @@
 - _target_: loss.components.RecLoss
   name: rec
-  weight: 0.1
+  weight: 1.0
   pred_key: slice
   ref_key: slice
   base_loss:
@@ -8,7 +8,7 @@
 
 - _target_: loss.components.reconstruction.EdgeRecLoss
   name: edge_rec
-  weight: 0.1
+  weight: 1.0
   pred_key: slice
   ref_key: slice
   edge_power: 3.0

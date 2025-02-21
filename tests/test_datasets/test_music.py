@@ -1,5 +1,6 @@
 import os
 import tempfile
+
 from loaders.datasets.music import MP3SliceDataset
 
 
@@ -14,7 +15,9 @@ def test_dataset_get_data(mp3_dataset: MP3SliceDataset) -> None:
     assert data["slice"].shape == (1, 1024)
 
 
-def test_dataset_process_files(mp3_dataset: MP3SliceDataset) -> None:
+def test_dataset_process_files(
+    mp3_dataset: MP3SliceDataset,
+) -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
         mp3_dataset.buffer = mp3_dataset._generate_data(
             os.path.join("tests", "data"), temp_dir

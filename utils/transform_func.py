@@ -1,4 +1,5 @@
 import torch
+import torchaudio.functional as AF
 
 
 def transparent(x: torch.Tensor) -> torch.Tensor:
@@ -40,3 +41,20 @@ def log_normal(x: torch.Tensor) -> torch.Tensor:
     mean = torch.mean(log_transformed)
     std = torch.std(log_transformed)
     return (log_transformed - mean) / std
+
+
+def high_pass_filter(x: torch.Tensor, cutoff: float) -> torch.Tensor:
+    """
+    Applies a high-pass filter to the input tensor.
+
+    The function applies a high-pass filter to the input tensor `x` with a cutoff frequency specified by the `cutoff`
+    argument. The filter is applied along the last dimension of the tensor.
+
+    Args:
+        x (torch.Tensor): The input tensor to which the high-pass filter will be applied.
+        cutoff (float): The cutoff frequency of the high-pass filter.
+
+    Returns:
+        torch.Tensor: The input tensor with the high-pass filter applied.
+    """
+    return AF.highpass_biquad(x, sample_rate=44100, cutoff_freq=cutoff, Q=0.707)
