@@ -40,7 +40,7 @@ class AttentionEmbeddingEncoder(nn.Module):
         self._positional_embeddings = SinusoidalPositionEmbeddings(hidden_dim)
         self._class_token = nn.Parameter(torch.randn(1, 1, hidden_dim))
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor) -> dict[str, torch.Tensor]:
         """
         Forward method of the network
 
@@ -48,7 +48,7 @@ class AttentionEmbeddingEncoder(nn.Module):
             x (torch.Tensor): Input sequence, shape (batch_size, input_channels, seq_len)
 
         Returns:
-            torch.Tensor: Output logits tensor, shape (batch_size, num_classes)
+            dict[str, torch.Tensor]: Output logits tensor, shape (batch_size, num_classes)
         """
         x = self._feature_extractor(x)
         x = x.transpose(1, 2).contiguous()
@@ -56,4 +56,22 @@ class AttentionEmbeddingEncoder(nn.Module):
         x = torch.cat((x, self._class_token.repeat(x.shape[0], 1, 1)), dim=1)
         x = self._transformer_encoder(x)
         x = self._class_head(x[:, -1, :])
-        return x
+        return {"logits": x}
+
+
+class PatchAttentionEmbeddingEncoder(AttentionEmbeddingEncoder):
+    def __init__(
+        self,
+        hidden_dim: int,
+        num_heads: int,
+        num_layers: int,
+        patch_size: int,
+        feature_extractor: nn.Module,
+        class_head: nn.Module,
+        dropout: float = 0.1,
+    ) -> None:
+        super().__init__(
+            hidden_dim, num_heads, num_layers, feature_extractor, class_head, dropout
+        )
+        self._patch_size = patch_size
+        # TODO: continue
