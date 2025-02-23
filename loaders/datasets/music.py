@@ -335,3 +335,29 @@ class MP3SliceDataset(Dataset):
             int: Dataset length
         """
         return len(self.buffer)
+
+
+class ClassifierMP3SliceDataset(MP3SliceDataset):
+    def __init__(
+        self,
+        data_path: str,
+        sample_rate: int,
+        slice_length: int,
+        output_class: int,
+        device: str | None = "cpu",
+        processed_path: str | None = None,
+        save_processed: bool = False,
+    ):
+        super().__init__(
+            data_path, sample_rate, slice_length, device, processed_path, save_processed
+        )
+        self._output_class = output_class
+
+    @property
+    def output_class(self):
+        return self._output_class
+
+    def __getitem__(self, index: int) -> dict[str, Any]:
+        data = super().__getitem__(index)
+        data["label"] = self._output_class
+        return data

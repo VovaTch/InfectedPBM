@@ -15,6 +15,7 @@ class MLP(nn.Module):
         num_layers: int,
         output_dim: int,
         activation_fn: nn.Module = nn.GELU(),
+        dropout: float = 0.0,
     ) -> None:
         """
         Initializes the MLP module.
@@ -25,6 +26,7 @@ class MLP(nn.Module):
             num_layers (int): The number of layers in the MLP. Must be at least 1.
             output_dim (int): The dimension of the output features.
             activation_fn (nn.Module, optional): The activation function to use between layers. Defaults to nn.GELU().
+            dropout (float, optional): The dropout probability. Defaults to 0.0.
 
         Raises:
             ValueError: If num_layers is less than 1.
@@ -54,9 +56,14 @@ class MLP(nn.Module):
                 nn.Linear(input_dim, hidden_dim),
                 activation_fn,
                 *[
-                    nn.Sequential(nn.Linear(hidden_dim, hidden_dim), activation_fn)
+                    nn.Sequential(
+                        nn.Dropout(dropout),
+                        nn.Linear(hidden_dim, hidden_dim),
+                        activation_fn,
+                    )
                     for _ in range(num_layers - 2)
                 ],
+                nn.Dropout(dropout),
                 nn.Linear(hidden_dim, output_dim),
             )
 
