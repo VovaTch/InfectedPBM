@@ -344,7 +344,7 @@ class ClassifierMP3SliceDataset(MP3SliceDataset):
         sample_rate: int,
         slice_length: int,
         output_class: int,
-        device: str | None = "cpu",
+        device: str = "cpu",
         processed_path: str | None = None,
         save_processed: bool = False,
     ):

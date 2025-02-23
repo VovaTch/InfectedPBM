@@ -3,7 +3,7 @@ defaults:
   - feature_extractor: encoder1d_random_long
   - class_head: mlp_2c
 
-_target_: models.models.contrastive.AttentionEmbeddingEncoder
+_target_: models.models.discriminator.AttentionEmbeddingEncoder
 hidden_dim: 512
 num_heads: 8
 num_layers: 6

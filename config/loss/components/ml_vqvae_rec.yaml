@@ -4,7 +4,7 @@
   pred_key: slice
   ref_key: slice
   base_loss:
-    _target_: torch.nn.MSELoss
+    _target_: torch.nn.L1Loss
 
 - _target_: loss.components.RecLoss
   name: high_pass_rec
@@ -12,7 +12,7 @@
   pred_key: slice
   ref_key: slice
   base_loss:
-    _target_: torch.nn.MSELoss
+    _target_: torch.nn.L1Loss
   transform_func:
     _target_: utils.transform_func.high_pass_filter
     cutoff: 1000.0
@@ -25,7 +25,7 @@
   ref_key: slice
   edge_power: 3.0
   base_loss:
-    _target_: torch.nn.MSELoss
+    _target_: torch.nn.L1Loss
 
 - _target_: loss.components.AlignLoss
   name: alignment_loss

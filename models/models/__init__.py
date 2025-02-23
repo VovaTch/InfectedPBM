@@ -1,1 +1,1 @@
-from .contrastive import MLP
+from .discriminator import MLP
