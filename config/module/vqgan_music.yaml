@@ -1,0 +1,10 @@
+defaults:
+  - _self_
+  - discriminator: inf_discriminator
+
+_target_: models.modules.VqganMusicLightningModule
+model: ${model}
+learning_params: ${learning}
+loss_aggregator: ${loss.aggregator}
+optimizer_cfg: ${optimizer}
+scheduler_cfg: ${scheduler}

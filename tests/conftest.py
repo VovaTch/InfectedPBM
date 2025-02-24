@@ -4,6 +4,8 @@ import pytest
 from loaders.datasets.latent import LatentSliceDataset
 from loaders.datasets.music import MP3SliceDataset
 from loaders.datasets.quantized import QuantizedUint8MusicDataset
+from models.models.discriminator.attn_body import PatchAttentionDiscriminator
+from models.models.discriminator.mlp_head import MLP
 from models.models.multi_level_vqvae.blocks.vq1d import VQ1D
 from models.models.multi_level_vqvae.decoder.attention_stft import AttentionStftDecoder
 from models.models.multi_level_vqvae.decoder.moe_stft import (
@@ -101,4 +103,30 @@ def lvl1_latent_dataset(
         slices_per_sample=16,
         tokenizer=vqvae_basic,
         device="cpu",
+    )
+
+
+@pytest.fixture
+def mlp_class_head() -> MLP:
+    return MLP(
+        input_dim=128,
+        hidden_dim=256,
+        num_layers=3,
+        output_dim=2,
+        dropout=0.1,
+    )
+
+
+@pytest.fixture
+def attn_discriminator(
+    mlp_class_head: MLP, encoder1d: Encoder1D
+) -> PatchAttentionDiscriminator:
+    return PatchAttentionDiscriminator(
+        hidden_dim=128,
+        num_heads=4,
+        num_layers=3,
+        patch_size=2,
+        feature_extractor=encoder1d,
+        class_head=mlp_class_head,
+        dropout=0.1,
     )

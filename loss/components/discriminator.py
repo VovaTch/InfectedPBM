@@ -8,6 +8,18 @@ from .base import LossComponent
 
 @dataclass
 class DiscriminatorLoss(LossComponent):
+    """
+    Discriminator loss component for the GAN training.
+
+    Args:
+        name (str): The name of the loss component.
+        weight (float): The weight of the loss component.
+        pred_key_real (str): The key of the real prediction.
+        pred_key_fake (str): The key of the fake prediction.
+        differentiable (bool): Whether the loss is differentiable. Defaults
+            to True.
+    """
+
     name: str
     weight: float
     pred_key_real: str

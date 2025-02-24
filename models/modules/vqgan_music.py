@@ -8,7 +8,7 @@ from models.modules.music import MusicLightningModule
 from utils.containers import LearningParameters
 
 
-class VqganMusicLightningModule1(MusicLightningModule):
+class VqganMusicLightningModule(MusicLightningModule):
 
     def __init__(
         self,
@@ -33,6 +33,6 @@ class VqganMusicLightningModule1(MusicLightningModule):
 
     def forward(self, input: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:
         vq_outputs = super().forward(input)
-        vq_outputs["d_input"] = self._discriminator(input["slice"])
-        vq_outputs["d_output"] = self._discriminator(vq_outputs["slice"])
+        vq_outputs["d_input"] = self._discriminator(input["slice"])["logits"]
+        vq_outputs["d_output"] = self._discriminator(vq_outputs["slice"])["logits"]
         return vq_outputs
