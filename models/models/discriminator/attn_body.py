@@ -74,4 +74,8 @@ class PatchAttentionEmbeddingEncoder(AttentionEmbeddingEncoder):
             hidden_dim, num_heads, num_layers, feature_extractor, class_head, dropout
         )
         self._patch_size = patch_size
-        # TODO: continue
+
+    def forward(self, x: torch.Tensor) -> dict[str, torch.Tensor]:
+        x = self._feature_extractor(x)
+        x = x.transpose(1, 2).contiguous()
+        x = apply_pos_encoding(x, self._positional_embeddings)
