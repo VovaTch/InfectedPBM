@@ -4,4 +4,4 @@ from .lm_cross_entropy import LLMClassificationLoss, TokenEntropy, LLMPercentCor
 from .mel_spec import MelSpecLoss, MelSpecDiffusionLoss
 from .reconstruction import RecLoss, NoisePredLoss, DiffReconstructionLoss, EdgeRecLoss
 from .base import LossComponent
-from .discriminator import DiscriminatorLoss
+from .discriminator import DiscriminatorLoss, DiscriminatorHingeLoss

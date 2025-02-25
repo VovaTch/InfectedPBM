@@ -39,8 +39,8 @@
   base_loss:
     _target_: torch.nn.MSELoss
 
-- _target_: loss.components.DiscriminatorLoss
+- _target_: loss.components.DiscriminatorHingeLoss
   name: discriminator_loss
-  weight: 1.0
+  weight: 10.0
   pred_key_real: d_input
   pred_key_fake: d_output

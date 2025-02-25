@@ -2,5 +2,5 @@ _target_: models.models.MLP
 input_dim: 512
 hidden_dim: 512
 num_layers: 3
-output_dim: 2
+output_dim: 1
 dropout: 0.2

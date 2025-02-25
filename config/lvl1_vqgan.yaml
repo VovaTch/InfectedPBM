@@ -11,7 +11,7 @@ defaults:
 
 # Project data
 project_name: InfectedPBM
-model_name: lvl1_vqvae_long
+model_name: lvl1_vqgan
 resume: null
 
 # Optimizations
