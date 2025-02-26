@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .base import Discriminator
+from .base import Discriminator, DiscriminatorHead
 from utils.positional_encoding import SinusoidalPositionEmbeddings, apply_pos_encoding
 
 
@@ -17,7 +17,7 @@ class AttentionDiscriminator(Discriminator):
         num_heads: int,
         num_layers: int,
         feature_extractor: nn.Module,
-        class_head: nn.Module,
+        class_head: DiscriminatorHead,
         dropout: float = 0.1,
     ) -> None:
         """
@@ -28,7 +28,7 @@ class AttentionDiscriminator(Discriminator):
             num_heads (int): The number of attention heads.
             num_layers (int): The number of transformer encoder layers.
             feature_extractor (nn.Module): The feature extractor module.
-            class_head (nn.Module): The classification head module.
+            class_head (DiscriminatorHead): The classification head module.
             dropout (float, optional): The dropout rate. Default is 0.1.
 
         Returns:
