@@ -2,8 +2,10 @@ import warnings
 import torch
 import torch.nn as nn
 
+from .base import DiscriminatorHead
 
-class MLP(nn.Module):
+
+class MLP(DiscriminatorHead):
     """
     Simple MLP head implementation
     """
@@ -48,6 +50,8 @@ class MLP(nn.Module):
         self._output_dim = output_dim
         self._activation_fn = activation_fn
 
+        self._last_layer = nn.Linear(hidden_dim, output_dim)
+
         # Construct the model
         if num_layers == 1:
             self._mlp = nn.Linear(input_dim, output_dim)
@@ -64,7 +68,7 @@ class MLP(nn.Module):
                     for _ in range(num_layers - 2)
                 ],
                 nn.Dropout(dropout),
-                nn.Linear(hidden_dim, output_dim),
+                self._last_layer,
             )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -78,3 +82,7 @@ class MLP(nn.Module):
             torch.Tensor: Output tensor after passing through the MLP.
         """
         return self._mlp(x)
+
+    @property
+    def last_layer(self) -> nn.Module:
+        return self._last_layer

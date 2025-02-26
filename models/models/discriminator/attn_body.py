@@ -2,10 +2,15 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from .base import Discriminator
 from utils.positional_encoding import SinusoidalPositionEmbeddings, apply_pos_encoding
 
 
-class AttentionDiscriminator(nn.Module):
+class AttentionDiscriminator(Discriminator):
+    """
+    A discriminator network based on the transformer architecture.
+    """
+
     def __init__(
         self,
         hidden_dim: int,
@@ -15,6 +20,20 @@ class AttentionDiscriminator(nn.Module):
         class_head: nn.Module,
         dropout: float = 0.1,
     ) -> None:
+        """
+        Initializes the attention body for the discriminator model.
+
+        Args:
+            hidden_dim (int): The dimension of the hidden layers.
+            num_heads (int): The number of attention heads.
+            num_layers (int): The number of transformer encoder layers.
+            feature_extractor (nn.Module): The feature extractor module.
+            class_head (nn.Module): The classification head module.
+            dropout (float, optional): The dropout rate. Default is 0.1.
+
+        Returns:
+            None
+        """
         super().__init__()
 
         # Parameters
@@ -25,7 +44,7 @@ class AttentionDiscriminator(nn.Module):
 
         # Feature extractor and head
         self._feature_extractor = feature_extractor
-        self._class_head = class_head
+        self.class_head = class_head
 
         # Attention layers
         encoder_layer = nn.TransformerEncoderLayer(
@@ -56,7 +75,7 @@ class AttentionDiscriminator(nn.Module):
         x = apply_pos_encoding(x, self._positional_embeddings)
         x = torch.cat((x, self._class_token.repeat(x.shape[0], 1, 1)), dim=1)
         x = self._transformer_encoder(x)
-        x = self._class_head(x[:, -1, :])
+        x = self.class_head(x[:, -1, :])
         return {"logits": x}
 
 
@@ -135,5 +154,5 @@ class PatchAttentionDiscriminator(AttentionDiscriminator):
         diag = diag.to(torch.bool)
 
         x = self._transformer_encoder.forward(x, mask=diag)
-        x = self._class_head(x[:, -num_total_patches:, :])
+        x = self.class_head(x[:, -num_total_patches:, :])
         return {"logits": x}
