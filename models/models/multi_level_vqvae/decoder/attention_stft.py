@@ -1,5 +1,6 @@
 from typing import Literal
 
+from numpy import imag
 import torch
 import torch.nn as nn
 
@@ -184,9 +185,15 @@ class AttentionStftDecoder(nn.Module):
         )  # z: BS x C x Len -> BS x Len x H
         z = apply_pos_encoding(z, self._pos_encoding)
         z = self._transformer_encoder(z)
-        z = self._before_istft_projection(z)
-        z = (
-            z[..., : self._before_istft_dim] + 1j * z[..., self._before_istft_dim :]
-        )  # Needs to be complex
-        z = self.istft(z.transpose(1, 2).contiguous())
-        return z.unsqueeze(1)
+        before_split = self._before_istft_projection(z)
+
+        # Create separate tensors for real and imaginary parts
+        real_part = before_split[..., : self._before_istft_dim].clone()
+        imag_part = before_split[..., self._before_istft_dim :].clone()
+
+        # Combine into complex tensor
+        complex_z = torch.complex(real_part, imag_part).to(z.device)
+
+        # Continue with ISTFT
+        complex_z = self.istft(complex_z.transpose(1, 2).contiguous())
+        return complex_z.unsqueeze(1)

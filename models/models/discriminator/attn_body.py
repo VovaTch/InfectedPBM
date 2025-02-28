@@ -92,7 +92,7 @@ class PatchAttentionDiscriminator(AttentionDiscriminator):
         num_layers: int,
         patch_size: int,
         feature_extractor: nn.Module,
-        class_head: nn.Module,
+        class_head: DiscriminatorHead,
         dropout: float = 0.1,
     ) -> None:
         """

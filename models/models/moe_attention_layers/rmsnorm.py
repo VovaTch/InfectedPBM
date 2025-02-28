@@ -53,5 +53,5 @@ class RMSNorm(nn.Module):
         """
         original_type = x.dtype
         x = self._norm(x.float())
-        x *= self.weight.float()
+        x = x * self.weight.float()
         return x.type(original_type)

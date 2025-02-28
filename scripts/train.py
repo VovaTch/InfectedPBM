@@ -13,6 +13,8 @@ def main(cfg: DictConfig) -> None:
     Main function for training. Initializes the data, model, and trainer and starts the training.
     """
 
+    torch.autograd.set_detect_anomaly(True)
+
     # Setting precision...
     torch.set_float32_matmul_precision("high")
 

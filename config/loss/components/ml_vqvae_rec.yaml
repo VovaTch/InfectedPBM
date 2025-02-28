@@ -6,17 +6,17 @@
   base_loss:
     _target_: torch.nn.L1Loss
 
-- _target_: loss.components.RecLoss
-  name: high_pass_rec
-  weight: 5.0
-  pred_key: slice
-  ref_key: slice
-  base_loss:
-    _target_: torch.nn.L1Loss
-  transform_func:
-    _target_: utils.transform_func.high_pass_filter
-    cutoff: 1000.0
-    _partial_: True
+# - _target_: loss.components.RecLoss
+#   name: high_pass_rec
+#   weight: 5.0
+#   pred_key: slice
+#   ref_key: slice
+#   base_loss:
+#     _target_: torch.nn.L1Loss
+#   transform_func:
+#     _target_: utils.transform_func.high_pass_filter
+#     cutoff: 1000.0
+#     _partial_: True
 
 - _target_: loss.components.reconstruction.EdgeRecLoss
   name: edge_rec

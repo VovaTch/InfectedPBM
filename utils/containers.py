@@ -16,7 +16,7 @@ class LearningParameters:
     grad_accumulation: int = 1
     epochs: int = 10
     beta_ema: float = 0.999
-    gradient_clip: float = 0.5
+    gradient_clip: float | None = 0.5
     save_path: str = "saved"
     amp: bool = False
     val_split: float = 0.05

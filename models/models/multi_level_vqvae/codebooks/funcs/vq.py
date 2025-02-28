@@ -54,9 +54,11 @@ class VQCodeBookFunc(torch.autograd.Function):
                 for idx in batch:
                     idx_value = idx.item()
 
-                    grad_emb[:, idx_value] += grad_outputs[  # type: ignore
+                    grad_emb[:, idx_value] = grad_emb[:, idx_value] + grad_outputs[  # type: ignore
                         batch_idx, :, running_idx
-                    ] / (indices.flatten().shape[0])
+                    ] / (
+                        indices.flatten().shape[0]
+                    )
                     running_idx += 1
 
         return grad_input, grad_emb, None, None

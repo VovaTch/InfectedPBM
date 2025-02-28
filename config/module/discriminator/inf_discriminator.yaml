@@ -4,8 +4,8 @@ defaults:
   - class_head: mlp_2c
 
 _target_: models.models.discriminator.PatchAttentionDiscriminator
-hidden_dim: 512
-num_heads: 8
-num_layers: 6
+hidden_dim: 128
+num_heads: 4
+num_layers: 3
 dropout: 0.1
 patch_size: 16

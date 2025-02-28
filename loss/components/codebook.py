@@ -34,7 +34,7 @@ class AlignLoss:
         loss = torch.tensor((0.0)).to(z_e.device)
         for codebook_idx in range(emb.shape[1]):
             # codebook_residual = emb[:, -1, ...] - emb[:, codebook_idx, ...]
-            loss += self.base_loss(emb[:, codebook_idx, ...], z_e.detach())
+            loss = loss + self.base_loss(emb[:, codebook_idx, ...], z_e.detach())
 
         return loss
 
@@ -69,6 +69,6 @@ class CommitLoss:
         loss = torch.tensor((0.0)).to(z_e.device)
         for codebook_idx in range(emb.shape[1]):
             # codebook_residual = emb[:, -1, ...] - emb[:, codebook_idx, ...]
-            loss += self.base_loss(emb[:, codebook_idx, ...].detach(), z_e)
+            loss = loss + self.base_loss(emb[:, codebook_idx, ...].detach(), z_e)
 
         return loss

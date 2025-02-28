@@ -50,3 +50,17 @@ class DiscriminatorHingeLoss(LossComponent):
         loss_real = torch.mean(F.relu(1 - pred[self.pred_key_real][..., 0]))
         loss_fake = torch.mean(F.relu(1 + pred[self.pred_key_fake][..., 0]))
         return 0.5 * (loss_real + loss_fake)
+
+
+@dataclass
+class GeneratorLoss(LossComponent):
+
+    name: str
+    weight: float
+    pred_key_disc: str
+    differentiable: bool = True
+
+    def __call__(
+        self, pred: dict[str, torch.Tensor], _: dict[str, torch.Tensor]
+    ) -> torch.Tensor:
+        return -torch.mean(pred[self.pred_key_disc][..., 0])

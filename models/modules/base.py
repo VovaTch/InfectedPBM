@@ -19,6 +19,8 @@ class LossAggregator(Protocol):
         self, pred: dict[str, torch.Tensor], target: dict[str, torch.Tensor]
     ) -> LossOutput: ...
 
+    def recalculate_total_loss(self, loss: LossOutput) -> LossOutput: ...
+
 
 class BaseLightningModule(L.LightningModule):
     """

@@ -43,6 +43,19 @@ class LossAggregator(ABC):
         """
         ...
 
+    @abstractmethod
+    def recalculate_total_loss(self, loss: LossOutput) -> LossOutput:
+        """
+        Recalculates the total loss based on the provided LossOutput object.
+
+        Args:
+            loss (LossOutput): An object containing the current loss values.
+
+        Returns:
+            LossOutput: An object containing the recalculated total loss values.
+        """
+        ...
+
 
 class LossComponent(Protocol):
     name: str
@@ -100,7 +113,29 @@ class WeightedSumAggregator(LossAggregator):
             ind_loss = component(pred, target)
             if component.differentiable:
                 loss.total = loss.total.to(ind_loss.device)
-                loss.total += component.weight * ind_loss
+                loss.total = loss.total + component.weight * ind_loss
             loss.individual[component.name] = ind_loss
 
         return loss
+
+    def recalculate_total_loss(self, loss: LossOutput) -> LossOutput:
+        """
+        Recalculates the total loss by summing the weighted individual losses of the differentiable components.
+
+        Args:
+            loss (LossOutput): An instance of LossOutput containing the total and individual losses.
+
+        Returns:
+            LossOutput: A new LossOutput instance with the recalculated total loss and the same individual losses.
+        """
+        recalculated_loss = LossOutput(torch.tensor(0.0).to(loss.total.device), {})
+        for component in self.components:
+            if component.differentiable:
+                recalculated_loss.total = recalculated_loss.total + (
+                    component.weight * loss.individual[component.name]
+                )
+            recalculated_loss.individual[component.name] = loss.individual[
+                component.name
+            ]
+
+        return recalculated_loss
