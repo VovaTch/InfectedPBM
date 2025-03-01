@@ -1,9 +1,9 @@
 from typing import Literal
 
-from numpy import imag
 import torch
 import torch.nn as nn
 
+from .base import Decoder
 from utils.positional_encoding import SinusoidalPositionEmbeddings, apply_pos_encoding
 
 
@@ -93,7 +93,7 @@ class ISTFT(nn.Module):
         return y
 
 
-class AttentionStftDecoder(nn.Module):
+class AttentionStftDecoder(Decoder):
     """
     Inspired by WavTokenizer, this is a decoder module that uses inverse STFT to map VQ tokens into waveforms.
     """
@@ -168,6 +168,7 @@ class AttentionStftDecoder(nn.Module):
             transformer_encoder_layer,
             num_layers,
         )
+        self._last_layer = nn.Conv1d(1, 1, 3, padding=1, stride=1)
 
     def forward(self, z: torch.Tensor) -> torch.Tensor:
         """
@@ -195,5 +196,10 @@ class AttentionStftDecoder(nn.Module):
         complex_z = torch.complex(real_part, imag_part).to(z.device)
 
         # Continue with ISTFT
-        complex_z = self.istft(complex_z.transpose(1, 2).contiguous())
-        return complex_z.unsqueeze(1)
+        output_z = self.istft(complex_z.transpose(1, 2).contiguous())
+        output_z = self.last_layer(output_z.unsqueeze(1))
+        return output_z
+
+    @property
+    def last_layer(self) -> nn.Module:
+        return self._last_layer

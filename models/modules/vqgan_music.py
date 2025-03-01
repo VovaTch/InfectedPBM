@@ -11,6 +11,7 @@ from lightning.pytorch.core.optimizer import LightningOptimizer
 
 from loss.aggregators import LossOutput
 from loss.components.base import LossComponent
+from models.models.base import Tokenizer
 from models.models.discriminator.base import Discriminator
 from models.modules.base import LossAggregator
 from models.modules.music import MusicLightningModule
@@ -35,7 +36,7 @@ class VqganMusicLightningModule(MusicLightningModule):
 
     def __init__(
         self,
-        model: nn.Module,
+        model: Tokenizer,
         discriminator: Discriminator,
         learning_params: LearningParameters,
         discriminator_loss: LossComponent,
@@ -82,14 +83,14 @@ class VqganMusicLightningModule(MusicLightningModule):
         self._generator_loss = generator_loss
 
     @property
-    def generator(self) -> nn.Module:
+    def generator(self) -> Tokenizer:
         """
         Getter for the generator model.
 
         Returns:
             nn.Module: Generator model of the module
         """
-        return self.model
+        return self.model  # type: ignore
 
     def _build_optimizer_gan(
         self, optimizer_cfg: dict[str, Any] | None, model_part: ModelPart
@@ -144,7 +145,7 @@ class VqganMusicLightningModule(MusicLightningModule):
         self,
         rec_loss: torch.Tensor,
         generator_loss: torch.Tensor,
-        last_layer: torch.Tensor,
+        last_layer: nn.Conv1d,
     ):
         """
         Calculate the adaptive weight for the discriminator loss.
@@ -162,9 +163,11 @@ class VqganMusicLightningModule(MusicLightningModule):
         Returns:
             torch.Tensor: The adaptive weight for the discriminator loss.
         """
-        rec_grads = torch.autograd.grad(rec_loss, last_layer, retain_graph=True)[0]
+        rec_grads = torch.autograd.grad(rec_loss, last_layer.weight, retain_graph=True)[
+            0
+        ]
         generator_grads = torch.autograd.grad(
-            generator_loss, last_layer, retain_graph=True
+            generator_loss, last_layer.weight, retain_graph=True
         )[0]
 
         d_weight = torch.norm(rec_grads) / (torch.norm(generator_grads) + 1e-4)
@@ -346,7 +349,7 @@ class VqganMusicLightningModule(MusicLightningModule):
             d_weight = self.calculate_adaptive_weight(
                 loss.total,
                 generator_loss,
-                restructured_outputs["z_e"],
+                self.generator.last_layer,  # type: ignore
             )
             generator_loss = generator_loss * d_weight
             self.log(

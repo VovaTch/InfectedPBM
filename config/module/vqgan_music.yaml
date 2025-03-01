@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  - discriminator: inf_discriminator
+  - discriminator: stft_discriminator
 
 _target_: models.modules.VqganMusicLightningModule
 model: ${model}
@@ -8,7 +8,7 @@ learning_params: ${learning}
 loss_aggregator: ${loss.aggregator}
 optimizer_cfg: ${optimizer}
 scheduler_cfg: ${scheduler}
-generator_start_step: 1000
+generator_start_step: 10
 
 discriminator_loss:
   _target_: loss.components.DiscriminatorHingeLoss

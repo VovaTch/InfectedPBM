@@ -60,3 +60,14 @@ class Tokenizer(nn.Module, ABC):
             information.
         """
         ...
+
+    @property
+    @abstractmethod
+    def last_layer(self) -> nn.Module:
+        """
+        Returns the last layer of the tokenizer.
+
+        Returns:
+            nn.Module: The last layer of the tokenizer.
+        """
+        ...

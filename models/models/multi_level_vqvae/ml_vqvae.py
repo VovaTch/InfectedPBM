@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 
 from loss.aggregators import LossAggregator
-
+from .decoder.base import Decoder
 from ..base import Tokenizer
 
 
@@ -30,7 +30,7 @@ class MultiLvlVQVariationalAutoEncoder(Tokenizer):
         self,
         input_channels: int,
         encoder: nn.Module,
-        decoder: nn.Module,
+        decoder: Decoder,
         vq_module: InterfaceVQ1D,
         loss_aggregator: LossAggregator | None = None,
         **kwargs,
@@ -146,3 +146,13 @@ class MultiLvlVQVariationalAutoEncoder(Tokenizer):
 
         total_output.update({"z_e": z_e})
         return total_output
+
+    @property
+    def last_layer(self) -> nn.Module:
+        """
+        Returns the last layer of the model.
+
+        Returns:
+            nn.Module: The last layer of the model.
+        """
+        return self.decoder.last_layer

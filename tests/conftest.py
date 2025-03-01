@@ -6,6 +6,7 @@ from loaders.datasets.music import MP3SliceDataset
 from loaders.datasets.quantized import QuantizedUint8MusicDataset
 from models.models.discriminator.attn_body import PatchAttentionDiscriminator
 from models.models.discriminator.mlp_head import MLP
+from models.models.discriminator.stft_disc import StftDiscriminator
 from models.models.multi_level_vqvae.blocks.vq1d import VQ1D
 from models.models.multi_level_vqvae.decoder.attention_stft import AttentionStftDecoder
 from models.models.multi_level_vqvae.decoder.moe_stft import (
@@ -129,4 +130,16 @@ def attn_discriminator(
         feature_extractor=encoder1d,
         class_head=mlp_class_head,
         dropout=0.1,
+    )
+
+
+@pytest.fixture
+def stft_discriminator() -> StftDiscriminator:
+    return StftDiscriminator(
+        channel_list=[2, 4, 8, 16, 32],
+        n_fft=256,
+        hop_length=64,
+        win_length=256,
+        stride=2,
+        kernel_size=7,
     )

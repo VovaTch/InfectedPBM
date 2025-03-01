@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 
 from loss.aggregators import LossAggregator
+from models.models.multi_level_vqvae.decoder.base import Decoder
 from utils.waveform_tokenization import dequantize_waveform_256
 from .ml_vqvae import MultiLvlVQVariationalAutoEncoder
 
@@ -28,7 +29,7 @@ class TokenPredictorVQVAE(MultiLvlVQVariationalAutoEncoder):
         input_channels: int,
         conv_out_channels: int,
         encoder: nn.Module,
-        decoder: nn.Module,
+        decoder: Decoder,
         vq_module: InterfaceVQ1D,
         loss_aggregator: LossAggregator | None = None,
         **kwargs,
