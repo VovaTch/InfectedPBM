@@ -189,7 +189,8 @@ class VqganMusicLightningModule(MusicLightningModule):
 
         Note:
             The method assumes that `self.optimizer_d` and `self.optimizer_g` are defined optimizers for the model.
-            The method also assumes that `self._configure_scheduler_settings` is a method that configures scheduler settings.
+            The method also assumes that `self._configure_scheduler_settings` is a method that configures scheduler
+            settings.
         """
         if self.scheduler is None:
             return [self.optimizer_d, self.optimizer_g], []
