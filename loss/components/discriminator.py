@@ -64,3 +64,17 @@ class GeneratorLoss(LossComponent):
         self, pred: dict[str, torch.Tensor], _: dict[str, torch.Tensor]
     ) -> torch.Tensor:
         return -torch.mean(pred[self.pred_key_disc][..., 0])
+
+
+@dataclass
+class GeneratorHingeLoss(LossComponent):
+
+    name: str
+    weight: float
+    pred_key_disc: str
+    differentiable: bool = True
+
+    def __call__(
+        self, pred: dict[str, torch.Tensor], _: dict[str, torch.Tensor]
+    ) -> torch.Tensor:
+        return torch.mean(torch.clamp(1 - pred[self.pred_key_disc][..., 0], min=0))

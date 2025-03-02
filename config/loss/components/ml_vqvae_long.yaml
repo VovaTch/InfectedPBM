@@ -4,7 +4,7 @@
   pred_key: slice
   ref_key: slice
   base_loss:
-    _target_: torch.nn.L1Loss
+    _target_: torch.nn.MSELoss
 
 - _target_: loss.components.reconstruction.EdgeRecLoss
   name: edge_rec
@@ -13,7 +13,7 @@
   ref_key: slice
   edge_power: 3.0
   base_loss:
-    _target_: torch.nn.L1Loss
+    _target_: torch.nn.MSELoss
 
 - _target_: loss.components.AlignLoss
   name: alignment_loss
@@ -31,7 +31,7 @@
   name: melspec_loss_1
   weight: 1.0
   base_loss:
-    _target_: torch.nn.MSELoss
+    _target_: torch.nn.L1Loss
   lin_start: 1.0
   lin_end: 1.0
   pred_key: slice
@@ -57,7 +57,7 @@
   name: melspec_loss_2
   weight: 1.0
   base_loss:
-    _target_: torch.nn.MSELoss
+    _target_: torch.nn.L1Loss
   lin_start: 1.0
   lin_end: 1.0
   pred_key: slice
@@ -80,7 +80,7 @@
   name: melspec_loss_3
   weight: 1.0
   base_loss:
-    _target_: torch.nn.MSELoss
+    _target_: torch.nn.L1Loss
   lin_start: 0.1
   lin_end: 20
   pred_key: slice
@@ -103,7 +103,7 @@
   name: melspec_loss_4
   weight: 5.0
   base_loss:
-    _target_: torch.nn.MSELoss
+    _target_: torch.nn.L1Loss
   lin_start: 0.5
   lin_end: 10.0
   # transform_func: 
@@ -130,7 +130,7 @@
   name: melspec_loss_5
   weight: 5.0
   base_loss:
-    _target_: torch.nn.MSELoss
+    _target_: torch.nn.L1Loss
   lin_start: 0.1
   lin_end: 20.0
   pred_key: slice

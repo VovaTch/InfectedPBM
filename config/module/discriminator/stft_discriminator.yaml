@@ -3,8 +3,7 @@ channel_list: [2, 32, 64, 128, 256]
 stride: 2
 kernel_size: 7
 activation_fn:
-  _target_: torch.nn.LeakyReLU
-  negative_slope: 0.1
+  _target_: torch.nn.GELU
 
 # STFT parameters
 n_fft: 1024
