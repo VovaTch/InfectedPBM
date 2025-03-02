@@ -1,13 +1,14 @@
 import torch
 import torch.nn as nn
 
+from models.models.multi_level_vqvae.blocks.res2d import Res2DBlock
+
 
 class EncoderConv2D(nn.Module):
     def __init__(
         self,
         channel_list: list[int],
         dim_change_list: list[int],
-        input_channels: int,
         kernel_size: int,
         num_res_block_conv: int,
         n_fft: int,
@@ -28,3 +29,26 @@ class EncoderConv2D(nn.Module):
         self._win_length = win_length
 
         layers = []
+        for idx in range(len(dim_change_list)):
+            layers.append(
+                Res2DBlock(
+                    channel_list[idx],
+                    num_res_block_conv,
+                    (kernel_size, 1),
+                    activation_fn,
+                )
+            )
+            layers.append(
+                nn.Conv2d(
+                    channel_list[idx],
+                    channel_list[idx + 1],
+                    kernel_size,
+                    stride=dim_change_list[idx],
+                    padding=kernel_size // dim_change_list[idx],
+                )
+            )
+        layers.append(
+            Res2DBlock(
+                channel_list[-1], num_res_block_conv, (kernel_size, 1), activation_fn
+            )
+        )
