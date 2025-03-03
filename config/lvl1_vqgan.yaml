@@ -5,7 +5,7 @@ defaults:
   - loss: ml_vqvae_long
   - model: ml_vqvae_random_long
   - module: vqgan_music
-  - optimizer: adamw_standard
+  - optimizer: adamw_vqgan
   - scheduler: none
 
 

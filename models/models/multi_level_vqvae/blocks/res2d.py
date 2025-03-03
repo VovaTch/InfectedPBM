@@ -18,7 +18,10 @@ class Res2DBlock(nn.Module):
         for _ in range(num_res_conv - 1):
             layers.append(
                 nn.Conv2d(
-                    num_channels, num_channels, kernel_size=kernel_size, padding=1
+                    num_channels,
+                    num_channels,
+                    kernel_size=kernel_size,
+                    padding=(kernel_size[0] // 2, kernel_size[1] // 2),
                 )
             )
 
@@ -26,7 +29,12 @@ class Res2DBlock(nn.Module):
             layers.append(nn.BatchNorm2d(num_channels))
 
         layers.append(
-            nn.Conv2d(num_channels, num_channels, kernel_size=kernel_size, padding=1)
+            nn.Conv2d(
+                num_channels,
+                num_channels,
+                kernel_size=kernel_size,
+                padding=(kernel_size[0] // 2, kernel_size[1] // 2),
+            )
         )
         layers.append(nn.BatchNorm2d(num_channels))
         self.layers = nn.Sequential(*layers)

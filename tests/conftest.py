@@ -13,6 +13,7 @@ from models.models.multi_level_vqvae.decoder.moe_stft import (
     MixtureOfExpertsRotaryStftDecoder,
 )
 from models.models.multi_level_vqvae.encoder.conv import Encoder1D
+from models.models.multi_level_vqvae.encoder.stft_conv import EncoderConv2D
 from models.models.multi_level_vqvae.ml_vqvae import MultiLvlVQVariationalAutoEncoder
 
 
@@ -142,4 +143,17 @@ def stft_discriminator() -> StftDiscriminator:
         win_length=256,
         stride=2,
         kernel_size=7,
+    )
+
+
+@pytest.fixture
+def stft_encoder() -> EncoderConv2D:
+    return EncoderConv2D(
+        channel_list=[2, 4, 8, 16, 32],
+        dim_change_list=[2, 2, 2, 2],
+        n_fft=256,
+        hop_length=64,
+        win_length=256,
+        kernel_size=3,
+        num_res_block_conv=3,
     )

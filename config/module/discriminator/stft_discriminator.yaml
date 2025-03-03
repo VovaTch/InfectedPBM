@@ -1,5 +1,5 @@
 _target_: models.models.discriminator.StftDiscriminator
-channel_list: [2, 32, 64, 128, 256]
+channel_list: [2, 32, 64, 128, 256, 512, 1024]
 stride: 2
 kernel_size: 7
 activation_fn:
