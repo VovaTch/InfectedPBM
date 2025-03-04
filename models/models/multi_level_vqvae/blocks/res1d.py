@@ -75,7 +75,7 @@ class Res1DBlock(nn.Module):
         for seq_module in self.res_block_modules:
             x = seq_module(x)
 
-        return x + x_init
+        return self.activation(x + x_init)
 
 
 class Res1DBlockReverse(Res1DBlock):

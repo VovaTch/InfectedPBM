@@ -4,9 +4,13 @@ import pytest
 from loaders.datasets.latent import LatentSliceDataset
 from loaders.datasets.music import MP3SliceDataset
 from loaders.datasets.quantized import QuantizedUint8MusicDataset
+from models.mel_spec_converters.simple import SimpleMelSpecConverter
 from models.models.discriminator.attn_body import PatchAttentionDiscriminator
+from models.models.discriminator.ensemble import EnsembleDiscriminator
+from models.models.discriminator.mel_spec_disc import MelSpecDiscriminator
 from models.models.discriminator.mlp_head import MLP
 from models.models.discriminator.stft_disc import StftDiscriminator
+from models.models.discriminator.waveform_disc import WaveformDiscriminator
 from models.models.multi_level_vqvae.blocks.vq1d import VQ1D
 from models.models.multi_level_vqvae.decoder.attention_stft import AttentionStftDecoder
 from models.models.multi_level_vqvae.decoder.moe_stft import (
@@ -15,6 +19,7 @@ from models.models.multi_level_vqvae.decoder.moe_stft import (
 from models.models.multi_level_vqvae.encoder.conv import Encoder1D
 from models.models.multi_level_vqvae.encoder.stft_conv import EncoderConv2D
 from models.models.multi_level_vqvae.ml_vqvae import MultiLvlVQVariationalAutoEncoder
+from utils.containers import MelSpecParameters
 
 
 @pytest.fixture
@@ -143,6 +148,48 @@ def stft_discriminator() -> StftDiscriminator:
         win_length=256,
         stride=2,
         kernel_size=7,
+    )
+
+
+@pytest.fixture
+def mel_spec_discriminator() -> MelSpecDiscriminator:
+    mel_spec_params = MelSpecParameters(
+        n_fft=1024,
+        hop_length=256,
+        n_mels=128,
+        f_min=0,
+        power=1.0,
+        pad=0,
+    )
+    mel_spec_converter = SimpleMelSpecConverter(mel_spec_params)
+    return MelSpecDiscriminator(
+        channel_list=[1, 4, 8, 16, 32],
+        stride=2,
+        kernel_size=7,
+        mel_spec_converter=mel_spec_converter,
+    )
+
+
+@pytest.fixture
+def waveform_discriminator() -> WaveformDiscriminator:
+    return WaveformDiscriminator(
+        channel_list=[2, 4, 8, 16, 32],
+        dim_change_list=[4, 2, 4, 2],
+        input_channels=1,
+        kernel_size=3,
+        num_res_block_conv=3,
+        dilation_factor=1,
+    )
+
+
+@pytest.fixture
+def ensemble_discriminator(
+    stft_discriminator: StftDiscriminator,
+    waveform_discriminator: WaveformDiscriminator,
+    mel_spec_discriminator: MelSpecDiscriminator,
+) -> EnsembleDiscriminator:
+    return EnsembleDiscriminator(
+        [stft_discriminator, waveform_discriminator, mel_spec_discriminator]
     )
 
 
