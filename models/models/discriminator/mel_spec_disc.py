@@ -17,12 +17,14 @@ class MelSpecDiscriminator(Discriminator):
         stride: int,
         kernel_size: int,
         mel_spec_converter: MelSpecConverter,
+        post_mel_fn: nn.Module = nn.Identity(),
         activation_fn: nn.Module = nn.GELU(),
     ) -> None:
         super().__init__()
 
         layers = []
         channel_list.insert(0, 1)
+        self._post_mel_fn = post_mel_fn
         for idx in range(len(channel_list) - 1):
             layers.append(
                 nn.Conv2d(
@@ -50,6 +52,7 @@ class MelSpecDiscriminator(Discriminator):
 
     def forward(self, x: torch.Tensor) -> dict[str, torch.Tensor]:
         x = self._mel_spec_converter.convert(x)
+        x = self._post_mel_fn(x)
         x = self.model(x)
         x = x.permute((0, 2, 3, 1)).flatten(start_dim=1, end_dim=2).contiguous()
         return {"logits": x}

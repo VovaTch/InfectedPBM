@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  - discriminator: stft_discriminator
+  - discriminator: ensemble_discriminator
 
 _target_: models.modules.VqganMusicLightningModule
 model: ${model}

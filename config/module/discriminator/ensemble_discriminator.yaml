@@ -1,0 +1,44 @@
+_target_: models.models.discriminator.EnsembleDiscriminator
+discriminators:
+  - _target_: models.models.discriminator.StftDiscriminator
+    channel_list: [2, 32, 64, 128, 256, 512, 1024]
+    stride: 2
+    kernel_size: 7
+    activation_fn:
+      _target_: torch.nn.GELU
+    n_fft: 1024
+    hop_length: 256
+    win_length: 1024
+
+  - _target_: models.models.discriminator.MelSpecDiscriminator
+    channel_list: [2, 4, 8, 16, 32]
+    stride: 2
+    kernel_size: 3
+    activation_fn:
+      _target_: torch.nn.GELU
+    post_mel_fn: 
+      _target_: utils.transform_func.log_normal
+      _partial_: true
+    mel_spec_converter:
+      _target_: models.mel_spec_converters.SimpleMelSpecConverter
+      mel_spec_params: 
+        _target_: utils.containers.MelSpecParameters
+        n_fft: 1024
+        f_min: 0
+        hop_length: 256
+        n_mels: 128
+        pad_mode: reflect
+        power: 1.0
+        norm: slaney
+        mel_scale: htk
+        pad: 0
+
+  - _target_: models.models.discriminator.WaveformDiscriminator
+    channel_list: [4, 8, 16, 32, 64, 128]
+    dim_change_list: [4, 4, 4, 4, 4]
+    kernel_size: 3
+    num_res_block_conv: 5
+    dilation_factor: 3
+    input_channels: 1
+    activation_fn:
+      _target_: torch.nn.GELU
