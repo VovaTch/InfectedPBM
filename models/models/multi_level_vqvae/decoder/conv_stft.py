@@ -30,7 +30,7 @@ class StftDecoder1D(nn.Module):
             )
 
         self._activation = activation_fn
-        self._enc_conv = nn.Conv1d(2, input_channels, kernel_size=3, padding=1)
+        self._end_conv = nn.Conv1d(2, input_channels, kernel_size=3, padding=1)
         self._istft = ISTFT(n_fft, hop_length, win_length, padding)
         self._before_istft_dim = n_fft // 2 + 1
         self._proj_before_istft = nn.Linear(
@@ -71,7 +71,7 @@ class StftDecoder1D(nn.Module):
 
     @property
     def last_layer(self) -> nn.Module:
-        return self._enc_conv
+        return self._end_conv
 
     def forward(self, z: torch.Tensor) -> torch.Tensor:
         for idx, (conv, dim_change) in zip(self.conv_list, self.dim_change_list):
@@ -101,5 +101,5 @@ class StftDecoder1D(nn.Module):
 
         # Continue with ISTFT
         output_z = self.istft(complex_z.transpose(1, 2).contiguous())
-        output_z = self.last_layer(output_z.unsqueeze(1))
+        output_z = self._end_conv(output_z.unsqueeze(1))
         return output_z
