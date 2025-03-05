@@ -1,6 +1,7 @@
 from typing import Literal
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from models.models.multi_level_vqvae.blocks.res1d import Res1DBlockReverse
 
@@ -10,8 +11,8 @@ from .attention_stft import ISTFT
 class StftDecoder1D(nn.Module):
     def __init__(
         self,
-        channel_list: list[str],
-        dim_change_list: list[str],
+        channel_list: list[int],
+        dim_change_list: list[int],
         input_channels: int,
         kernel_size: int,
         dim_add_kernel_add: int,
@@ -30,7 +31,7 @@ class StftDecoder1D(nn.Module):
             )
 
         self._activation = activation_fn
-        self._end_conv = nn.Conv1d(2, input_channels, kernel_size=3, padding=1)
+        self._end_conv = nn.Conv1d(1, input_channels, kernel_size=3, padding=1)
         self._istft = ISTFT(n_fft, hop_length, win_length, padding)
         self._before_istft_dim = n_fft // 2 + 1
         self._proj_before_istft = nn.Linear(
@@ -55,8 +56,7 @@ class StftDecoder1D(nn.Module):
             raise ValueError("dim_add_kernel_size must be an even number.")
 
         self.dim_change_list = nn.ModuleList(
-            [nn.Linear(channel_list[0], channel_list[1] * dim_change_list[0])]
-            + [
+            [
                 nn.ConvTranspose1d(
                     channel_list[idx],
                     channel_list[idx + 1],
@@ -64,31 +64,29 @@ class StftDecoder1D(nn.Module):
                     stride=dim_change_list[idx],
                     padding=dim_add_kernel_add // 2,
                 )
-                for idx in range(1, len(dim_change_list))
+                for idx in range(len(dim_change_list))
             ]
         )
         self.required_post_channel_size = channel_list[1]
+        self._pre_stft_layer_norm = nn.LayerNorm(channel_list[-1])
 
     @property
     def last_layer(self) -> nn.Module:
         return self._end_conv
 
     def forward(self, z: torch.Tensor) -> torch.Tensor:
-        for idx, (conv, dim_change) in zip(self.conv_list, self.dim_change_list):
-            if idx == 0:
-                z = conv(z.transpose(1, 2).contiguous()).transpose(1, 2).contiguous()
-                z = (
-                    dim_change(z.transpose(1, 2).contiguous())
-                    .transpose(1, 2)
-                    .contiguous()
-                )
-                z = z.reshape(z.shape[0], self.required_post_channel_size, -1)
-            else:
-                z = conv(z)
-                z = dim_change(z)
-            if idx != len(self.conv_list) - 1:
-                z = self._activation(z)
+        for idx, (conv, dim_change) in enumerate(
+            zip(self.conv_list, self.dim_change_list)
+        ):
+            z = conv(z)
+            z = dim_change(z)
+            z = self._activation(z)
 
+        z = (
+            self._pre_stft_layer_norm(z.transpose(1, 2).contiguous())
+            .transpose(1, 2)
+            .contiguous()
+        )
         z = z.transpose(1, 2).contiguous()
         before_split = self._proj_before_istft(z)
 
@@ -100,6 +98,6 @@ class StftDecoder1D(nn.Module):
         complex_z = torch.complex(real_part, imag_part).to(z.device)
 
         # Continue with ISTFT
-        output_z = self.istft(complex_z.transpose(1, 2).contiguous())
+        output_z = self._istft.forward(complex_z.transpose(1, 2).contiguous())
         output_z = self._end_conv(output_z.unsqueeze(1))
         return output_z

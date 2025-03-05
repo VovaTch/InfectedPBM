@@ -1,4 +1,5 @@
 from __future__ import annotations
+import copy
 from enum import Enum
 import importlib
 from typing import Any
@@ -77,6 +78,10 @@ class VqganMusicLightningModule(MusicLightningModule):
             optimizer_cfg, ModelPart.DISCRIMINATOR
         )
         self.optimizer_g = self._build_optimizer_gan(optimizer_cfg, ModelPart.GENERATOR)
+        self.scheduler_d = self._build_scheduler_gan(
+            scheduler_cfg, ModelPart.DISCRIMINATOR
+        )
+        self.scheduler_g = self._build_scheduler_gan(scheduler_cfg, ModelPart.GENERATOR)
         self._current_step = nn.Parameter(torch.tensor(0), requires_grad=False)
         self.automatic_optimization = False  # Necessary for GANs
         self._discriminator_loss = discriminator_loss
@@ -140,6 +145,48 @@ class VqganMusicLightningModule(MusicLightningModule):
                 amsgrad=True,
             )
         return optimizer
+
+    def _build_scheduler_gan(
+        self, scheduler_cfg: dict[str, Any] | None, model_part: ModelPart
+    ) -> LRScheduler | None:
+        """
+        Build and return a learning rate scheduler for the GAN model.
+
+        This method constructs a learning rate scheduler for either the generator or discriminator
+        part of the GAN model based on the provided configuration.
+
+        Args:
+            scheduler_cfg (dict[str, Any] | None): Configuration dictionary for the scheduler.
+                If None or if the "target" key is set to "none", no scheduler will be created.
+            model_part (ModelPart): Enum indicating which part of the model the scheduler
+                is for. Must be either ModelPart.GENERATOR or ModelPart.DISCRIMINATOR.
+
+        Returns:
+            LRScheduler | None: The constructed learning rate scheduler for the specified model part.
+        """
+
+        if scheduler_cfg is None or scheduler_cfg["target"] == "none":
+            return None
+
+        match model_part:
+            case ModelPart.GENERATOR:
+                optimizer = self.optimizer_g
+            case ModelPart.DISCRIMINATOR:
+                optimizer = self.optimizer_d
+            case _:
+                raise ValueError(f"Invalid model part {model_part}")
+
+        filtered_scheduler_cfg = {
+            key: value
+            for key, value in scheduler_cfg.items()
+            if key not in ["target", "module_params"]
+        }
+        scheduler = getattr(
+            importlib.import_module(".".join(scheduler_cfg["target"].split(".")[:-1])),
+            scheduler_cfg["target"].split(".")[-1],
+        )(optimizer, **filtered_scheduler_cfg)
+
+        return scheduler
 
     def calculate_adaptive_weight(
         self,
@@ -206,15 +253,10 @@ class VqganMusicLightningModule(MusicLightningModule):
             self.learning_params.frequency,
         )
 
-        return {"optimizer": self.optimizer_d, "scheduler": scheduler_settings_d}, {
-            "optimizer": self.optimizer_g,
-            "scheduler": scheduler_settings_g,
-        }
-
-        # return [self.optimizer_d, self.optimizer_g], [
-        #     scheduler_settings_d,
-        #     scheduler_settings_g,
-        # ]  # type: ignore
+        return [self.optimizer_d, self.optimizer_g], [
+            scheduler_settings_d,
+            scheduler_settings_g,
+        ]  # type: ignore
 
     def step(self, batch: dict[str, Any], phase: str) -> torch.Tensor | None:
         if phase == "training":
