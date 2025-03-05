@@ -1,0 +1,12 @@
+target: torch.optim.lr_scheduler.OneCycleLR
+max_lr: ${learning.learning_rate}
+epochs: ${learning.epochs}
+steps_per_epoch: 223
+pct_start: 0.1
+anneal_strategy: cos
+
+module_params:
+  loss_monitor: "training total loss"
+  interval: step
+  frequency: 1
+  trigger_loss: 0.00000001

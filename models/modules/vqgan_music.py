@@ -206,10 +206,15 @@ class VqganMusicLightningModule(MusicLightningModule):
             self.learning_params.frequency,
         )
 
-        return [self.optimizer_d, self.optimizer_g], [
-            scheduler_settings_d,
-            scheduler_settings_g,
-        ]  # type: ignore
+        return {"optimizer": self.optimizer_d, "scheduler": scheduler_settings_d}, {
+            "optimizer": self.optimizer_g,
+            "scheduler": scheduler_settings_g,
+        }
+
+        # return [self.optimizer_d, self.optimizer_g], [
+        #     scheduler_settings_d,
+        #     scheduler_settings_g,
+        # ]  # type: ignore
 
     def step(self, batch: dict[str, Any], phase: str) -> torch.Tensor | None:
         if phase == "training":

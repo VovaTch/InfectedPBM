@@ -1,14 +1,14 @@
 _target_: models.models.discriminator.EnsembleDiscriminator
 discriminators:
-  - _target_: models.models.discriminator.StftDiscriminator
-    channel_list: [2, 32, 64, 128, 256, 512, 1024]
-    stride: 2
-    kernel_size: 7
-    activation_fn:
-      _target_: torch.nn.GELU
-    n_fft: 1024
-    hop_length: 256
-    win_length: 1024
+  # - _target_: models.models.discriminator.StftDiscriminator
+  #   channel_list: [2, 32, 64, 128, 256, 512, 1024]
+  #   stride: 2
+  #   kernel_size: 7
+  #   activation_fn:
+  #     _target_: torch.nn.GELU
+  #   n_fft: 1024
+  #   hop_length: 256
+  #   win_length: 1024
 
   - _target_: models.models.discriminator.MelSpecDiscriminator
     channel_list: [2, 4, 8, 16, 32]
