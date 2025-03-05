@@ -68,3 +68,38 @@ class StftDecoder1D(nn.Module):
             ]
         )
         self.required_post_channel_size = channel_list[1]
+
+    @property
+    def last_layer(self) -> nn.Module:
+        return self._enc_conv
+
+    def forward(self, z: torch.Tensor) -> torch.Tensor:
+        for idx, (conv, dim_change) in zip(self.conv_list, self.dim_change_list):
+            if idx == 0:
+                z = conv(z.transpose(1, 2).contiguous()).transpose(1, 2).contiguous()
+                z = (
+                    dim_change(z.transpose(1, 2).contiguous())
+                    .transpose(1, 2)
+                    .contiguous()
+                )
+                z = z.reshape(z.shape[0], self.required_post_channel_size, -1)
+            else:
+                z = conv(z)
+                z = dim_change(z)
+            if idx != len(self.conv_list) - 1:
+                z = self._activation(z)
+
+        z = z.transpose(1, 2).contiguous()
+        before_split = self._proj_before_istft(z)
+
+        # Create separate tensors for real and imaginary parts
+        real_part = before_split[..., : self._before_istft_dim].clone()
+        imag_part = before_split[..., self._before_istft_dim :].clone()
+
+        # Combine into complex tensor
+        complex_z = torch.complex(real_part, imag_part).to(z.device)
+
+        # Continue with ISTFT
+        output_z = self.istft(complex_z.transpose(1, 2).contiguous())
+        output_z = self.last_layer(output_z.unsqueeze(1))
+        return output_z
