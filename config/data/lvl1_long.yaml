@@ -1,0 +1,6 @@
+defaults:
+  - _self_
+  - dataset: long_padded
+
+_target_: loaders.data_modules.SplitDatasetModule
+learning_params: ${learning}

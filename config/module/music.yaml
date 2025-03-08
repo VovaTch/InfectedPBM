@@ -1,0 +1,6 @@
+_target_: models.modules.music.MusicLightningModule
+model: ${model}
+learning_params: ${learning}
+loss_aggregator: ${loss.aggregator}
+optimizer_cfg: ${optimizer}
+scheduler_cfg: ${scheduler}

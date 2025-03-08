@@ -1,20 +1,13 @@
-# Model type
-type: multi_lvl_vqvae
-module_type: music
+defaults:
+  - _self_
+  - encoder: encoder1d
+  - decoder: decoder1d
 
-# Model parameters
-hidden_size: 24
-latent_depth: 16
-channel_dim_change_list: [2, 2, 2, 2, 8]
+_target_: models.models.multi_level_vqvae.ml_vqvae.MultiLvlVQVariationalAutoEncoder
 input_channels: 1
-vocabulary_size: 1024
-num_codebooks: 1
-num_res_block_conv: 5
-dilation_factor: 3
-activation_type: leaky_relu
-
-# Encoder and decoder parameters
-encoder_kernel_size: 3
-encoder_dim_change_kernel_size: 3
-decoder_kernel_size: 3
-decoder_dim_change_kernel_add: 0
+vq_module:
+  _target_: models.models.multi_level_vqvae.blocks.VQ1D
+  token_dim: 256
+  num_tokens: 2048
+  num_rq_steps: 4
+loss_aggregator: ${loss.aggregator}

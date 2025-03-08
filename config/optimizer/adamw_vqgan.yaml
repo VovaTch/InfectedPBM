@@ -1,0 +1,6 @@
+target: torch.optim.AdamW
+
+weight_decay: ${learning.weight_decay}
+lr: ${learning.learning_rate}
+amsgrad: true
+betas: [0.5, 0.9]

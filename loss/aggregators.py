@@ -1,114 +1,141 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Protocol, TYPE_CHECKING
-from typing_extensions import Self
+from typing import Iterable, Protocol
 
-from omegaconf import DictConfig
 import torch
-
-from common import registry
-
-if TYPE_CHECKING:
-    from .component_base import LossComponent
 
 
 @dataclass
 class LossOutput:
     """
-    Loss output object that contains individual components named, and the total loss from the aggregator.
+    Represents the output of a loss calculation.
 
-    Fields:
-        *   total (Tensor): Total loss from the aggregator
-        *   individuals (dict[str, Tensor]): Individual loss component values.
+    Attributes:
+        total (torch.Tensor): The total loss value.
+        individual (dict[str, torch.Tensor]): A dictionary containing individual loss values for each component.
     """
 
     total: torch.Tensor
-    individuals: dict[str, torch.Tensor]
+    individual: dict[str, torch.Tensor]
 
 
-class LossAggregator(Protocol):
+class LossAggregator(ABC):
     """
-    Loss aggregator protocol, uses a math operation on component losses to compute a total loss. For example, weighted sum.
+    Base class for loss aggregator.
+
+    This class defines the protocol for a loss aggregator, which is responsible for aggregating
+    the losses calculated by the model.
     """
 
-    components: list["LossComponent"]
-
+    @abstractmethod
     def __call__(
-        self,
-        estimation: dict[str, torch.Tensor],
-        target: dict[str, torch.Tensor],
+        self, pred: dict[str, torch.Tensor], target: dict[str, torch.Tensor]
     ) -> LossOutput:
-        """Call method for loss aggregation
+        """
+        Perform the forward pass of the loss aggregator.
 
         Args:
-            estimation (dict[str, torch.Tensor]): Network estimation dictionary
-            target (dict[str, torch.Tensor]): Target dictionary
+            pred (dict[str, torch.Tensor]): The predicted output of the model.
+            target (dict[str, torch.Tensor]): The target output.
 
         Returns:
-            LossOutput: LossOutput object representing the total loss and the individual parts
+            LossOutput: The computed loss output.
         """
         ...
 
-    @classmethod
-    def from_cfg(cls, cfg: DictConfig) -> Self:
+    @abstractmethod
+    def recalculate_total_loss(self, loss: LossOutput) -> LossOutput:
         """
-        Create an instance of the class from a configuration dictionary.
+        Recalculates the total loss based on the provided LossOutput object.
 
         Args:
-            cfg (DictConfig): The configuration dictionary.
+            loss (LossOutput): An object containing the current loss values.
 
         Returns:
-            Self: An instance of the class.
+            LossOutput: An object containing the recalculated total loss values.
         """
         ...
 
 
-@registry.register_loss_aggregator("weighted_sum")
-@dataclass
-class WeightedSumAggregator:
-    """
-    Weighted sum loss component
-    """
-
-    components: list["LossComponent"]
+class LossComponent(Protocol):
+    name: str
+    differentiable: bool
+    weight: float
 
     def __call__(
-        self, estimation: dict[str, torch.Tensor], target: dict[str, torch.Tensor]
-    ) -> LossOutput:
+        self, pred: dict[str, torch.Tensor], target: dict[str, torch.Tensor]
+    ) -> torch.Tensor: ...
+
+
+class WeightedSumAggregator(LossAggregator):
+    """
+    Aggregator that computes the weighted sum of multiple loss components.
+
+    Args:
+        components (Iterable[LossComponent]): A collection of loss components.
+
+    Returns:
+        LossOutput: The aggregated loss output.
+
+    Example:
+
+    ```python
+    aggregator = WeightedSumAggregator([component1, component2])
+    loss_output = aggregator(pred, target)
+    ```
+    """
+
+    def __init__(self, components: Iterable[LossComponent]) -> None:
         """
-        Forward method to compute the weighted sum
+        Initializes the Aggregator object.
 
         Args:
-            estimation (dict[str, torch.Tensor]): Network estimation
-            target (dict[str, torch.Tensor]): Ground truth reference
+            components (Iterable[LossComponent]): An iterable of LossComponent objects.
+        """
+        self.components = components
+
+    def __call__(
+        self, pred: dict[str, torch.Tensor], target: dict[str, torch.Tensor]
+    ) -> LossOutput:
+        """
+        Calculates the aggregated loss based on the predictions and targets.
+
+        Args:
+            pred (dict[str, torch.Tensor]): A dictionary containing the predicted values.
+            target (dict[str, torch.Tensor]): A dictionary containing the target values.
 
         Returns:
-            LossOutput: Loss output object with total loss and individual losses
+            LossOutput: An instance of the LossOutput class representing the aggregated loss.
         """
         loss = LossOutput(torch.tensor(0.0), {})
 
         for component in self.components:
-            ind_loss = component(estimation, target)
+            ind_loss = component(pred, target)
             if component.differentiable:
                 loss.total = loss.total.to(ind_loss.device)
-                loss.total += component.weight * ind_loss
-            loss.individuals[component.name] = ind_loss
+                loss.total = loss.total + component.weight * ind_loss
+            loss.individual[component.name] = ind_loss
 
         return loss
 
-    @classmethod
-    def from_cfg(cls, cfg: DictConfig) -> Self:
+    def recalculate_total_loss(self, loss: LossOutput) -> LossOutput:
         """
-        Utility method to parse loss parameters from a configuration dictionary
+        Recalculates the total loss by summing the weighted individual losses of the differentiable components.
 
         Args:
-            cfg (DictConfig): configuration dictionary
+            loss (LossOutput): An instance of LossOutput containing the total and individual losses.
 
         Returns:
-            WeightedSumAggregator: Weighted sum loss object
+            LossOutput: A new LossOutput instance with the recalculated total loss and the same individual losses.
         """
-        return cls(
-            [
-                registry.get_loss_component(loss_cfg["type"]).from_cfg(name, loss_cfg)
-                for name, loss_cfg in cfg.loss.components.items()
+        recalculated_loss = LossOutput(torch.tensor(0.0).to(loss.total.device), {})
+        for component in self.components:
+            if component.differentiable:
+                recalculated_loss.total = recalculated_loss.total + (
+                    component.weight * loss.individual[component.name]
+                )
+            recalculated_loss.individual[component.name] = loss.individual[
+                component.name
             ]
-        )
+
+        return recalculated_loss

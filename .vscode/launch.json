@@ -5,52 +5,21 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "Python Debugger: Current File",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
-            "console": "integratedTerminal",
-            "justMyCode": true
+            "console": "integratedTerminal"
         },
         {
-            "name": "Python: Pull Weights",
+            "name": "Python Debugger: Train",
             "type": "debugpy",
             "request": "launch",
-            "module": "scripts.pull_last_weights",
+            "module": "scripts.train",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "args": [
+                "--config-name=lvl1_vqgan", "resume=weights/lvl1_vqgan.ckpt"
+            ]
         },
-        {
-            "name": "Python: Train",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "scripts.train_tokenizer",
-            "console": "integratedTerminal",
-            "justMyCode": true
-        },
-        {
-            "name": "Python: Train Ripple Linear",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "scripts.train_ripl",
-            "console": "integratedTerminal",
-            "justMyCode": true
-        },
-        {
-            "name": "Python: Tokenize Data",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "scripts.datasets.tokenize",
-            "console": "integratedTerminal",
-            "justMyCode": true
-        },
-        {
-            "name": "Python: Run Mamba",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "scripts.train_pretrained_seq",
-            "console": "integratedTerminal",
-            "justMyCode": true
-        }
     ]
 }

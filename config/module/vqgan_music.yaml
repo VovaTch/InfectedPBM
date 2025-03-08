@@ -1,0 +1,24 @@
+defaults:
+  - _self_
+  - discriminator: ensemble_discriminator
+
+_target_: models.modules.VqganMusicLightningModule
+model: ${model}
+learning_params: ${learning}
+loss_aggregator: ${loss.aggregator}
+optimizer_cfg: ${optimizer}
+scheduler_cfg: ${scheduler}
+generator_start_step: 400000
+
+discriminator_loss:
+  _target_: loss.components.DiscriminatorHingeLoss
+  name: discriminator_loss
+  weight: 1.0
+  pred_key_real: d_input
+  pred_key_fake: d_output
+  
+generator_loss:
+  _target_: loss.components.GeneratorHingeLoss
+  name: generator_loss
+  weight: 1.0
+  pred_key_disc: d_output

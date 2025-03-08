@@ -163,8 +163,9 @@ cython_debug/
 # Repository specific: data, metadata, outputs, logs, etc.
 outputs/
 saved/
-data/
-data_small/
-data_big/
+/data/
+/data_small/
+/data_big/
 weights/
 sample.mp3
+/trained/

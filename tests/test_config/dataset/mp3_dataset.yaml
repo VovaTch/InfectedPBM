@@ -1,8 +1,0 @@
-dataset_type: "mp3_slice"
-data_module_type: "music_data_module"
-sample_rate: 44100
-data_dir: "data"
-slice_length: 1024
-preload: True
-preload_data_dir: "data/slices"
-device: "cpu"

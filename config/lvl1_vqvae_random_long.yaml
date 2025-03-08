@@ -1,0 +1,18 @@
+defaults: 
+  - _self_
+  - data: lvl1_vqvae
+  - learning: standard
+  - loss: ml_vqvae_long
+  - model: ml_vqvae_random_long
+  - module: music
+  - optimizer: adamw_standard
+  - scheduler: none
+
+
+# Project data
+project_name: InfectedPBM
+model_name: lvl1_vqvae_long
+resume: null
+
+# Optimizations
+use_torch_compile: False

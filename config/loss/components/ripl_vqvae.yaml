@@ -1,15 +1,20 @@
-reconstruction_loss:
-  type: rec
+- _target_: loss.components.RecLoss
+  name: rec
   weight: 1.0
-  base_loss: 'mse'
-  phase_parameter: 1
+  pred_key: slice
+  ref_key: slice
+  base_loss:
+    _target_: torch.nn.MSELoss
+  edge_power: 3.0
 
-alignment_loss:
-  type: align
+- _target_: loss.components.AlignLoss
+  name: alignment_loss
   weight: 0.5
-  base_loss: 'mse'
+  base_loss:
+    _target_: torch.nn.MSELoss
 
-commitment_loss:
-  type: commit
+- _target_: loss.components.CommitLoss
+  name: commitment_loss
   weight: 0.5
-  base_loss: 'mse'
+  base_loss:
+    _target_: torch.nn.MSELoss

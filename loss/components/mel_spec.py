@@ -1,19 +1,17 @@
 from dataclasses import dataclass
-from typing import Any, Callable, TYPE_CHECKING
-from typing_extensions import Self
+from typing import Callable, TYPE_CHECKING
 
 import torch
 import torch.nn as nn
 
-from common import registry
+from .base import LossComponent
 
 if TYPE_CHECKING:
     from models.mel_spec_converters import MelSpecConverter
 
 
-@registry.register_loss_component("mel_spec")
 @dataclass
-class MelSpecLoss:
+class MelSpecLoss(LossComponent):
     """
     This loss is a reconstruction loss of a mel spectrogram, convert the inputs into a spectrogram and
     compute reconstruction loss
@@ -21,6 +19,8 @@ class MelSpecLoss:
 
     name: str
     weight: float
+    pred_key: str
+    ref_key: str
     base_loss: nn.Module
 
     # Loss-specific parameters
@@ -63,8 +63,8 @@ class MelSpecLoss:
         Returns:
             torch.Tensor: Loss
         """
-        pred_slice = estimation["slice"]
-        target_slice = target["slice"]
+        pred_slice = estimation[self.pred_key]
+        target_slice = target[self.ref_key]
 
         self.mel_spec_converter.mel_spec = self.mel_spec_converter.mel_spec.to(
             pred_slice.device
@@ -75,48 +75,18 @@ class MelSpecLoss:
             self._mel_spec_and_process(target_slice),
         )
 
-    @classmethod
-    def from_cfg(cls, name: str, loss_cfg: dict[str, Any]) -> Self:
-        """
-        Utility method to parse mel spectrogram loss parameters from a configuration dictionary
 
-        Args:
-            name (str): loss name
-            loss_cfg (DictConfig): configuration dictionary
-
-        Returns:
-            MelSpecLoss: mel spectrogram loss object
-        """
-        # Create mel spec converter
-        mel_spec_converter = registry.get_mel_spec_converter("simple").from_cfg(
-            loss_cfg["melspec_params"]
-        )
-        loss_module = registry.get_loss_module(loss_cfg.get("base_loss", "mse"))
-        transform_func = registry.get_transform_function(
-            loss_cfg.get("transform_func", "tanh")
-        )
-        lin_start = loss_cfg.get("lin_start", 1.0)
-        lin_end = loss_cfg.get("lin_end", 1.0)
-
-        # Create mel-spec loss
-        return cls(
-            name,
-            loss_cfg.get("weight", 1.0),
-            loss_module,
-            mel_spec_converter,
-            transform_func=transform_func,
-            lin_start=lin_start,
-            lin_end=lin_end,
-        )
-
-
-@registry.register_loss_component("mel_spec_diff")
 @dataclass
 class MelSpecDiffusionLoss(MelSpecLoss):
     """
     Mel-spectrogram loss object, used for diffusion models, where you predict the denoised output
     and compute the loss for it. Inherits from the regular mel spec loss object
     """
+
+    # Diffusion specific
+    noise_pred_key: str = "noise_pred"
+    noise_ref_key: str = "noisy_slice"
+    noise_scale_key: str = "noise_scale"
 
     def __call__(
         self, estimation: dict[str, torch.Tensor], target: dict[str, torch.Tensor]
@@ -132,10 +102,10 @@ class MelSpecDiffusionLoss(MelSpecLoss):
             torch.Tensor: Loss
         """
 
-        target_slice = target["slice"]
-        noisy_slice = target["noisy_slice"]
-        noise_scale = target["noise_scale"]
-        noise_pred = estimation["noise_pred"]
+        target_slice = target[self.ref_key]
+        noisy_slice = target[self.noise_ref_key]
+        noise_scale = target[self.noise_scale_key]
+        noise_pred = estimation[self.noise_pred_key]
         estimated_slice = (noisy_slice - (1.0 - noise_scale) ** 0.5 * noise_pred) / (
             noise_scale**0.5
         )
@@ -143,38 +113,4 @@ class MelSpecDiffusionLoss(MelSpecLoss):
         return self.base_loss(
             self._mel_spec_and_process(estimated_slice),
             self._mel_spec_and_process(target_slice),
-        )
-
-    @classmethod
-    def from_cfg(cls, name: str, loss_cfg: dict[str, Any]) -> Self:
-        """
-        Utility method to parse diffusion mel spectrogram loss parameters from a configuration dictionary
-
-        Args:
-            name (str): loss name
-            loss_cfg (DictConfig): configuration dictionary
-
-        Returns:
-            MelSpecDiffusionLoss: diffusion mel spectrogram loss object
-        """
-        # Create mel spec converter
-        mel_spec_converter = registry.get_mel_spec_converter("simple").from_cfg(
-            loss_cfg["melspec_params"]
-        )
-        loss_module = registry.get_loss_module(loss_cfg.get("base_loss", "mse"))
-        transform_func = registry.get_transform_function(
-            loss_cfg.get("transform_func", "tanh")
-        )
-        lin_start = loss_cfg.get("lin_start", 1.0)
-        lin_end = loss_cfg.get("lin_end", 1.0)
-
-        # Create mel-spec loss
-        return cls(
-            name,
-            loss_cfg.get("weight", 1.0),
-            loss_module,
-            mel_spec_converter,
-            transform_func=transform_func,
-            lin_start=lin_start,
-            lin_end=lin_end,
         )
