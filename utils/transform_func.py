@@ -43,6 +43,25 @@ def log_normal(x: torch.Tensor) -> torch.Tensor:
     return (log_transformed - mean) / std
 
 
+def log_normal_fixed(x: torch.Tensor, mean: float, std: float) -> torch.Tensor:
+    """
+    Applies a log transformation to the input tensor and normalizes it using fixed mean and standard deviation.
+
+    The function first applies a log transformation to the input tensor `x` with a small constant added to avoid
+    taking the log of zero. It then normalizes the tensor by subtracting the mean and dividing by the standard deviation.
+
+    Args:
+        x (torch.Tensor): The input tensor to be log-transformed and normalized.
+        mean (float): The mean value to normalize the log-transformed tensor.
+        std (float): The standard deviation value to normalize the log-transformed tensor.
+
+    Returns:
+        torch.Tensor: The log-transformed and normalized tensor.
+    """
+    log_transformed = torch.log(x + 1e-6)
+    return (log_transformed - mean) / std
+
+
 def high_pass_filter(x: torch.Tensor, cutoff: float) -> torch.Tensor:
     """
     Applies a high-pass filter to the input tensor.

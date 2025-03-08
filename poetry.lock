@@ -824,6 +824,23 @@ test-full = ["adlfs", "aiohttp (!=4.0.0a0,!=4.0.0a1)", "cloudpickle", "dask", "d
 tqdm = ["tqdm"]
 
 [[package]]
+name = "graphviz"
+version = "0.20.3"
+description = "Simple Python interface for Graphviz"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "graphviz-0.20.3-py3-none-any.whl", hash = "sha256:81f848f2904515d8cd359cc611faba817598d2feaac4027b266aa3eda7b3dde5"},
+    {file = "graphviz-0.20.3.zip", hash = "sha256:09d6bc81e6a9fa392e7ba52135a9d49f1ed62526f96499325930e87ca1b5925d"},
+]
+
+[package.extras]
+dev = ["flake8", "pep8-naming", "tox (>=3)", "twine", "wheel"]
+docs = ["sphinx (>=5,<7)", "sphinx-autodoc-typehints", "sphinx-rtd-theme"]
+test = ["coverage", "pytest (>=7,<8.1)", "pytest-cov", "pytest-mock (>=3)"]
+
+[[package]]
 name = "grpcio"
 version = "1.70.0"
 description = "HTTP/2-based RPC framework"
@@ -3039,6 +3056,18 @@ typing = ["mypy (==1.14.0)", "torch (==2.5.1)", "types-PyYAML", "types-emoji", "
 visual = ["SciencePlots (>=2.0.0)", "matplotlib (>=3.6.0)"]
 
 [[package]]
+name = "torchview"
+version = "0.2.6"
+description = "Visualization of Pytorch Models"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "torchview-0.2.6-py3-none-any.whl", hash = "sha256:e1a1fa9821b8f9dd88d59c029d6c9762c56ae1ac13b201bfbe377e138a669bfb"},
+    {file = "torchview-0.2.6.tar.gz", hash = "sha256:9db17f345321a991b756b985a6142f4d86af9f27e4235e2b1c909ce27553bfc9"},
+]
+
+[[package]]
 name = "torchvision"
 version = "0.21.0"
 description = "image and video datasets and models for torch deep learning"
@@ -3387,4 +3416,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12"
-content-hash = "d10f1ea4b08a6c3bb5733960447cfc82ce712a12e10f4069932f7f9026208282"
+content-hash = "1fffd32407e28f1a1f5950cce86dccc2ba1247206181f68796b68ac47971a28c"

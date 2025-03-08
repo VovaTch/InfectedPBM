@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  - encoder: encoder1d_random_long
+  - encoder: encoder1d_stft
   - decoder: attention_stft
 
 _target_: models.models.multi_level_vqvae.ml_vqvae.MultiLvlVQVariationalAutoEncoder

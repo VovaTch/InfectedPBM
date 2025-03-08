@@ -1,5 +1,4 @@
 from __future__ import annotations
-import copy
 from enum import Enum
 import importlib
 from typing import Any
@@ -86,6 +85,9 @@ class VqganMusicLightningModule(MusicLightningModule):
         self.automatic_optimization = False  # Necessary for GANs
         self._discriminator_loss = discriminator_loss
         self._generator_loss = generator_loss
+
+        self.optimizer = 0
+        del self.scheduler
 
     @property
     def generator(self) -> Tokenizer:
@@ -221,6 +223,31 @@ class VqganMusicLightningModule(MusicLightningModule):
         d_weight = torch.clamp(d_weight, 0.0, 1e4).detach()
         return d_weight
 
+    def _configure_scheduler_settings(
+        self, scheduler: LRScheduler, interval: str, monitor: str, frequency: int
+    ) -> dict[str, Any]:
+        """
+        Utility method to return scheduler configurations to `self.configure_optimizers` method.
+
+        Args:
+            interval (str): Intervals to use the scheduler, either 'step' or 'epoch'.
+            monitor (str): Loss to monitor and base the scheduler on.
+            frequency (int): Frequency to potentially use the scheduler.
+            scheduler
+
+        Raises:
+            AttributeError: Must include a scheduler
+
+        Returns:
+            dict[str, Any]: Scheduler configuration dictionary
+        """
+        return {
+            "scheduler": scheduler,
+            "interval": interval,
+            "monitor": monitor,
+            "frequency": frequency,
+        }
+
     def configure_optimizers(
         self,
     ) -> OptimizerLRScheduler:
@@ -239,19 +266,22 @@ class VqganMusicLightningModule(MusicLightningModule):
             The method also assumes that `self._configure_scheduler_settings` is a method that configures scheduler
             settings.
         """
-        if self.scheduler is None:
+        if self.scheduler_d is None or self.scheduler_g is None:
             return [self.optimizer_d, self.optimizer_g], []
 
         scheduler_settings_g = self._configure_scheduler_settings(
+            self.scheduler_g,
             self.learning_params.interval,
             self.learning_params.loss_monitor,
             self.learning_params.frequency,
         )
         scheduler_settings_d = self._configure_scheduler_settings(
+            self.scheduler_g,
             self.learning_params.interval,
             self.learning_params.loss_monitor,
             self.learning_params.frequency,
         )
+        self.optimizer = self.optimizer_g
 
         return [self.optimizer_d, self.optimizer_g], [
             scheduler_settings_d,
@@ -259,6 +289,7 @@ class VqganMusicLightningModule(MusicLightningModule):
         ]  # type: ignore
 
     def step(self, batch: dict[str, Any], phase: str) -> torch.Tensor | None:
+
         if phase == "training":
             self._current_step.data = self._current_step.data + 1
 
@@ -333,15 +364,14 @@ class VqganMusicLightningModule(MusicLightningModule):
             optimizer_d.step()
             optimizer_d.zero_grad()
 
-            if scheduler_d is not None:
-                scheduler_d.step()  # type: ignore
-
         self.log(
             f"{phase} discriminator loss",
             disc_loss if self._current_step >= self._generator_start_step else 0,
             sync_dist=True,
             batch_size=self.learning_params.batch_size,
         )
+        if scheduler_d is not None and phase == "training":
+            scheduler_d.step()  # type: ignore
         self.untoggle_optimizer(optimizer_d)
 
     def _generator_step(
@@ -418,7 +448,7 @@ class VqganMusicLightningModule(MusicLightningModule):
         optimizer_g.step()
         optimizer_g.zero_grad()
 
-        if scheduler_g is not None:
+        if scheduler_g is not None and phase == "training":
             scheduler_g.step()  # type: ignore
 
         self._close_generator_phase(

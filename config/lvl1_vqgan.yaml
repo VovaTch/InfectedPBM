@@ -3,10 +3,10 @@ defaults:
   - data: lvl1_vqvae
   - learning: vqgan
   - loss: ml_vqvae_long
-  - model: ml_vqvae_random_long
+  - model: ml_vqvae_stft
   - module: vqgan_music
   - optimizer: adamw_vqgan
-  - scheduler: none
+  - scheduler: one_cycle_lr
 
 
 # Project data

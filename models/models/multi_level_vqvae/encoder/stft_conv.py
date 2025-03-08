@@ -99,5 +99,5 @@ class EncoderConv2D(nn.Module):
         x = x.permute((0, 3, 1, 2)).contiguous()
         x = x[..., : x.shape[2] - 1, : x.shape[3] - 1]
         x = self.layers(x)  # returns size of (batch_size, num_channels, H, W)
-        x = x.flatten(start_dim=2, end_dim=3)
+        x = x.transpose(2, 3).flatten(start_dim=2, end_dim=3)
         return x

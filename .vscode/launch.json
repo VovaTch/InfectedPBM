@@ -18,7 +18,7 @@
             "module": "scripts.train",
             "console": "integratedTerminal",
             "args": [
-                "--config-name=lvl1_vqgan"//, "resume=weights/lvl1_vq_before_gan.ckpt"
+                "--config-name=lvl1_vqgan", "resume=weights/lvl1_vqgan.ckpt"
             ]
         },
     ]
