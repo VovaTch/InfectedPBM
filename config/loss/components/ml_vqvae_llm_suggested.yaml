@@ -8,7 +8,7 @@
 
 - _target_: loss.components.RecLoss
   name: rec_2500
-  weight: 2.0
+  weight: 20.0
   pred_key: slice
   ref_key: slice
   base_loss:
@@ -20,7 +20,7 @@
 
 - _target_: loss.components.RecLoss
   name: rec_5000
-  weight: 5.0
+  weight: 350.0
   pred_key: slice
   ref_key: slice
   base_loss:
@@ -32,7 +32,7 @@
 
 - _target_: loss.components.RecLoss
   name: rec_10k
-  weight: 10.0
+  weight: 1500.0
   pred_key: slice
   ref_key: slice
   base_loss:

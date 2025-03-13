@@ -19,6 +19,7 @@ class EncoderConv2D(nn.Module):
         n_fft: int,
         hop_length: int,
         win_length: int,
+        lstm_hiddem_dim: int = 64,
         activation_fn: nn.Module = nn.GELU(),
     ) -> None:
         """
@@ -75,6 +76,17 @@ class EncoderConv2D(nn.Module):
         )
 
         self.layers = nn.Sequential(*layers)
+        self._lstm = nn.LSTM(
+            input_size=channel_list[-1],
+            hidden_size=lstm_hiddem_dim,
+            num_layers=2,
+            batch_first=True,
+            bidirectional=True,
+            dropout=0.1,
+        )
+        self._post_lstm_proj = nn.Conv1d(
+            lstm_hiddem_dim * 2, channel_list[-1], kernel_size=3, padding=1
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -100,4 +112,11 @@ class EncoderConv2D(nn.Module):
         x = x[..., : x.shape[2] - 1, : x.shape[3] - 1]
         x = self.layers(x)  # returns size of (batch_size, num_channels, H, W)
         x = x.transpose(2, 3).flatten(start_dim=2, end_dim=3)
-        return x
+
+        lstm_in = x.transpose(1, 2).contiguous()
+        lstm_out, _ = self._lstm(lstm_in)
+        lstm_out = lstm_out.transpose(1, 2).contiguous()
+
+        output = self._post_lstm_proj(lstm_out)
+
+        return output

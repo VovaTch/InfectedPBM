@@ -1,3 +1,4 @@
+from math import prod
 from typing import Literal
 import torch
 import torch.nn as nn
@@ -22,6 +23,7 @@ class StftDecoder2D(nn.Module):
         hop_length: int,
         win_length: int,
         activation_fn: nn.Module = nn.GELU(),
+        output_conv_hidden_dim: int = 32,
         padding: Literal["center", "same"] = "same",
     ):
         super().__init__()
@@ -31,11 +33,19 @@ class StftDecoder2D(nn.Module):
             )
 
         self._activation = activation_fn
-        self._end_conv = nn.Conv1d(1, input_channels, kernel_size=3, padding=1)
+        self._end_conv = nn.Sequential(
+            nn.Conv1d(1, output_conv_hidden_dim, kernel_size=3, padding=1),
+            nn.LeakyReLU(0.2),
+            nn.Conv1d(
+                output_conv_hidden_dim, output_conv_hidden_dim, kernel_size=3, padding=1
+            ),
+            nn.LeakyReLU(0.2),
+            nn.Conv1d(output_conv_hidden_dim, 1, kernel_size=3, padding=1),
+        )
         self._istft = ISTFT(n_fft, hop_length, win_length, padding)
         self._before_istft_dim = n_fft // 2 + 1
         self._proj_before_istft = nn.Linear(
-            channel_list[-1], self._before_istft_dim * 2
+            prod(dim_change_list) * channel_list[-1], self._before_istft_dim * 2
         )
 
         self.conv_list = nn.ModuleList(
@@ -67,7 +77,7 @@ class StftDecoder2D(nn.Module):
             ]
         )
         self.required_post_channel_size = channel_list[1]
-        self._pre_stft_layer_norm = nn.LayerNorm(channel_list[-1])
+        self._pre_stft_layer_norm = nn.LayerNorm(prod(dim_change_list))
 
     @property
     def last_layer(self) -> nn.Module:
@@ -75,20 +85,13 @@ class StftDecoder2D(nn.Module):
 
     def forward(self, z: torch.Tensor) -> torch.Tensor:
         z = z.unsqueeze(-1)
-        for idx, (conv, dim_change) in enumerate(
-            zip(self.conv_list, self.dim_change_list)
-        ):
+        for conv, dim_change in zip(self.conv_list, self.dim_change_list):
             z = conv(z)
             z = dim_change(z)
             z = self._activation(z)
+        # z = self._pre_stft_layer_norm(z)
 
-        z = z.flatten(start_dim=2, end_dim=3)
-        z = (
-            self._pre_stft_layer_norm(z.transpose(1, 2).contiguous())
-            .transpose(1, 2)
-            .contiguous()
-        )
-        z = z.transpose(1, 2).contiguous()
+        z = z.transpose(1, 2).contiguous().flatten(start_dim=2)
         before_split = self._proj_before_istft(z)
 
         # Create separate tensors for real and imaginary parts

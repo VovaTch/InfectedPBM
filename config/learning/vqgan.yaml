@@ -9,7 +9,7 @@ learning_rate: 0.001
 weight_decay: 0.0
 batch_size: 8
 grad_accumulation: 1
-epochs: 2500
+epochs: 1500
 beta_ema: 0.99
 gradient_clip: null # Do not touch; manual mode training in Lightning does not support gradient clipping
 save_path: saved/

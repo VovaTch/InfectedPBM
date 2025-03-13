@@ -13,7 +13,8 @@ from models.models.discriminator.stft_disc import StftDiscriminator
 from models.models.discriminator.waveform_disc import WaveformDiscriminator
 from models.models.multi_level_vqvae.blocks.vq1d import VQ1D
 from models.models.multi_level_vqvae.decoder.attention_stft import AttentionStftDecoder
-from models.models.multi_level_vqvae.decoder.conv_stft import StftDecoder1D
+from models.models.multi_level_vqvae.decoder.conv1d_stft import StftDecoder1D
+from models.models.multi_level_vqvae.decoder.conv2d_stft import StftDecoder2D
 from models.models.multi_level_vqvae.decoder.moe_stft import (
     MixtureOfExpertsRotaryStftDecoder,
 )
@@ -217,6 +218,21 @@ def conv_stft_decoder() -> StftDecoder1D:
         dim_add_kernel_add=2,
         num_res_block_conv=3,
         dilation_factor=3,
+        n_fft=256,
+        hop_length=64,
+        win_length=256,
+    )
+
+
+@pytest.fixture
+def conv_stft_decoder_2d() -> StftDecoder2D:
+    return StftDecoder2D(
+        channel_list=[64, 16, 8, 4, 2],
+        dim_change_list=[2, 2, 2, 2],
+        input_channels=1,
+        kernel_size=3,
+        dim_add_kernel_add=2,
+        num_res_block_conv=3,
         n_fft=256,
         hop_length=64,
         win_length=256,

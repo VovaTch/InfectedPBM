@@ -109,6 +109,7 @@ class AttentionStftDecoder(Decoder):
         win_length: int,
         dropout: float = 0.1,
         expansion_factor: int = 1,
+        last_conv_hidden_size: int = 32,
         padding: Literal["center", "same"] = "same",
     ) -> None:
         """
@@ -147,10 +148,11 @@ class AttentionStftDecoder(Decoder):
         self.istft = ISTFT(n_fft, hop_length, win_length, padding)
         self._in_projection = nn.ConvTranspose1d(
             in_channels=input_dim,
-            out_channels=hidden_dim,
-            kernel_size=expansion_factor,
-            stride=expansion_factor,
+            out_channels=hidden_dim * expansion_factor,
+            kernel_size=expansion_factor + 1,
+            padding=(expansion_factor + 1) // 2,
         )
+        self._expansion_factor = expansion_factor
         self._before_istft_projection = nn.Linear(
             hidden_dim, self._before_istft_dim * 2
         )
@@ -168,7 +170,13 @@ class AttentionStftDecoder(Decoder):
             transformer_encoder_layer,
             num_layers,
         )
-        self._last_layer = nn.Conv1d(1, 1, 3, padding=1, stride=1)
+        self._last_layer = nn.Sequential(
+            nn.Conv1d(1, last_conv_hidden_size, 5, padding=2),
+            nn.LeakyReLU(0.2),
+            nn.Conv1d(last_conv_hidden_size, last_conv_hidden_size, 5, padding=2),
+            nn.LeakyReLU(0.2),
+            nn.Conv1d(last_conv_hidden_size, 1, 5, padding=2),
+        )
 
     def forward(self, z: torch.Tensor) -> torch.Tensor:
         """
@@ -182,7 +190,10 @@ class AttentionStftDecoder(Decoder):
                             with shape (batch_size, 1, length).
         """
         z = (
-            (self._in_projection.forward(z)).transpose(1, 2).contiguous()
+            (self._in_projection.forward(z))
+            .transpose(1, 2)
+            .reshape((z.shape[0], -1, self._hidden_dim))
+            .contiguous()
         )  # z: BS x C x Len -> BS x Len x H
         z = apply_pos_encoding(z, self._pos_encoding)
         z = self._transformer_encoder(z)
@@ -197,7 +208,7 @@ class AttentionStftDecoder(Decoder):
 
         # Continue with ISTFT
         output_z = self.istft(complex_z.transpose(1, 2).contiguous())
-        output_z = self.last_layer(output_z.unsqueeze(1))
+        output_z = self.last_layer(output_z.unsqueeze(1)) + output_z.unsqueeze(1)
         return output_z
 
     @property

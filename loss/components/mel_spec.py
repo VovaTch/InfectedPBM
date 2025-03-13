@@ -25,7 +25,9 @@ class MelSpecLoss(LossComponent):
 
     # Loss-specific parameters
     mel_spec_converter: "MelSpecConverter"
-    transform_func: Callable[[torch.Tensor], torch.Tensor] = lambda x: torch.tanh(x)
+    transform_func: Callable[[torch.Tensor], torch.Tensor] = (
+        lambda x: torch.tanh(x) * 2 - 1
+    )
     lin_start: float = 1.0
     lin_end: float = 1.0
     differentiable: bool = True
