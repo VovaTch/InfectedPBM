@@ -147,6 +147,8 @@ class LatentSliceDataset(Dataset):
             self._dump_data(processed_path)
             logger.info(f"Saved processed data to {processed_path}")
 
+        self._track_name_to_idx_mapping = self._attach_index_to_file_path()
+
     def _generate_data(
         self, data_path: str, processed_path: str | None, tokenizer: Tokenizer
     ) -> list[LatentDataPoint]:
@@ -382,6 +384,26 @@ class LatentSliceDataset(Dataset):
 
         logger.info("Parsed metadata and loaded latents to buffer")
         return loaded_data
+
+    def _attach_index_to_file_path(self) -> dict[str, int]:
+        """
+        Creates a mapping from file paths to unique indices.
+
+        Iterates over the data points in the buffer and assigns a unique index to each
+        file path that has not been encountered before. The indices start from 0 and
+        increment by 1 for each new file path.
+
+        Returns:
+            dict[str, int]: A dictionary where the keys are file paths (str) and the values
+                            are unique indices (int).
+        """
+        name_to_idx_mapping = {}
+        running_idx = 0
+        for data_point in self.buffer:
+            if data_point.slice_path not in name_to_idx_mapping:
+                name_to_idx_mapping[data_point.slice_path] = running_idx
+                running_idx += 1
+        return name_to_idx_mapping
 
     def __len__(self) -> int:
         """

@@ -105,9 +105,10 @@ class EncoderConv2D(nn.Module):
             n_fft=self._n_fft,
             hop_length=self._hop_length,
             win_length=self._win_length,
-            return_complex=False,
+            return_complex=True,
             window=window,
         )
+        x = torch.view_as_real(x)
         x = x.permute((0, 3, 1, 2)).contiguous()
         x = x[..., : x.shape[2] - 1, : x.shape[3] - 1]
         x = self.layers(x)  # returns size of (batch_size, num_channels, H, W)

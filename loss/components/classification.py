@@ -70,7 +70,7 @@ class PercentCorrect(LossComponent):
 @dataclass
 class MaskedClassificationLoss(LossComponent):
     """
-    Classification loss with masking
+    Classification loss with masking, mostly used in Diffusion LLM training
     """
 
     name: str
@@ -94,8 +94,10 @@ class MaskedClassificationLoss(LossComponent):
         Returns:
             torch.Tensor: loss
         """
-        mask = target[
-            self.mask_key
-        ]  # TODO; make it general for dimensions other than 3
-        cls_mask = mask.unsqueeze(1).repeat(1, pred[self.pred_key].shape[1], 1)
-        return self.base_loss(pred[self.pred_key][cls_mask], target[self.ref_key][mask])
+        mask = target[self.mask_key]
+        if pred[self.pred_key].dim() == 4:
+            logits = pred[self.pred_key][mask].permute(0, 3, 1, 2)
+        elif pred[self.pred_key].dim() == 3:
+            logits = pred[self.pred_key][mask].permute(0, 2, 1)
+        labels = target[self.ref_key][mask]
+        return self.base_loss(logits, labels)

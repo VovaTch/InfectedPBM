@@ -3,6 +3,7 @@ import tempfile
 
 from loaders.datasets.latent import LatentSliceDataset
 from models.models.multi_level_vqvae.ml_vqvae import MultiLvlVQVariationalAutoEncoder
+from loaders.datasets.latent_llada import LatentLladaSliceDataset
 
 
 def test_dataset_data_length(lvl1_latent_dataset: LatentSliceDataset) -> None:
@@ -31,3 +32,16 @@ def test_dataset_process_files(
         assert os.path.isfile(os.path.join(temp_dir, "_metadata.json"))
         assert len(lvl1_latent_dataset.buffer) == 368
         assert lvl1_latent_dataset.buffer[0].latent.shape == (16, 4)
+
+
+def test_dataset_dllm_get_data(
+    lvl1_latent_dllm_dataset: LatentLladaSliceDataset,
+) -> None:
+    data = lvl1_latent_dllm_dataset[0]
+    assert data["latent_idx"] == 0
+    assert data["slice_path"] == os.path.join(
+        "tests", "data_slices", "slices_track_1.pt"
+    )
+    assert data["latent"].shape == (16, 4)
+    assert data["mask"].shape == (16,)
+    assert data["conditional"] == 0

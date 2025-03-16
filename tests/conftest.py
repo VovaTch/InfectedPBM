@@ -2,9 +2,11 @@ import os
 import pytest
 
 from loaders.datasets.latent import LatentSliceDataset
+from loaders.datasets.latent_llada import LatentLladaSliceDataset
 from loaders.datasets.music import MP3SliceDataset
 from loaders.datasets.quantized import QuantizedUint8MusicDataset
 from models.mel_spec_converters.simple import SimpleMelSpecConverter
+from models.models.diffusion.token import TokenDiffusionTransformer
 from models.models.discriminator.attn_body import PatchAttentionDiscriminator
 from models.models.discriminator.ensemble import EnsembleDiscriminator
 from models.models.discriminator.mel_spec_disc import MelSpecDiscriminator
@@ -107,6 +109,19 @@ def lvl1_latent_dataset(
     vqvae_basic: MultiLvlVQVariationalAutoEncoder,
 ) -> LatentSliceDataset:
     return LatentSliceDataset(
+        data_path=os.path.join("tests", "data_slices"),
+        slice_level=1,
+        slices_per_sample=16,
+        tokenizer=vqvae_basic,
+        device="cpu",
+    )
+
+
+@pytest.fixture
+def lvl1_latent_dllm_dataset(
+    vqvae_basic: MultiLvlVQVariationalAutoEncoder,
+) -> LatentLladaSliceDataset:
+    return LatentLladaSliceDataset(
         data_path=os.path.join("tests", "data_slices"),
         slice_level=1,
         slices_per_sample=16,
@@ -236,4 +251,16 @@ def conv_stft_decoder_2d() -> StftDecoder2D:
         n_fft=256,
         hop_length=64,
         win_length=256,
+    )
+
+
+@pytest.fixture
+def token_diffusion_transformer() -> TokenDiffusionTransformer:
+    return TokenDiffusionTransformer(
+        vocab_size=100,
+        cond_size=10,
+        hidden_size=256,
+        num_layers=3,
+        num_heads=4,
+        dropout=0.1,
     )

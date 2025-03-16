@@ -24,6 +24,7 @@ class StftDecoder2D(nn.Module):
         win_length: int,
         activation_fn: nn.Module = nn.GELU(),
         output_conv_hidden_dim: int = 32,
+        dropout: float = 0.1,
         padding: Literal["center", "same"] = "same",
     ):
         super().__init__()
@@ -32,6 +33,7 @@ class StftDecoder2D(nn.Module):
                 "The channel list length must be greater than the dimension change list by 1"
             )
 
+        self._dropout = nn.Dropout(dropout)
         self._activation = activation_fn
         self._end_conv = nn.Sequential(
             nn.Conv1d(1, output_conv_hidden_dim, kernel_size=3, padding=1),
@@ -39,6 +41,7 @@ class StftDecoder2D(nn.Module):
             nn.Conv1d(
                 output_conv_hidden_dim, output_conv_hidden_dim, kernel_size=3, padding=1
             ),
+            self._dropout,
             nn.LeakyReLU(0.2),
             nn.Conv1d(output_conv_hidden_dim, 1, kernel_size=3, padding=1),
         )
@@ -87,16 +90,25 @@ class StftDecoder2D(nn.Module):
         z = z.unsqueeze(-1)
         for conv, dim_change in zip(self.conv_list, self.dim_change_list):
             z = conv(z)
+            z = self._dropout(z)
             z = dim_change(z)
             z = self._activation(z)
         # z = self._pre_stft_layer_norm(z)
 
         z = z.transpose(1, 2).contiguous().flatten(start_dim=2)
+        z = self._dropout(z)
         before_split = self._proj_before_istft(z)
 
         # Create separate tensors for real and imaginary parts
-        real_part = before_split[..., : self._before_istft_dim].clone()
-        imag_part = before_split[..., self._before_istft_dim :].clone()
+        # real_part = before_split[..., : self._before_istft_dim].clone()
+        # imag_part = before_split[..., self._before_istft_dim :].clone()
+
+        # Split to phase and magnitude
+        magnitude = before_split[..., : self._before_istft_dim].clone()
+        phase = before_split[..., self._before_istft_dim :].clone()
+        magnitude = torch.exp(magnitude).clip(max=100)
+        real_part = magnitude * torch.cos(phase)
+        imag_part = magnitude * torch.sin(phase)
 
         # Combine into complex tensor
         complex_z = torch.complex(real_part, imag_part).to(z.device)

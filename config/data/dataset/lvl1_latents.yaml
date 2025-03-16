@@ -1,0 +1,3 @@
+_target_: loaders.datasets.LatentLladaSliceDataset
+data_path: data/lvl1_latents
+slices_per_sample: 32

@@ -199,9 +199,12 @@ class AttentionStftDecoder(Decoder):
         z = self._transformer_encoder(z)
         before_split = self._before_istft_projection(z)
 
-        # Create separate tensors for real and imaginary parts
-        real_part = before_split[..., : self._before_istft_dim].clone()
-        imag_part = before_split[..., self._before_istft_dim :].clone()
+        # Split to phase and magnitude
+        magnitude = before_split[..., : self._before_istft_dim].clone()
+        phase = before_split[..., self._before_istft_dim :].clone()
+        magnitude = torch.exp(magnitude).clip(max=100)
+        real_part = magnitude * torch.cos(phase)
+        imag_part = magnitude * torch.sin(phase)
 
         # Combine into complex tensor
         complex_z = torch.complex(real_part, imag_part).to(z.device)

@@ -276,7 +276,7 @@ class VqganMusicLightningModule(MusicLightningModule):
             self.learning_params.frequency,
         )
         scheduler_settings_d = self._configure_scheduler_settings(
-            self.scheduler_g,
+            self.scheduler_d,
             self.learning_params.interval,
             self.learning_params.loss_monitor,
             self.learning_params.frequency,

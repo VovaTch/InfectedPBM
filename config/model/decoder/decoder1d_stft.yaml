@@ -8,6 +8,7 @@ num_res_block_conv: 5
 dilation_factor: 3
 activation_fn:
   _target_: torch.nn.GELU
+dropout: 0.1
 
 # STFT parameters
 n_fft: 256

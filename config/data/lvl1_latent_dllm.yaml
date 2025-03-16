@@ -1,0 +1,6 @@
+defaults:
+  - _self_
+  - dataset: lvl1_latents
+
+_target_: loaders.data_modules.SplitDatasetModule
+learning_params: ${learning}

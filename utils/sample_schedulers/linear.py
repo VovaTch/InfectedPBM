@@ -27,8 +27,8 @@ class LinearSampleScheduler(SampleScheduler):
     ) -> torch.Tensor:
         if step > self._num_steps:
             raise ValueError("Step must be less than the number of steps.")
-        cover_probability = 1 - step / self._num_steps
-        new_mask = torch.rand_like(prev_mask) < cover_probability
+        uncover_probability = step / self._num_steps
+        new_mask = torch.bernoulli(torch.ones_like(prev_mask) * uncover_probability)
         return new_mask
 
 
@@ -55,25 +55,22 @@ class LinearEntropyBatchSampleScheduler(SampleScheduler):
     ) -> torch.Tensor:
         new_mask = prev_mask.clone()
 
-        attended_logits = logits[
-            step // self._steps_per_batch : step // self._steps_per_batch
-            + self._batch_length
-        ]
+        attended_logit_idx_start = (step // self._steps_per_batch) * self._batch_length
+        attended_logit_idx_end = attended_logit_idx_start + self._batch_length
+
+        attended_logits = logits[attended_logit_idx_start:attended_logit_idx_end]
         attended_masks = new_mask[
-            step // self._steps_per_batch : step // self._steps_per_batch
-            + self._batch_length
+            attended_logit_idx_start:attended_logit_idx_end
         ].clone()
         attended_entropy = (
             -F.softmax(attended_logits, dim=-1) * F.log_softmax(attended_logits, dim=-1)
         ).sum(dim=-1)
         _, sorted_indices = attended_entropy.sort(descending=True)
         tokens_to_uncover = math.ceil(
-            step % self._steps_per_batch * (self._batch_length / self._steps_per_batch)
+            (step % self._steps_per_batch + 1)
+            * (self._batch_length / self._steps_per_batch)
         )
         attended_masks[sorted_indices[:tokens_to_uncover]] = True
-        new_mask[
-            step // self._steps_per_batch : step // self._steps_per_batch
-            + self._batch_length
-        ] = attended_masks
+        new_mask[attended_logit_idx_start:attended_logit_idx_end] = attended_masks
 
         return new_mask

@@ -1,17 +1,17 @@
 defaults: 
   - _self_
-  - data: lvl1_long
+  - data: lvl1_latent_dllm
   - learning: long
-  - loss: ml_vqvae_long
-  - model: ml_vqvae_stft
-  - module: vqgan_music
+  - loss: dllm
+  - model: token_diffusion
+  - module: dllm
   - optimizer: adamw_vqgan
   - scheduler: one_cycle_lr
 
 
 # Project data
 project_name: InfectedPBM
-model_name: lvl1_vqgan
+model_name: lvl1_dllm
 resume: null
 
 # Optimizations
