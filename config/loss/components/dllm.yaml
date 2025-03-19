@@ -1,0 +1,15 @@
+- _target_: loss.components.MaskedClassificationLoss
+  name: masked_ce_loss
+  weight: 1.0
+  base_loss: 
+    _target_: torch.nn.CrossEntropyLoss
+  pred_key: logits
+  ref_key: latent
+  mask_key: mask
+
+- _target_: loss.components.MaskedPercentCorrect
+  name: masked_percent_correct
+  weight: 0.0
+  pred_key: logits
+  ref_key: latent
+  mask_key: mask

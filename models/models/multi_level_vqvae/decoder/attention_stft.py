@@ -149,8 +149,8 @@ class AttentionStftDecoder(Decoder):
         self._in_projection = nn.ConvTranspose1d(
             in_channels=input_dim,
             out_channels=hidden_dim * expansion_factor,
-            kernel_size=expansion_factor + 1,
-            padding=(expansion_factor + 1) // 2,
+            kernel_size=expansion_factor + 1 if expansion_factor > 1 else 1,
+            padding=(expansion_factor + 1) // 2 if expansion_factor > 1 else 0,
         )
         self._expansion_factor = expansion_factor
         self._before_istft_projection = nn.Linear(

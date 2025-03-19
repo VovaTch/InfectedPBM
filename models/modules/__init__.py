@@ -3,3 +3,4 @@ from .autoregressor import AutoRegressorModule
 from .music import MusicLightningModule
 from .ripl import RippleNetModule
 from .vqgan_music import VqganMusicLightningModule
+from .diffusion_llm import DiffusionLLMLightningModule

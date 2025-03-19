@@ -1,3 +1,15 @@
 _target_: loaders.datasets.LatentLladaSliceDataset
-data_path: data/lvl1_latents
-slices_per_sample: 32
+data_path: data/slices
+tokens_per_sample: 512
+tokenizer: 
+  _target_: models.models.AutoModelLoader
+  config_path: trained/lvl1_vqvae/config.yaml
+  weights_path: trained/lvl1_vqvae/model.ckpt
+tokenizing_batch_size: 32
+device: cpu
+tokenizing_device: cuda
+channel_first_data: False
+sample_rate: 44100
+processed_path: data/lvl1_latents
+save_processed: True
+slice_level: 1

@@ -111,7 +111,7 @@ def lvl1_latent_dataset(
     return LatentSliceDataset(
         data_path=os.path.join("tests", "data_slices"),
         slice_level=1,
-        slices_per_sample=16,
+        tokens_per_sample=16,
         tokenizer=vqvae_basic,
         device="cpu",
     )
@@ -124,7 +124,7 @@ def lvl1_latent_dllm_dataset(
     return LatentLladaSliceDataset(
         data_path=os.path.join("tests", "data_slices"),
         slice_level=1,
-        slices_per_sample=16,
+        tokens_per_sample=16,
         tokenizer=vqvae_basic,
         device="cpu",
     )

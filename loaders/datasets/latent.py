@@ -84,7 +84,7 @@ class LatentSliceDataset(Dataset):
     def __init__(
         self,
         data_path: str,
-        slices_per_sample: int,
+        tokens_per_sample: int,
         tokenizer: Tokenizer | None = None,
         tokenizing_batch_size: int = 32,
         device: str = "cpu",
@@ -117,7 +117,7 @@ class LatentSliceDataset(Dataset):
         super().__init__()
 
         self._data_path = data_path
-        self._slices_per_sample = slices_per_sample
+        self._tokens_per_sample = tokens_per_sample
         self._device = device
         self._sample_rate = sample_rate
         self._tokenizing_batch_size = tokenizing_batch_size
@@ -240,21 +240,21 @@ class LatentSliceDataset(Dataset):
                     dim=0,
                 )
 
-        num_token_slices = collected_tokenized_slices.shape[0]
+        num_tokens = collected_tokenized_slices.shape[0]
         data_points: list[LatentDataPoint] = []
-        for idx in range(num_token_slices // self._slices_per_sample + 1):
+        for idx in range(num_tokens // self._tokens_per_sample + 1):
 
-            if idx < num_token_slices // self._slices_per_sample:
+            if idx < num_tokens // self._tokens_per_sample:
                 latent_slice = collected_tokenized_slices[
-                    idx * self._slices_per_sample : (idx + 1) * self._slices_per_sample
+                    idx * self._tokens_per_sample : (idx + 1) * self._tokens_per_sample
                 ]
-            elif num_token_slices % self._slices_per_sample != 0:
+            elif num_tokens % self._tokens_per_sample != 0:
                 partial_slice = collected_tokenized_slices[
-                    idx * self._slices_per_sample : num_token_slices
+                    idx * self._tokens_per_sample : num_tokens
                 ]
                 latent_slice = F.pad(
                     partial_slice,
-                    (0, 0, 0, self._slices_per_sample - partial_slice.shape[0]),
+                    (0, 0, 0, self._tokens_per_sample - partial_slice.shape[0]),
                 )
             else:
                 continue
@@ -265,7 +265,7 @@ class LatentSliceDataset(Dataset):
                 latent=latent_slice.to(self._device),
                 latent_path=latent_file_name,
                 slice_path=file,
-                slice_idx=idx * self._slices_per_sample,
+                slice_idx=idx * self._tokens_per_sample,
                 latent_idx=idx,
                 latent_init_idx=running_idx,
                 track_init_time=0,  # TODO: currently 0, might need to change later
@@ -317,7 +317,7 @@ class LatentSliceDataset(Dataset):
         metadata_path = os.path.join(path, "_metadata.json")
         metadata_for_json = [buffer_data.get_metadata() for buffer_data in self.buffer]
         with open(metadata_path, "w") as f:
-            json.dump(metadata_for_json, f)
+            json.dump(metadata_for_json, f, indent=4)
 
         file_mapping = {
             buffer_data.slice_path: buffer_data.latent_path

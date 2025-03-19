@@ -101,3 +101,40 @@ class MaskedClassificationLoss(LossComponent):
             logits = pred[self.pred_key][mask].permute(0, 2, 1)
         labels = target[self.ref_key][mask]
         return self.base_loss(logits, labels)
+
+
+@dataclass
+class MaskedPercentCorrect(LossComponent):
+    """
+    Classification loss with masking, mostly used in Diffusion LLM training
+    """
+
+    name: str
+    weight: float
+    pred_key: str
+    ref_key: str
+    mask_key: str
+    base_loss: nn.Module | None = None
+    differentiable: bool = False
+
+    def __call__(
+        self, pred: dict[str, torch.Tensor], target: dict[str, torch.Tensor]
+    ) -> torch.Tensor:
+        """
+        Call method for outputting the loss
+
+        Args:
+            pred (dict[str, torch.Tensor]): Network estimation
+            target (dict[str, torch.Tensor]): Ground truth reference
+
+        Returns:
+            torch.Tensor: loss
+        """
+        mask = target[self.mask_key]
+        if pred[self.pred_key].dim() == 4:
+            logits = pred[self.pred_key][mask].permute(0, 3, 1, 2)
+        elif pred[self.pred_key].dim() == 3:
+            logits = pred[self.pred_key][mask].permute(0, 2, 1)
+        pred_logits_argmax = torch.argmax(logits, dim=1)
+        correct = torch.sum(pred_logits_argmax == target[self.ref_key][mask])
+        return correct / torch.numel(pred_logits_argmax)

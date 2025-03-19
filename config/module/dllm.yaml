@@ -1,0 +1,9 @@
+_target_: models.modules.DiffusionLLMLightningModule
+model: ${model}
+learning_params: ${learning}
+loss_aggregator: ${loss.aggregator}
+sample_scheduler: 
+  _target_: utils.sample_schedulers.LinearSampleScheduler
+  num_steps: 50
+optimizer_cfg: ${optimizer}
+scheduler_cfg: ${scheduler}
