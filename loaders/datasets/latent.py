@@ -129,6 +129,7 @@ class LatentSliceDataset(Dataset):
             logger.info(f"Loading processed data from {processed_path}...")
             self.buffer = self._load_data(processed_path)
             logger.info("Loaded processed data")
+            self._track_name_to_idx_mapping = self._attach_index_to_file_path()
             return
 
         if tokenizer is None:

@@ -64,7 +64,10 @@ class TokenDiffusionTransformer(TokenDiffusionModel):
         self._transformer_decoder = nn.TransformerDecoder(
             transformer_decoder_layer, num_layers=num_layers
         )
-        self._post_transformer_proj = nn.Linear(hidden_size, vocab_size)
+        self._post_transformer_proj = nn.Linear(hidden_size, vocab_size + 1, bias=False)
+
+        # Weight sharing
+        self._post_transformer_proj.weight = self._token_embedding.weight
 
     def forward(
         self,
@@ -97,6 +100,9 @@ class TokenDiffusionTransformer(TokenDiffusionModel):
         else:
             cond_embedding = self._cond_embeddings.forward(conditional)
 
+        if cond_embedding.dim() == 2:
+            cond_embedding = cond_embedding.unsqueeze(1)
+
         # Set mask
         if mask is None:
             mask = torch.ones(
@@ -119,5 +125,5 @@ class TokenDiffusionTransformer(TokenDiffusionModel):
         # Project to vocab size
         output = self._post_transformer_proj.forward(t_outputs)
         return output.reshape(
-            batch_size, seq_len, num_codebooks, self._vocab_size
+            batch_size, seq_len, num_codebooks, self._vocab_size + 1
         ).contiguous()

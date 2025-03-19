@@ -1,6 +1,8 @@
 from typing import Any
 
 import torch
+
+from loaders.datasets.latent import Tokenizer
 from .latent import LatentSliceDataset
 
 

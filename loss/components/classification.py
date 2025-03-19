@@ -96,9 +96,9 @@ class MaskedClassificationLoss(LossComponent):
         """
         mask = target[self.mask_key]
         if pred[self.pred_key].dim() == 4:
-            logits = pred[self.pred_key][mask].permute(0, 3, 1, 2)
-        elif pred[self.pred_key].dim() == 3:
             logits = pred[self.pred_key][mask].permute(0, 2, 1)
+        elif pred[self.pred_key].dim() == 3:
+            logits = pred[self.pred_key][mask]
         labels = target[self.ref_key][mask]
         return self.base_loss(logits, labels)
 
@@ -132,9 +132,9 @@ class MaskedPercentCorrect(LossComponent):
         """
         mask = target[self.mask_key]
         if pred[self.pred_key].dim() == 4:
-            logits = pred[self.pred_key][mask].permute(0, 3, 1, 2)
-        elif pred[self.pred_key].dim() == 3:
             logits = pred[self.pred_key][mask].permute(0, 2, 1)
+        elif pred[self.pred_key].dim() == 3:
+            logits = pred[self.pred_key][mask]
         pred_logits_argmax = torch.argmax(logits, dim=1)
         correct = torch.sum(pred_logits_argmax == target[self.ref_key][mask])
         return correct / torch.numel(pred_logits_argmax)
