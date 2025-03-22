@@ -9,6 +9,7 @@ from .attention_stft import ISTFT
 
 
 class StftDecoder1D(nn.Module):
+
     def __init__(
         self,
         channel_list: list[int],
@@ -22,6 +23,8 @@ class StftDecoder1D(nn.Module):
         hop_length: int,
         win_length: int,
         activation_fn: nn.Module = nn.GELU(),
+        dropout: float = 0.1,
+        output_conv_hidden_dim: int = 32,
         padding: Literal["center", "same"] = "same",
     ):
         super().__init__()
@@ -30,8 +33,18 @@ class StftDecoder1D(nn.Module):
                 "The channel list length must be greater than the dimension change list by 1"
             )
 
+        self._dropout = nn.Dropout(dropout)
         self._activation = activation_fn
-        self._end_conv = nn.Conv1d(1, input_channels, kernel_size=3, padding=1)
+        self._end_conv = nn.Sequential(
+            nn.Conv1d(1, output_conv_hidden_dim, kernel_size=3, padding=1),
+            self._activation,
+            nn.Conv1d(
+                output_conv_hidden_dim, output_conv_hidden_dim, kernel_size=3, padding=1
+            ),
+            self._dropout,
+            self._activation,
+            nn.Conv1d(output_conv_hidden_dim, 1, kernel_size=3, padding=1),
+        )
         self._istft = ISTFT(n_fft, hop_length, win_length, padding)
         self._before_istft_dim = n_fft // 2 + 1
         self._proj_before_istft = nn.Linear(
@@ -79,6 +92,7 @@ class StftDecoder1D(nn.Module):
             zip(self.conv_list, self.dim_change_list)
         ):
             z = conv(z)
+            z = self._dropout(z)
             z = dim_change(z)
             z = self._activation(z)
 
@@ -88,6 +102,7 @@ class StftDecoder1D(nn.Module):
             .contiguous()
         )
         z = z.transpose(1, 2).contiguous()
+        z = self._dropout(z)
         before_split = self._proj_before_istft(z)
 
         # Create separate tensors for real and imaginary parts

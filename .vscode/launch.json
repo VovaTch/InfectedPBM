@@ -21,5 +21,15 @@
                 "--config-name=lvl1_dllm"
             ]
         },
+                {
+            "name": "Python Debugger: Train Lvl2",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.train",
+            "console": "integratedTerminal",
+            "args": [
+                "--config-name=lvl2_vqvae"
+            ]
+        },
     ]
 }

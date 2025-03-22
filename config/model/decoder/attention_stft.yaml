@@ -1,11 +1,11 @@
 _target_: models.models.multi_level_vqvae.decoder.AttentionStftDecoder
 input_dim: 512
 num_heads: 16
-hidden_dim: 768
+hidden_dim: 1024
 num_layers: 8
-n_fft: 1024
+n_fft: 514
 hop_length: 512 # Must be equal to the sequence length reduction ration in the encoder divided by the expansion factor
-win_length: 1024
+win_length: 514
 expansion_factor: 1
 dropout: 0.1
 padding: same

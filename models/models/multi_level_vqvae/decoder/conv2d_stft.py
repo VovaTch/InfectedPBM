@@ -15,7 +15,6 @@ class StftDecoder2D(nn.Module):
         self,
         channel_list: list[int],
         dim_change_list: list[int],
-        input_channels: int,
         kernel_size: int,
         dim_add_kernel_add: int,
         num_res_block_conv: int,
@@ -100,15 +99,15 @@ class StftDecoder2D(nn.Module):
         before_split = self._proj_before_istft(z)
 
         # Create separate tensors for real and imaginary parts
-        # real_part = before_split[..., : self._before_istft_dim].clone()
-        # imag_part = before_split[..., self._before_istft_dim :].clone()
+        real_part = before_split[..., : self._before_istft_dim].clone()
+        imag_part = before_split[..., self._before_istft_dim :].clone()
 
         # Split to phase and magnitude
-        magnitude = before_split[..., : self._before_istft_dim].clone()
-        phase = before_split[..., self._before_istft_dim :].clone()
-        magnitude = torch.exp(magnitude).clip(max=100)
-        real_part = magnitude * torch.cos(phase)
-        imag_part = magnitude * torch.sin(phase)
+        # magnitude = before_split[..., : self._before_istft_dim].clone()
+        # phase = before_split[..., self._before_istft_dim :].clone()
+        # magnitude = torch.exp(magnitude).clip(max=100)
+        # real_part = magnitude * torch.cos(phase)
+        # imag_part = magnitude * torch.sin(phase)
 
         # Combine into complex tensor
         complex_z = torch.complex(real_part, imag_part).to(z.device)

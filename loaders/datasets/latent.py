@@ -30,7 +30,7 @@ class LatentDataPoint:
         slice_idx (int): The index of the slice.
         latent_idx (int): The index of the latent tensor.
         latent_init_idx (int): The initial index of the latent tensor.
-        track_init_time (float): The time stamp at the original file. TODO: add
+        slice_init_time (float): The time stamp at the original file. TODO: add
 
     Methods:
         get_metadata() -> dict[str, int | str | None | float]:
@@ -45,7 +45,7 @@ class LatentDataPoint:
     slice_idx: int
     latent_idx: int
     latent_init_idx: int
-    track_init_time: float
+    slice_init_time: float
 
     def get_metadata(self) -> dict[str, int | str | None | float]:
         """
@@ -67,7 +67,7 @@ class LatentDataPoint:
             "slice_level": self.slice_level,
             "latent_idx": self.latent_idx,
             "latent_init_idx": self.latent_init_idx,
-            "track_init_time": self.track_init_time,
+            "slice_init_time": self.slice_init_time,
             "latent_path": self.latent_path,
             "slice_path": self.slice_path,
             "slice_idx": self.slice_idx,
@@ -168,10 +168,14 @@ class LatentSliceDataset(Dataset):
 
         # Create slice file list
         self.file_list = []
+        self._loaded_metadata = []
         for root, _, files in os.walk(data_path):
             for file in files:
                 if file.endswith(".pt"):
                     self.file_list.append(os.path.join(root, file))
+                elif file.endswith(".json"):
+                    with open(os.path.join(root, file), "r") as f:
+                        self._loaded_metadata = json.load(f)
         self.file_list = sorted(self.file_list)
 
         # Load data from files
@@ -210,6 +214,7 @@ class LatentSliceDataset(Dataset):
         """
         print(f"Loading data from {file}")
         slices: torch.Tensor = torch.load(file).to(self._tokenizing_device)
+        time_per_slice = slices.shape[-1] / self._sample_rate
         if self._channel_first:
             slices = slices.transpose(1, 2).contiguous()
         slice_loader = DataLoader(
@@ -235,6 +240,7 @@ class LatentSliceDataset(Dataset):
 
             if idx == 0:
                 collected_tokenized_slices = tokenized_batch.flatten(end_dim=1)
+                time_per_token = time_per_slice / tokenized_batch.shape[-2]
             else:
                 collected_tokenized_slices = torch.cat(
                     (collected_tokenized_slices, tokenized_batch.flatten(end_dim=1)),
@@ -269,7 +275,7 @@ class LatentSliceDataset(Dataset):
                 slice_idx=idx * self._tokens_per_sample,
                 latent_idx=idx,
                 latent_init_idx=running_idx,
-                track_init_time=0,  # TODO: currently 0, might need to change later
+                slice_init_time=idx * time_per_token * self._tokens_per_sample,
             )
             data_points.append(data_point)
 

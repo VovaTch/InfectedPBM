@@ -212,7 +212,7 @@ class AttentionStftDecoder(Decoder):
         # Continue with ISTFT
         output_z = self.istft(complex_z.transpose(1, 2).contiguous())
         output_z = self.last_layer(output_z.unsqueeze(1)) + output_z.unsqueeze(1)
-        return output_z
+        return torch.tanh(output_z)
 
     @property
     def last_layer(self) -> nn.Module:

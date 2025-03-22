@@ -156,3 +156,54 @@ class MultiLvlVQVariationalAutoEncoder(Tokenizer):
             nn.Module: The last layer of the model.
         """
         return self.decoder.last_layer
+
+
+class EmbeddingMlVqvae(MultiLvlVQVariationalAutoEncoder):
+    """
+    A variation designed for handling token sequences. It uses an additional embedding layer to convert the token
+    indices to embeddings before feeding them to the encoder.
+    """
+
+    def __init__(
+        self,
+        input_channels: int,
+        encoder: nn.Module,
+        decoder: Decoder,
+        vq_module: InterfaceVQ1D,
+        outer_vocab_size: int,
+        loss_aggregator: LossAggregator | None = None,
+        **kwargs,
+    ) -> None:
+        """
+        Initializes the Multi-Level VQ-VAE model.
+
+        Args:
+            input_channels (int): Number of input channels for the encoder, also used as the embedding dim.
+            encoder (nn.Module): The encoder module for the model.
+            decoder (Decoder): The decoder module for the model.
+            vq_module (InterfaceVQ1D): The vector quantization module.
+            outer_vocab_size (int): Size of the outer vocabulary for embeddings.
+            loss_aggregator (LossAggregator | None, optional): An optional loss aggregator for combining losses.
+                Defaults to None.
+            **kwargs: Additional keyword arguments for the parent class initialization.
+
+        """
+        super().__init__(
+            input_channels, encoder, decoder, vq_module, loss_aggregator, **kwargs
+        )
+        self.outer_vocab_size = outer_vocab_size
+        self.outer_embedding = nn.Embedding(outer_vocab_size, input_channels)
+
+    def encode(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Forward method for the model
+
+        Args:
+            x (torch.Tensor): Indices tensor, size (batch_size, seq_len, num_codebooks_outer)
+
+        Returns:
+            torch.Tensor: Encoded tensor, size (batch_size, inner_seq_len, num_codebooks_inner)
+        """
+        x_emb = self.outer_embedding.forward(x)
+        x_emb = x_emb.sum(dim=2)
+        return super().encode(x_emb)
