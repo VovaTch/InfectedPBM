@@ -30,7 +30,7 @@ class LatentDataPoint:
         slice_idx (int): The index of the slice.
         latent_idx (int): The index of the latent tensor.
         latent_init_idx (int): The initial index of the latent tensor.
-        slice_init_time (float): The time stamp at the original file. TODO: add
+        slice_init_time (float): The time stamp at the original file.
 
     Methods:
         get_metadata() -> dict[str, int | str | None | float]:

@@ -1,16 +1,16 @@
 _target_: models.models.multi_level_vqvae.decoder.StftDecoder2D
-channel_list: [512, 1024, 512, 256, 128]
-dim_change_list: [2, 2, 2, 2]
+channel_list: [512, 1024, 512]
+dim_change_list: [2, 2]
 kernel_size: 3
 dim_add_kernel_add: 0
 num_res_block_conv: 5
 activation_fn:
-  _target_: torch.nn.LeakyReLU
-  negative_slope: 0.1
-dropout: 0.2
+  _target_: torch.nn.GELU
+dropout: 0.13
+dilation_factor: 2
 
 # STFT parameters
-n_fft: 128
-hop_length: 32
-win_length: 128
+n_fft: 512
+hop_length: 128
+win_length: 512
 # Sequence length must be latent_size * hop_length * prod(dim_change_list)

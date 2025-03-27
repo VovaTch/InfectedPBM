@@ -24,6 +24,7 @@ class StftDecoder2D(nn.Module):
         activation_fn: nn.Module = nn.GELU(),
         output_conv_hidden_dim: int = 32,
         dropout: float = 0.1,
+        dilation_factor: int = 1,
         padding: Literal["center", "same"] = "same",
     ):
         super().__init__()
@@ -58,6 +59,7 @@ class StftDecoder2D(nn.Module):
                     num_res_conv=num_res_block_conv,
                     kernel_size=(kernel_size, kernel_size),
                     activation_fn=activation_fn,
+                    dilation_factor=dilation_factor,
                 )
                 for idx in range(1, len(dim_change_list))
             ]
