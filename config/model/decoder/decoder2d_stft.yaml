@@ -6,8 +6,12 @@ dim_add_kernel_add: 0
 num_res_block_conv: 5
 activation_fn:
   _target_: torch.nn.GELU
+<<<<<<< HEAD
 dropout: 0.13
 dilation_factor: 2
+=======
+dropout: 0.1
+>>>>>>> bae3ae9ff7b1d5d0d439caac14f2aaadca1daf97
 
 # STFT parameters
 n_fft: 512
