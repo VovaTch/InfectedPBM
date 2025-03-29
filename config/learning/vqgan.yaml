@@ -5,11 +5,11 @@ _target_: utils.learning.LearningParameters
 model_name: ${model_name}
 
 # Learning parameters
-learning_rate: 0.001
+learning_rate: 0.0002
 weight_decay: 0.1
-batch_size: 64
+batch_size: 8
 grad_accumulation: 1
-epochs: 700
+epochs: 1500
 beta_ema: 0.99
 gradient_clip: null # Do not touch; manual mode training in Lightning does not support gradient clipping
 save_path: saved/

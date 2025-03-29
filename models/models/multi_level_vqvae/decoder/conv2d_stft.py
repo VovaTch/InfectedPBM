@@ -85,7 +85,7 @@ class StftDecoder2D(nn.Module):
 
     @property
     def last_layer(self) -> nn.Module:
-        return self._end_conv
+        return self._end_conv[-1]
 
     def forward(self, z: torch.Tensor) -> torch.Tensor:
         z = z.unsqueeze(-1)
