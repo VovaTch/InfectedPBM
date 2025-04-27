@@ -7,6 +7,7 @@ import tqdm
 
 from utils.logger import logger
 
+
 def main(args: argparse.Namespace) -> None:
 
     os.makedirs(args.output_dir, exist_ok=True)
