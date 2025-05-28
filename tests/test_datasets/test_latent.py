@@ -31,7 +31,7 @@ def test_dataset_process_files(
         lvl1_latent_dataset.buffer = lvl1_latent_dataset._load_data(temp_dir)
         assert os.path.isfile(os.path.join(temp_dir, "_metadata.json"))
         assert len(lvl1_latent_dataset.buffer) == 368
-        assert lvl1_latent_dataset.buffer[0].indices.shape == (16, 4)
+        assert lvl1_latent_dataset.buffer[0].latent.shape == (16, 4)
 
 
 def test_dataset_dllm_get_data(

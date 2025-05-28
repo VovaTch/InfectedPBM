@@ -244,7 +244,6 @@ def conv_stft_decoder_2d() -> StftDecoder2D:
     return StftDecoder2D(
         channel_list=[64, 16, 8, 4, 2],
         dim_change_list=[2, 2, 2, 2],
-        input_channels=1,
         kernel_size=3,
         dim_add_kernel_add=2,
         num_res_block_conv=3,

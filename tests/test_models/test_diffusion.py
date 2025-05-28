@@ -7,7 +7,16 @@ def test_token_diffusion_transformer_forward_inputs_only(
 ) -> None:
     dummy_input = torch.randint(0, 100, (3, 128, 4))  # BS x L
     dummy_output = token_diffusion_transformer.forward(dummy_input)
-    assert dummy_output.shape == (3, 128, 4, 100)  # BS x C x L
+    assert dummy_output.shape == (3, 128, 4, 101)  # BS x C x L
+
+
+def test_token_diffusion_transformer_forward_inputs_only_cuda(
+    token_diffusion_transformer: TokenDiffusionTransformer,
+) -> None:
+    token_diffusion_transformer = token_diffusion_transformer.to("cuda")
+    dummy_input = torch.randint(0, 100, (3, 128, 4)).to("cuda")  # BS x L
+    dummy_output = token_diffusion_transformer.forward(dummy_input)
+    assert dummy_output.shape == (3, 128, 4, 101)  # BS x C x L
 
 
 def test_token_diffusion_transformer_forward_with_mask(
@@ -16,4 +25,14 @@ def test_token_diffusion_transformer_forward_with_mask(
     dummy_input = torch.randint(0, 100, (3, 128, 4))  # BS x L
     dummy_mask = torch.randint(0, 2, (3, 128)).bool()  # BS x L
     dummy_output = token_diffusion_transformer.forward(dummy_input, mask=dummy_mask)
-    assert dummy_output.shape == (3, 128, 4, 100)  # BS x C x L
+    assert dummy_output.shape == (3, 128, 4, 101)  # BS x C x L
+
+
+def test_token_diffusion_transformer_forward_with_mask_cuda(
+    token_diffusion_transformer: TokenDiffusionTransformer,
+) -> None:
+    token_diffusion_transformer = token_diffusion_transformer.to("cuda")
+    dummy_input = torch.randint(0, 100, (3, 128, 4)).to("cuda")  # BS x L
+    dummy_mask = torch.randint(0, 2, (3, 128)).bool().to("cuda")  # BS x L
+    dummy_output = token_diffusion_transformer.forward(dummy_input, mask=dummy_mask)
+    assert dummy_output.shape == (3, 128, 4, 101)  # BS x C x L
