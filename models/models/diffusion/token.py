@@ -64,10 +64,12 @@ class TokenDiffusionTransformer(TokenDiffusionModel):
         self._transformer_decoder = nn.TransformerDecoder(
             transformer_decoder_layer, num_layers=num_layers
         )
-        self._post_transformer_proj = nn.Linear(hidden_size, vocab_size + 1, bias=False)
+        self._post_transformer_proj = nn.Linear(hidden_size, vocab_size, bias=False)
 
         # Weight sharing
-        self._post_transformer_proj.weight = self._token_embedding.weight
+        self._post_transformer_proj.weight = nn.Parameter(
+            self._token_embedding.weight[:-1, ...]
+        )
 
     def forward(
         self,
@@ -111,7 +113,9 @@ class TokenDiffusionTransformer(TokenDiffusionModel):
         mask = mask.clone()
 
         masked_inputs = input.clone()
-        masked_inputs[mask] = self._vocab_size
+        masked_inputs[~mask] = (
+            self._vocab_size
+        )  # Not sure whether the indices should be True for masking or False for masking.
 
         # Get embeddings + positional encodings
         token_embedding = self._token_embedding.forward(masked_inputs).flatten(
@@ -125,5 +129,5 @@ class TokenDiffusionTransformer(TokenDiffusionModel):
         # Project to vocab size
         output = self._post_transformer_proj.forward(t_outputs)
         return output.reshape(
-            batch_size, seq_len, num_codebooks, self._vocab_size + 1
+            batch_size, seq_len, num_codebooks, self._vocab_size
         ).contiguous()
