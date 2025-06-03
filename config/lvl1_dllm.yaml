@@ -5,7 +5,7 @@ defaults:
   - loss: dllm
   - model: token_diffusion
   - module: dllm
-  - optimizer: adamw_vqgan
+  - optimizer: adamw_standard
   - scheduler: one_cycle_lr
 
 
