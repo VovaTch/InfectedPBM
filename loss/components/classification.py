@@ -94,7 +94,7 @@ class MaskedClassificationLoss(LossComponent):
         Returns:
             torch.Tensor: loss
         """
-        mask = target[self.mask_key]
+        mask = ~target[self.mask_key]
         if pred[self.pred_key].dim() == 4:
             logits = pred[self.pred_key][mask].permute(0, 2, 1)
         elif pred[self.pred_key].dim() == 3:
@@ -130,7 +130,7 @@ class MaskedPercentCorrect(LossComponent):
         Returns:
             torch.Tensor: loss
         """
-        mask = target[self.mask_key]
+        mask = ~target[self.mask_key]
         if pred[self.pred_key].dim() == 4:
             logits = pred[self.pred_key][mask].permute(0, 2, 1)
         elif pred[self.pred_key].dim() == 3:
