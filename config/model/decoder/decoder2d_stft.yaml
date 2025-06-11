@@ -1,5 +1,5 @@
 _target_: models.models.multi_level_vqvae.decoder.StftDecoder2D
-channel_list: [512, 1024, 512]
+channel_list: [1024, 2048, 1024]
 dim_change_list: [2, 2]
 kernel_size: 3
 dim_add_kernel_add: 0

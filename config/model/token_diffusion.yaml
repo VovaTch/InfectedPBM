@@ -1,6 +1,6 @@
 _target_: models.models.diffusion.TokenDiffusionTransformer
-vocab_size: 3072
-cond_size: 2
+vocab_size: 8192 # Should be equal to the codebook size
+cond_size: 53 # Should be equal to the number of datapoints
 hidden_size: 512
 num_layers: 6
 num_heads: 8

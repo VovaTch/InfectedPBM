@@ -1,7 +1,7 @@
 target: torch.optim.lr_scheduler.OneCycleLR
 max_lr: ${learning.learning_rate}
 epochs: ${learning.epochs}
-steps_per_epoch: 223
+steps_per_epoch: 891
 pct_start: 0.1
 anneal_strategy: cos
 
