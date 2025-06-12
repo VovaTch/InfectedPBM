@@ -31,6 +31,16 @@ class LinearSampleScheduler(SampleScheduler):
         new_mask = torch.bernoulli(torch.ones_like(prev_mask) * uncover_probability)
         return new_mask
 
+    @property
+    def num_steps(self) -> int:
+        """
+        Returns the number of steps in the sampling process.
+
+        Returns:
+            int: The number of steps.
+        """
+        return self._num_steps
+
 
 class LinearEntropyBatchSampleScheduler(SampleScheduler):
     """
@@ -74,3 +84,13 @@ class LinearEntropyBatchSampleScheduler(SampleScheduler):
         new_mask[attended_logit_idx_start:attended_logit_idx_end] = attended_masks
 
         return new_mask
+
+    @property
+    def num_steps(self) -> int:
+        """
+        Returns the number of steps in the sampling process.
+
+        Returns:
+            int: The number of steps.
+        """
+        return self._batch_length * self._steps_per_batch

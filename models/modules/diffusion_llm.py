@@ -81,6 +81,10 @@ class DiffusionLLMLightningModule(BaseLightningModule):
         init_latent: torch.Tensor | None = None,
         init_step: int = 0,
         conditional: torch.Tensor | None = None,
+        seq_len: int = 512,
+        rq_codebooks: int = 4,
+        vocab_size: int = 8192,
+        temperature: float = 0.7,
     ) -> torch.Tensor:
         """
         Generates a tensor based on the provided initial latent tensor, initial step, and conditional tensor.
@@ -95,4 +99,26 @@ class DiffusionLLMLightningModule(BaseLightningModule):
         Returns:
             torch.Tensor: The generated tensor.
         """
-        raise NotImplementedError("TODO: needs to be implemented")
+
+        num_steps = self._sample_scheduler.num_steps
+        current_latent = (
+            init_latent
+            if init_latent is not None
+            else torch.zeros((1, seq_len, rq_codebooks)).to(self._device)
+        )
+        current_logits = torch.randn((1, seq_len, vocab_size), device=self._device)
+        current_mask = torch.zeros_like(current_latent, dtype=torch.bool)
+        for step in range(num_steps):
+            current_mask = self._sample_scheduler.sample(
+                step, current_mask, current_logits
+            )
+            if step > init_step:
+                current_logits = self.model(current_latent, conditional, current_mask)[
+                    "logits"
+                ]
+                logits_probs = torch.distributions.Categorical(
+                    current_logits**temperature
+                )
+                sampled_latent = logits_probs.sample()
+                current_latent[~current_mask] = sampled_latent[~current_mask]
+        return current_latent

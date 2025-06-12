@@ -6,6 +6,17 @@ import torch
 class SampleScheduler(ABC):
 
     @abstractmethod
+    @property
+    def num_steps(self) -> int:
+        """
+        Returns the number of steps in the sampling process.
+
+        Returns:
+            int: The number of steps.
+        """
+        ...
+
+    @abstractmethod
     def sample(
         self, step: int, prev_mask: torch.Tensor, logits: torch.Tensor
     ) -> torch.Tensor:
