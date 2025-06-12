@@ -2,6 +2,7 @@ from typing import Any
 
 import torch
 import torch.nn as nn
+import tqdm
 
 from loss.aggregators import LossOutput
 from utils.containers import LearningParameters
@@ -110,7 +111,9 @@ class DiffusionLLMLightningModule(BaseLightningModule):
         )
         current_logits = torch.randn((1, seq_len, vocab_size), device=self._device)
         current_mask = torch.zeros_like(current_latent[:, :, 0], dtype=torch.bool)
-        for step in range(num_steps):
+        for step in tqdm.tqdm(
+            range(num_steps), desc="Generating a tokenized sound sample..."
+        ):
             current_mask = self._sample_scheduler.sample(
                 step, current_mask, current_logits
             ).to(dtype=torch.bool)
