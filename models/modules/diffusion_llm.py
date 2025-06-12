@@ -99,6 +99,8 @@ class DiffusionLLMLightningModule(BaseLightningModule):
         Returns:
             torch.Tensor: The generated tensor.
         """
+        if temperature < 0:
+            raise ValueError("Temperature must be non-negative.")
 
         num_steps = self._sample_scheduler.num_steps
         current_latent = (
@@ -107,18 +109,17 @@ class DiffusionLLMLightningModule(BaseLightningModule):
             else torch.zeros((1, seq_len, rq_codebooks)).to(self._device)
         )
         current_logits = torch.randn((1, seq_len, vocab_size), device=self._device)
-        current_mask = torch.zeros_like(current_latent, dtype=torch.bool)
+        current_mask = torch.zeros_like(current_latent[:, :, 0], dtype=torch.bool)
         for step in range(num_steps):
             current_mask = self._sample_scheduler.sample(
                 step, current_mask, current_logits
-            )
+            ).to(dtype=torch.bool)
             if step > init_step:
-                current_logits = self.model(current_latent, conditional, current_mask)[
-                    "logits"
-                ]
-                logits_probs = torch.distributions.Categorical(
-                    current_logits**temperature
+                current_logits = self.model(current_latent, conditional, current_mask)
+                cat_probs = torch.softmax(current_logits, dim=-1)
+                cat_distribution = torch.distributions.Categorical(
+                    cat_probs ** (1 / (temperature + 1e-9))
                 )
-                sampled_latent = logits_probs.sample()
+                sampled_latent = cat_distribution.sample()
                 current_latent[~current_mask] = sampled_latent[~current_mask]
         return current_latent

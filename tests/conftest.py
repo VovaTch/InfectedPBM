@@ -23,7 +23,9 @@ from models.models.multi_level_vqvae.decoder.moe_stft import (
 from models.models.multi_level_vqvae.encoder.conv import Encoder1D
 from models.models.multi_level_vqvae.encoder.stft_conv import EncoderConv2D
 from models.models.multi_level_vqvae.ml_vqvae import MultiLvlVQVariationalAutoEncoder
-from utils.containers import MelSpecParameters
+from models.modules.diffusion_llm import DiffusionLLMLightningModule
+from utils.containers import LearningParameters, MelSpecParameters
+from utils.sample_schedulers.linear import LinearSampleScheduler
 
 
 @pytest.fixture
@@ -31,6 +33,16 @@ def mp3_dataset() -> MP3SliceDataset:
     return MP3SliceDataset(
         data_path="tests/data", sample_rate=44100, slice_length=1024, device="cpu"
     )
+
+
+@pytest.fixture
+def learning_params() -> LearningParameters:
+    return LearningParameters(model_name="test_model")
+
+
+@pytest.fixture
+def linear_sample_scheduler() -> LinearSampleScheduler:
+    return LinearSampleScheduler(num_steps=10)
 
 
 @pytest.fixture
@@ -262,4 +274,17 @@ def token_diffusion_transformer() -> TokenDiffusionTransformer:
         num_layers=3,
         num_heads=4,
         dropout=0.1,
+    )
+
+
+@pytest.fixture
+def token_diffusion_module(
+    token_diffusion_transformer: TokenDiffusionTransformer,
+    learning_params: LearningParameters,
+    linear_sample_scheduler: LinearSampleScheduler,
+) -> DiffusionLLMLightningModule:
+    return DiffusionLLMLightningModule(
+        model=token_diffusion_transformer,
+        learning_params=learning_params,
+        sample_scheduler=linear_sample_scheduler,
     )

@@ -5,8 +5,8 @@ import torch
 
 class SampleScheduler(ABC):
 
-    @abstractmethod
     @property
+    @abstractmethod
     def num_steps(self) -> int:
         """
         Returns the number of steps in the sampling process.
