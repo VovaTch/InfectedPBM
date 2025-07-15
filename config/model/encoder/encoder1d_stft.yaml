@@ -1,8 +1,9 @@
 _target_: models.models.multi_level_vqvae.encoder.EncoderConv2D
-channel_list: [2, 64, 128, 256, 512, 1024]
-dim_change_list: [2, 2, 2, 2, 2] # 2^15 / 2^4 / 2^5
+channel_list: [2, 32, 64, 128, 256, 512, 1024]
+dim_change_list: [2, 2, 2, 2, 2, 2] # 2^15 / 2^4 / 2^5
 kernel_size: 5
 num_res_block_conv: 3
+dilation_factor: 3
 n_fft: 1024
 hop_length: 256
 win_length: 1024

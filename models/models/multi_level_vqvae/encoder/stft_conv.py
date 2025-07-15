@@ -20,6 +20,7 @@ class EncoderConv2D(nn.Module):
         hop_length: int,
         win_length: int,
         lstm_hiddem_dim: int = 64,
+        dilation_factor: int = 1,
         activation_fn: nn.Module = nn.GELU(),
     ) -> None:
         """
@@ -58,6 +59,7 @@ class EncoderConv2D(nn.Module):
                     num_res_block_conv,
                     (kernel_size, 1),
                     activation_fn,
+                    dilation_factor=dilation_factor,
                 )
             )
             layers.append(
@@ -82,7 +84,7 @@ class EncoderConv2D(nn.Module):
             num_layers=2,
             batch_first=True,
             bidirectional=True,
-            dropout=0.1,
+            dropout=0.0,
         )
         self._post_lstm_proj = nn.Conv1d(
             lstm_hiddem_dim * 2, channel_list[-1], kernel_size=3, padding=1
