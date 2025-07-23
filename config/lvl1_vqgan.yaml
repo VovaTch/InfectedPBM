@@ -6,7 +6,7 @@ defaults:
   - model: ml_vqvae_stft
   - module: vqgan_music
   - optimizer: adamw_vqgan
-  - scheduler: one_cycle_lr
+  - scheduler: none
 
 
 # Project data
