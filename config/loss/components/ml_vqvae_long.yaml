@@ -17,13 +17,13 @@
 
 - _target_: loss.components.AlignLoss
   name: alignment_loss
-  weight: 0.5
+  weight: 0.05
   base_loss:
     _target_: torch.nn.MSELoss
 
 - _target_: loss.components.CommitLoss
   name: commitment_loss
-  weight: 0.5
+  weight: 0.05
   base_loss:
     _target_: torch.nn.MSELoss
 
