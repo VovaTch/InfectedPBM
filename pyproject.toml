@@ -2,12 +2,10 @@
 name = "infectedpbm"
 version = "0.1.0"
 description = "Music generation project that uses multi-level VQVAEs for encoding/decoding and autoregressive generation"
-authors = [
-    {name = "Vladimir Tchuiev",email = "rmcf126@gmail.com"}
-]
-license = {file = "LICENSE"}
-readme = "README.md"
+authors = [{ name = "Vladimir Tchuiev", email = "rmcf126@gmail.com" }]
 requires-python = ">=3.12"
+readme = "README.md"
+license = { file = "LICENSE" }
 dependencies = [
     "torch (>=2.6.0,<3.0.0)",
     "torchaudio (>=2.6.0,<3.0.0)",
@@ -20,14 +18,13 @@ dependencies = [
     "mamba-ssm (>=2.2.4,<3.0.0)",
     "ipykernel (>=6.29.5,<7.0.0)",
     "graphviz (>=0.20.3,<0.21.0)",
-    "torchview (>=0.2.6,<0.3.0)"
+    "torchview (>=0.2.6,<0.3.0)",
 ]
 
-
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.3.4"
+[dependency-groups]
+dev = ["pytest>=8.3.4,<9"]
 
