@@ -30,6 +30,7 @@ class LearningParameters:
     limit_train_batches: int | float | None = None
     limit_eval_batches: int | float | None = None
     limit_test_batches: int | float | None = None
+    pin_memory: bool = True
 
 
 @dataclass

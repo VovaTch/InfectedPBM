@@ -22,6 +22,7 @@ test_split: 0.01
 # Device parameters
 devices: auto
 num_workers: 4
+pin_memory: true
 
 # Scheduler parameters
 loss_monitor: ${scheduler.module_params.loss_monitor}
