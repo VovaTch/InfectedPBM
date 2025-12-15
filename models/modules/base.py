@@ -239,7 +239,7 @@ class BaseLightningModule(L.LightningModule):
         loss = self.loss_aggregator(output, batch)
         for ind_loss, value in loss.individual.items():
             self.log(
-                f"test_{ind_loss}",
+                f"test/{ind_loss}",
                 value,
                 prog_bar=True,
                 on_step=False,
@@ -248,7 +248,7 @@ class BaseLightningModule(L.LightningModule):
                 batch_size=self.learning_params.batch_size,
             )
         self.log(
-            "test_total",
+            "test/total",
             loss.total,
             prog_bar=True,
             on_step=False,
@@ -294,7 +294,7 @@ def load_inner_model_state_dict(
         return module
 
     try:
-        checkpoint = torch.load(checkpoint_path)
+        checkpoint = torch.load(checkpoint_path, map_location="cpu")
         state_dict = checkpoint["state_dict"]
         module.load_state_dict(state_dict)
 

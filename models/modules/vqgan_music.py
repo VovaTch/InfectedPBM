@@ -322,7 +322,7 @@ class VqganMusicLightningModule(MusicLightningModule):
             optimizer_g (LightningOptimizer): The optimizer for the generator.
         """
         self.log(
-            f"{phase} generator loss",
+            f"{phase}/generator loss",
             generator_loss / (d_weight + 1e-6),
             sync_dist=True,
             batch_size=self.learning_params.batch_size,
@@ -365,7 +365,7 @@ class VqganMusicLightningModule(MusicLightningModule):
             optimizer_d.zero_grad()
 
         self.log(
-            f"{phase} discriminator loss",
+            f"{phase}/discriminator loss",
             disc_loss if self._current_step >= self._generator_start_step else 0,
             sync_dist=True,
             batch_size=self.learning_params.batch_size,

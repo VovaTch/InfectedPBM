@@ -23,7 +23,7 @@ class LearningParameters:
     test_split: float = 0.01
     devices: Any = "auto"
     num_workers: int = 0
-    loss_monitor: str = "validation total loss"
+    loss_monitor: str = "validation/total loss"
     trigger_loss: float = 0.0
     interval: str = "step"
     frequency: int = 1

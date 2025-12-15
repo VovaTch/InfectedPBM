@@ -17,13 +17,13 @@
 
 - _target_: loss.components.AlignLoss
   name: alignment_loss
-  weight: 0.05
+  weight: 0.5
   base_loss:
     _target_: torch.nn.MSELoss
 
 - _target_: loss.components.CommitLoss
   name: commitment_loss
-  weight: 0.05
+  weight: 0.5
   base_loss:
     _target_: torch.nn.MSELoss
 
@@ -36,14 +36,14 @@
   lin_end: 1.0
   pred_key: slice
   ref_key: slice
-  # transform_func: 
+  # transform_func:
   #   _target_: utils.transform_func.log_normal_fixed
   #   _partial_: true
   #   mean: -5
   #   std: 4.7
   mel_spec_converter:
     _target_: models.mel_spec_converters.SimpleMelSpecConverter
-    mel_spec_params: 
+    mel_spec_params:
       _target_: utils.containers.MelSpecParameters
       n_fft: 2048
       f_min: 0
@@ -66,7 +66,7 @@
   ref_key: slice
   mel_spec_converter:
     _target_: models.mel_spec_converters.SimpleMelSpecConverter
-    mel_spec_params: 
+    mel_spec_params:
       _target_: utils.containers.MelSpecParameters
       n_fft: 1024
       f_min: 0
@@ -92,7 +92,7 @@
   ref_key: slice
   mel_spec_converter:
     _target_: models.mel_spec_converters.SimpleMelSpecConverter
-    mel_spec_params: 
+    mel_spec_params:
       _target_: utils.containers.MelSpecParameters
       n_fft: 512
       f_min: 0
@@ -111,7 +111,7 @@
     _target_: torch.nn.L1Loss
   lin_start: 0.5
   lin_end: 10.0
-  # transform_func: 
+  # transform_func:
   #   _target_: utils.transform_func.log_normal_fixed
   #   _partial_: true
   #   mean: -5
@@ -120,7 +120,7 @@
   ref_key: slice
   mel_spec_converter:
     _target_: models.mel_spec_converters.SimpleMelSpecConverter
-    mel_spec_params: 
+    mel_spec_params:
       _target_: utils.containers.MelSpecParameters
       n_fft: 4096
       f_min: 0
@@ -131,7 +131,6 @@
       norm: slaney
       mel_scale: htk
       pad: 0
-
 
 - _target_: loss.components.MelSpecLoss
   name: melspec_loss_5
@@ -144,7 +143,7 @@
   ref_key: slice
   mel_spec_converter:
     _target_: models.mel_spec_converters.SimpleMelSpecConverter
-    mel_spec_params: 
+    mel_spec_params:
       _target_: utils.containers.MelSpecParameters
       n_fft: 512
       f_min: 0
@@ -170,7 +169,7 @@
   ref_key: slice
   mel_spec_converter:
     _target_: models.mel_spec_converters.SimpleMelSpecConverter
-    mel_spec_params: 
+    mel_spec_params:
       _target_: utils.containers.MelSpecParameters
       n_fft: 4096
       f_min: 0
@@ -181,3 +180,4 @@
       norm: slaney
       mel_scale: htk
       pad: 0
+
