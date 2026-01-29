@@ -6,6 +6,8 @@ kernel_size: 3
 dim_add_kernel_add: 0
 num_res_block_conv: 5
 dilation_factor: 3
+# activation_fn:
+#   _target_: torch.nn.LeakyReLU
+#   negative_slope: 0.1
 activation_fn:
-  _target_: torch.nn.LeakyReLU
-  negative_slope: 0.1
+  _target_: models.experimental.NakedSnake
