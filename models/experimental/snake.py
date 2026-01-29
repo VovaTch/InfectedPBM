@@ -66,6 +66,19 @@ class SnakeFunction(Function):
         return grad_x, grad_a
 
 
+class SnakeFuncBasic(Function):
+    @staticmethod
+    def forward(ctx, x: torch.Tensor) -> torch.Tensor:
+        ctx.save_for_backward(x)
+        return x + sin(x).square()
+
+    @staticmethod
+    def backward(ctx, grad_output: torch.Tensor) -> torch.Tensor:
+        (x,) = ctx.saved_tensors
+        grad_x = grad_output * (1 + sin(2 * x))
+        return grad_x
+
+
 class Snake(Module):
     """
     Implementation of the Snake activation function as a torch module.
@@ -141,4 +154,4 @@ class NakedSnake(Module):
         super().__init__()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return SnakeFunction.apply(x, torch.tensor(1.0, device=x.device, dtype=x.dtype))  # type: ignore
+        return SnakeFuncBasic.apply(x)  # type: ignore

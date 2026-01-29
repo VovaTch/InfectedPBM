@@ -75,7 +75,7 @@ def get_trainer(learning_parameters: LearningParameters) -> L.Trainer:
             learning_rate_monitor,
             ema,
         ],
-        strategy="ddp_find_unused_parameters_true",
+        strategy="ddp",
         devices=devices,
         max_epochs=learning_parameters.epochs,
         log_every_n_steps=1,

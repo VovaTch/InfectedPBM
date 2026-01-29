@@ -6,5 +6,7 @@ kernel_size: 3
 dim_add_kernel_add: 0
 num_res_block_conv: 5
 dilation_factor: 3
+# activation_fn:
+#   _target_: torch.nn.GELU
 activation_fn:
-  _target_: torch.nn.GELU
+  _target_: models.experimental.NakedSnake
