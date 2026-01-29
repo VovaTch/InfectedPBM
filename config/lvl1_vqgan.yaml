@@ -1,4 +1,4 @@
-defaults: 
+defaults:
   - _self_
   - data: lvl1_vqvae
   - learning: vqgan
@@ -7,7 +7,6 @@ defaults:
   - module: vqgan_music
   - optimizer: adamw_vqgan
   - scheduler: none
-
 
 # Project data
 project_name: InfectedPBM

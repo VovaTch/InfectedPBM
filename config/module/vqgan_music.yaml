@@ -8,7 +8,7 @@ learning_params: ${learning}
 loss_aggregator: ${loss.aggregator}
 optimizer_cfg: ${optimizer}
 scheduler_cfg: ${scheduler}
-generator_start_step: 1
+generator_start_step: 1000000000000000
 
 discriminator_loss:
   _target_: loss.components.DiscriminatorHingeLoss
@@ -22,4 +22,3 @@ generator_loss:
   name: generator_loss
   weight: 1.0
   pred_key_disc: d_output
-
