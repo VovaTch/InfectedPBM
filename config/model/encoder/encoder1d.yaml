@@ -5,5 +5,7 @@ input_channels: 1
 kernel_size: 3
 num_res_block_conv: 5
 dilation_factor: 3
+# activation_fn:
+#   _target_: utils.activation_funcs.ReluSquared
 activation_fn:
-  _target_: models.experimental.NakedSnake
+  _target_: torch.nn.GELU

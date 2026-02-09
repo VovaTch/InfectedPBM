@@ -9,3 +9,13 @@ class SinActivation(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return torch.sin(x)
+
+
+class ReluSquared(nn.Module):
+    """
+    Squared relu activation function
+    """
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return torch.relu(x).square()
+

@@ -63,4 +63,4 @@ class Res2DBlock(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x_init = x.clone()
         x = self.layers(x)
-        return self._activation_fn(x + x_init)
+        return x + x_init

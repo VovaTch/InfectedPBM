@@ -73,9 +73,9 @@ class SnakeFuncBasic(Function):
         return x + sin(x).square()
 
     @staticmethod
-    def backward(ctx, grad_output: torch.Tensor) -> torch.Tensor:
+    def backward(ctx, grad_output: torch.Tensor) -> torch.Tensor | None:
         (x,) = ctx.saved_tensors
-        grad_x = grad_output * (1 + sin(2 * x))
+        grad_x = grad_output * (1 + sin(2 * x)) if ctx.needs_input_grad[0] else None
         return grad_x
 
 
@@ -154,4 +154,4 @@ class NakedSnake(Module):
         super().__init__()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return SnakeFuncBasic.apply(x)  # type: ignore
+        return SnakeFuncBasic.apply(x)

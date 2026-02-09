@@ -6,6 +6,8 @@ dim_add_kernel_add: 0
 num_res_block_conv: 6
 activation_fn:
   _target_: torch.nn.GELU
+# activation_fn:
+#   _target_: utils.activation_funcs.ReluSquared
 dropout: 0.0
 dilation_factor: 2
 

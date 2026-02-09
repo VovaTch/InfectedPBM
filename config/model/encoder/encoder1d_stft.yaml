@@ -8,5 +8,4 @@ n_fft: 512
 hop_length: 128
 win_length: 512
 activation_fn:
-  _target_: models.experimental.NakedSnake
-
+  _target_: torch.nn.GELU

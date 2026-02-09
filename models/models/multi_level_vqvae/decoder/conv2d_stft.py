@@ -94,7 +94,7 @@ class StftDecoder2D(nn.Module):
             z = self._dropout(z)
             z = dim_change(z)
             z = self._activation(z)
-        # z = self._pre_stft_layer_norm(z)
+        z = self._pre_stft_layer_norm(z)
 
         z = z.transpose(1, 2).contiguous().flatten(start_dim=2)
         z = self._dropout(z)
